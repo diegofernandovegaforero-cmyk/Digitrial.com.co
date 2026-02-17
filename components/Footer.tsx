@@ -15,12 +15,20 @@ export default function Footer() {
                             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white leading-tight">¿Listo para el siguiente nivel?</h2>
                             <p className="text-slate-400 italic text-lg mb-8">"En <strong>DIGITRIAL</strong>, diseñamos soluciones que se convierten en el motor de tu crecimiento."</p>
                             <div className="flex flex-wrap gap-4">
-                                <button className="bg-green-500 hover:bg-green-600 transition px-8 py-3 rounded-xl font-bold flex items-center gap-2 text-white shadow-lg shadow-green-900/20">
+                                <a
+                                    href="https://wa.me/573123299053"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-green-500 hover:bg-green-600 transition px-8 py-3 rounded-xl font-bold flex items-center gap-2 text-white shadow-lg shadow-green-900/20"
+                                >
                                     <Phone className="w-5 h-5" /> WhatsApp
-                                </button>
-                                <button className="bg-slate-700 hover:bg-slate-600 transition px-8 py-3 rounded-xl font-bold flex items-center gap-2 text-white border border-slate-600">
+                                </a>
+                                <a
+                                    href="mailto:digitrialsolucionesdigitales@gmail.com"
+                                    className="bg-slate-700 hover:bg-slate-600 transition px-8 py-3 rounded-xl font-bold flex items-center gap-2 text-white border border-slate-600"
+                                >
                                     <Mail className="w-5 h-5" /> Email
-                                </button>
+                                </a>
                             </div>
                         </div>
                         <div className="bg-slate-950/50 backdrop-blur-sm p-8 rounded-3xl border border-slate-800 text-sm space-y-4">
