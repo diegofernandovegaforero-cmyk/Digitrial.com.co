@@ -41,18 +41,20 @@ export default function Hero() {
                     </div>
                 </div>
 
-                {/* Image Content */}
+                {/* Video Content */}
                 <div className="order-1 lg:order-2 relative opacity-0 animate-scale-in" style={{ animationDelay: '0.2s' }}>
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white transform rotate-2 hover:rotate-0 transition-all duration-500">
-                        {/* Using a standard reliable Unsplash ID */}
-                        <Image
-                            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"
-                            alt="Equipo DIGITRIAL trabajando"
-                            width={800}
-                            height={600}
+                        {/* Video Background */}
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
                             className="w-full h-auto object-cover"
-                            priority
-                        />
+                            style={{ minHeight: '400px' }}
+                        >
+                            <source src="/videos/background-watermark.mp4.mp4" type="video/mp4" />
+                        </video>
 
                         {/* Overlay Gradient */}
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
