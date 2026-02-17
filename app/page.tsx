@@ -7,7 +7,7 @@ import { MessageCircle } from "lucide-react";
 
 export default function Home() {
     return (
-        <main className="relative">
+        <main className="relative z-10">
             <Navbar />
             <Hero />
             <Services />
