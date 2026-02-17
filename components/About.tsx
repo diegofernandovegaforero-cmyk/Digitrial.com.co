@@ -57,9 +57,14 @@ export default function About() {
                         </div>
                     </div>
 
-                    <button className="mt-14 bg-slate-900 text-white px-10 py-4 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg w-full sm:w-auto">
+                    <a
+                        href="https://wa.me/573123299053"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-14 bg-slate-900 text-white px-10 py-4 rounded-xl font-bold hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full sm:w-auto text-center inline-block"
+                    >
                         Hablemos de tu Proyecto
-                    </button>
+                    </a>
                 </div>
             </div>
         </section>
