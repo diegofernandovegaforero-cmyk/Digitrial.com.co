@@ -132,20 +132,40 @@ export default function Hero() {
                             backgroundClip: 'text',
                         }}>
                             {'Visión Digital'.split('').map((char, index) => {
-                                const isAnimated = ['i', 'í'].includes(char);
+                                if (char === 'i' || char === 'í') {
+                                    // Calculate approximate color based on position for gradient continuity
+                                    // Gradient: #1E3A8A (0%) -> #7C3AED (45%) -> #E11D48 (100%)
+                                    // Indices of i: 1, 3, 8, 10
+                                    let color = '#7C3AED'; // fallback
+                                    if (index === 1) color = '#4c46b6'; // ~10% (Navy-Purple)
+                                    if (index === 3) color = '#664ec6'; // ~25% (Navy-Purple)
+                                    if (index === 8) color = '#9f32ac'; // ~60% (Purple-Red)
+                                    if (index === 10) color = '#c8237b'; // ~75% (Purple-Red)
+
+                                    return (
+                                        <span key={index} className="relative inline-flex flex-col items-center justify-end leading-none" style={{ width: '0.3em', verticalAlign: 'baseline' }}>
+                                            {/* Dotless body */}
+                                            <span style={{ color, WebkitTextFillColor: color }}>ı</span>
+                                            {/* Animated Dot */}
+                                            <motion.span
+                                                className="absolute rounded-full"
+                                                style={{
+                                                    width: '0.25em',
+                                                    height: '0.25em',
+                                                    backgroundColor: color,
+                                                    top: '0.05em'
+                                                }}
+                                                animate={{ y: [0, -6, 0] }}
+                                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.1 }}
+                                            />
+                                        </span>
+                                    );
+                                }
+
                                 return (
-                                    <motion.span
-                                        key={index}
-                                        className={isAnimated ? "inline-block" : "inline"}
-                                        style={isAnimated ? {
-                                            WebkitTextFillColor: '#7C3AED',
-                                            color: '#7C3AED'
-                                        } : undefined}
-                                        animate={isAnimated ? { y: [0, -8, 0] } : {}}
-                                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.1 }}
-                                    >
+                                    <span key={index} className="inline">
                                         {char === ' ' ? '\u00A0' : char}
-                                    </motion.span>
+                                    </span>
                                 );
                             })}
                         </span>
