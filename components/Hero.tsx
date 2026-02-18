@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight, Star, ShoppingBag, BarChart2, Filter, Layers } from 'lucide-react';
+import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight, Star, ShoppingBag, Layers, Share2, Users, Video } from 'lucide-react';
 
 // ─── Paleta Digitrial ─────────────────────────────────────────────────────────
 // Navy: #1A2B4C  |  Green: #2ED573  |  Purple: #6C5CE7  |  White: #FFFFFF
@@ -28,44 +28,54 @@ function useCounter(target: number, duration: number = 1500) {
 // ─── Datos del carrusel de portafolio ─────────────────────────────────────────
 const portfolioCards = [
     {
-        title: 'Tienda Online XYZ',
-        metric: '98% Satisfacción',
-        tag: 'E-Commerce',
+        title: 'Diseño Web Premium',
+        metric: 'UX/UI de Alto Impacto',
+        tag: 'Web Design',
         bg: 'from-[#0d1b33] to-[#1A2B4C]',
         accent: '#2ED573',
+        Icon: Layers,
+        desc: 'Sitios web corporativos veloces, seguros y optimizados para conversión.',
+        bars: [85, 90, 75, 95, 80, 88, 92],
+    },
+    {
+        title: 'Tienda Online',
+        metric: 'Ventas Automatizadas',
+        tag: 'E-Commerce',
+        bg: 'from-[#1A2B4C] to-[#2d1b6e]',
+        accent: '#6C5CE7',
         Icon: ShoppingBag,
-        desc: 'Plataforma de ventas con integración de pagos y logística automatizada.',
+        desc: 'Plataformas de venta robustas con pasarelas de pago y logística integrada.',
         bars: [65, 80, 55, 90, 70, 95, 75],
     },
     {
-        title: 'Plataforma DEF',
-        metric: 'Crecimiento +250%',
-        tag: 'SaaS',
-        bg: 'from-[#1A2B4C] to-[#2d1b6e]',
-        accent: '#6C5CE7',
-        Icon: BarChart2,
-        desc: 'Dashboard analítico con reportes en tiempo real para equipos de ventas.',
-        bars: [40, 60, 75, 85, 70, 90, 95],
-    },
-    {
-        title: 'Funnel Estratégico',
-        metric: 'ROI +180%',
+        title: 'Estrategia Social Media',
+        metric: '+300% Engagement',
         tag: 'Marketing',
         bg: 'from-[#0d1b33] to-[#1A2B4C]',
         accent: '#2ED573',
-        Icon: Filter,
-        desc: 'Embudo de conversión automatizado con seguimiento de leads 24/7.',
+        Icon: Share2,
+        desc: 'Gestión de comunidades y contenido viral que conecta con tu audiencia.',
         bars: [50, 65, 80, 72, 88, 76, 92],
     },
     {
-        title: 'Landing Premium',
-        metric: 'Conversión +320%',
-        tag: 'Landing Page',
-        bg: 'from-[#2d1b6e] to-[#1A2B4C]',
+        title: 'Talento Humano & SST',
+        metric: 'Cumplimiento 100%',
+        tag: 'Consultoría',
+        bg: 'from-[#1A2B4C] to-[#2d1b6e]',
         accent: '#6C5CE7',
-        Icon: Layers,
-        desc: 'Página de alta conversión con A/B testing y optimización continua.',
-        bars: [30, 50, 68, 82, 75, 90, 98],
+        Icon: Users,
+        desc: 'Asesoría integral en seguridad, salud en el trabajo y gestión de personal.',
+        bars: [90, 85, 92, 88, 95, 90, 98],
+    },
+    {
+        title: 'Producción Audiovisual',
+        metric: 'Calidad 4K Cinema',
+        tag: 'Media',
+        bg: 'from-[#0d1b33] to-[#1A2B4C]',
+        accent: '#2ED573',
+        Icon: Video,
+        desc: 'Videos corporativos, spots publicitarios y fotografía profesional.',
+        bars: [70, 82, 75, 88, 92, 85, 95],
     },
 ];
 
