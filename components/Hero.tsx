@@ -52,7 +52,7 @@ export default function Hero() {
     const { count, ref: counterRef } = useCounter(127);
 
     return (
-        <section className="pt-32 pb-20 px-6 lg:pt-40 bg-gradient-to-b from-white to-blue-50/30 relative overflow-hidden">
+        <section className="pt-32 pb-20 px-6 lg:pt-40 bg-gradient-to-b from-white/85 to-blue-50/20 relative overflow-hidden">
             {/* Animated background blobs */}
             <motion.div
                 className="absolute -top-32 -right-32 w-96 h-96 bg-blue-100 rounded-full blur-3xl -z-10"
