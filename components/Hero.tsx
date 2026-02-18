@@ -201,34 +201,37 @@ export default function Hero() {
                     {portfolioCards.map((card, i) => (
                         <motion.div
                             key={i}
-                            className="bg-white rounded-2xl p-4 shadow-xl border border-white/20 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300"
+                            className="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 hover:shadow-xl"
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}>
 
-                            {/* Fondo gradiente oscuro */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${card.bg} -z-10`} />
+                            {/* Decoración de fondo sutil */}
+                            <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-[0.03]"
+                                style={{ background: `radial-gradient(circle, ${card.accent}, transparent)`, transform: 'translate(30%, -30%)' }} />
 
-                            {/* Decoración */}
-                            <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-[0.15]"
-                                style={{ background: `radial-gradient(circle, ${card.accent}, transparent)`, transform: 'translate(40%, -40%)' }} />
-
-                            {/* Contenido compacto */}
-                            <div className="flex flex-col h-full justify-between gap-3">
+                            <div className="flex flex-col h-full justify-between gap-4">
+                                {/* Header: Icono y Tag */}
                                 <div className="flex items-start justify-between">
-                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/10 border border-white/10">
-                                        <card.Icon className="w-4 h-4 text-white" />
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300"
+                                        style={{ background: `${card.accent}15`, color: card.accent }}>
+                                        <card.Icon className="w-5 h-5" strokeWidth={1.5} />
                                     </div>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/10">
+                                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide"
+                                        style={{ background: '#f1f5f9', color: '#64748b' }}>
                                         {card.tag}
                                     </span>
                                 </div>
 
+                                {/* Contenido: Título y Métrica */}
                                 <div>
-                                    <h3 className="text-sm font-bold text-white leading-tight mb-1">{card.title}</h3>
-                                    <div className="flex items-center gap-1">
-                                        <Star className="w-2.5 h-2.5 fill-current" style={{ color: card.accent }} />
-                                        <span className="text-xs font-bold" style={{ color: card.accent }}>{card.metric}</span>
+                                    <h3 className="text-base font-bold leading-tight mb-2 group-hover:text-blue-600 transition-colors"
+                                        style={{ color: '#1A2B4C' }}>
+                                        {card.title}
+                                    </h3>
+                                    <div className="flex items-center gap-1.5">
+                                        <Star className="w-3.5 h-3.5 fill-current" style={{ color: card.accent }} />
+                                        <span className="text-sm font-bold" style={{ color: card.accent }}>{card.metric}</span>
                                     </div>
                                 </div>
                             </div>
