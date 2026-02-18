@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight, Star, ShoppingBag, Layers, Share2, Users, Video, Filter } from 'lucide-react';
+import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight, Star, ShoppingBag, Layers, Share2, Users, Video, Filter, Zap, Mouse } from 'lucide-react';
 import WavesBackground from './WavesBackground';
 
 // ─── Paleta Digitrial ─────────────────────────────────────────────────────────
@@ -131,7 +131,16 @@ export default function Hero() {
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text',
                         }}>
-                            Visión Digital
+                            {'Visión Digital'.split('').map((char, index) => (
+                                <motion.span
+                                    key={index}
+                                    className="inline-block"
+                                    animate={['i', 'í'].includes(char) ? { y: [0, -8, 0] } : {}}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.1 }}
+                                >
+                                    {char === ' ' ? '\u00A0' : char}
+                                </motion.span>
+                            ))}
                         </span>
                     </motion.h1>
 
@@ -188,6 +197,44 @@ export default function Hero() {
                             </p>
                             <p className="text-sm font-bold uppercase tracking-widest mt-1" style={{ color: '#1A2B4C' }}>Confianza Total</p>
                         </div>
+                    </motion.div>
+
+                    {/* Social Proof + Mouse Scroll */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.5, duration: 1 }}
+                        className="mt-12 flex flex-wrap items-center gap-8 text-sm font-semibold text-slate-600"
+                    >
+                        {/* Avatares Flotantes */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-3">
+                                {[...Array(4)].map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="w-10 h-10 rounded-full border-2 border-white bg-[#6C5CE7]"
+                                        animate={{ y: [0, -4, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-[#1A2B4C]">+500 Empresarios Confiaron</span>
+                        </div>
+
+                        {/* Resultados */}
+                        <div className="flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-yellow-400 fill-current" />
+                            <span className="text-[#1A2B4C]">Resultados en 30 días</span>
+                        </div>
+
+                        {/* Mouse Animado */}
+                        <motion.div
+                            className="ml-auto pr-8 hidden md:block"
+                            animate={{ y: [0, 10, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <Mouse className="w-6 h-6 text-slate-400" />
+                        </motion.div>
                     </motion.div>
                 </motion.div>
 
