@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ArrowRight, TrendingUp, ChevronLeft, ChevronRight, Star, ShoppingBag, BarChart2, Filter, Layers } from 'lucide-react';
 
 // ─── Paleta Digitrial ─────────────────────────────────────────────────────────
 // Navy: #1A2B4C  |  Green: #2ED573  |  Purple: #6C5CE7  |  White: #FFFFFF
@@ -31,10 +31,11 @@ const portfolioCards = [
         title: 'Tienda Online XYZ',
         metric: '98% Satisfacción',
         tag: 'E-Commerce',
-        bg: 'from-[#1A2B4C] to-[#0d1b33]',
+        bg: 'from-[#0d1b33] to-[#1A2B4C]',
         accent: '#2ED573',
-        icon: '🛒',
+        Icon: ShoppingBag,
         desc: 'Plataforma de ventas con integración de pagos y logística automatizada.',
+        bars: [65, 80, 55, 90, 70, 95, 75],
     },
     {
         title: 'Plataforma DEF',
@@ -42,8 +43,9 @@ const portfolioCards = [
         tag: 'SaaS',
         bg: 'from-[#1A2B4C] to-[#2d1b6e]',
         accent: '#6C5CE7',
-        icon: '📊',
+        Icon: BarChart2,
         desc: 'Dashboard analítico con reportes en tiempo real para equipos de ventas.',
+        bars: [40, 60, 75, 85, 70, 90, 95],
     },
     {
         title: 'Funnel Estratégico',
@@ -51,8 +53,9 @@ const portfolioCards = [
         tag: 'Marketing',
         bg: 'from-[#0d1b33] to-[#1A2B4C]',
         accent: '#2ED573',
-        icon: '🎯',
+        Icon: Filter,
         desc: 'Embudo de conversión automatizado con seguimiento de leads 24/7.',
+        bars: [50, 65, 80, 72, 88, 76, 92],
     },
     {
         title: 'Landing Premium',
@@ -60,8 +63,9 @@ const portfolioCards = [
         tag: 'Landing Page',
         bg: 'from-[#2d1b6e] to-[#1A2B4C]',
         accent: '#6C5CE7',
-        icon: '🚀',
+        Icon: Layers,
         desc: 'Página de alta conversión con A/B testing y optimización continua.',
+        bars: [30, 50, 68, 82, 75, 90, 98],
     },
 ];
 
@@ -216,34 +220,55 @@ export default function Hero() {
                                 {/* Fondo degradado oscuro */}
                                 <div className={`bg-gradient-to-br ${card.bg} p-8 min-h-[360px] flex flex-col justify-between relative overflow-hidden`}>
 
-                                    {/* Decoración de fondo */}
-                                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10"
-                                        style={{ background: `radial-gradient(circle, ${card.accent}, transparent)`, transform: 'translate(30%, -30%)' }} />
-                                    <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10"
-                                        style={{ background: `radial-gradient(circle, ${card.accent}, transparent)`, transform: 'translate(-30%, 30%)' }} />
+                                    {/* Grid lines sutiles — dinamismo minimalista */}
+                                    <div className="absolute inset-0 opacity-[0.06]" style={{
+                                        backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+                                        backgroundSize: '40px 40px',
+                                    }} />
 
-                                    {/* Header de la tarjeta */}
+                                    {/* Glow radial de acento */}
+                                    <div className="absolute top-0 right-0 w-72 h-72 rounded-full opacity-[0.12]"
+                                        style={{ background: `radial-gradient(circle, ${card.accent}, transparent)`, transform: 'translate(35%, -35%)' }} />
+
+                                    {/* Barras de datos animadas — fondo dinámico */}
+                                    <div className="absolute bottom-16 right-6 flex items-end gap-1 opacity-[0.18]">
+                                        {card.bars.map((h, bi) => (
+                                            <motion.div key={bi}
+                                                className="w-2 rounded-t-sm"
+                                                style={{ background: card.accent }}
+                                                initial={{ height: 0 }}
+                                                animate={{ height: `${h * 0.7}px` }}
+                                                transition={{ duration: 0.8, delay: bi * 0.07, ease: 'easeOut' }}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Header */}
                                     <div className="relative z-10">
                                         <div className="flex items-start justify-between mb-6">
-                                            <span className="text-5xl">{card.icon}</span>
-                                            <span className="px-3 py-1 rounded-full text-xs font-bold"
-                                                style={{ background: `${card.accent}22`, color: card.accent, border: `1px solid ${card.accent}44` }}>
+                                            {/* Icono Lucide minimalista */}
+                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+                                                style={{ background: `${card.accent}18`, border: `1px solid ${card.accent}30` }}>
+                                                <card.Icon className="w-5 h-5" style={{ color: card.accent }} strokeWidth={1.5} />
+                                            </div>
+                                            <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wide"
+                                                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }}>
                                                 {card.tag}
                                             </span>
                                         </div>
-                                        <h3 className="text-2xl font-extrabold text-white mb-2">{card.title}</h3>
-                                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>{card.desc}</p>
+                                        <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">{card.title}</h3>
+                                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{card.desc}</p>
                                     </div>
 
-                                    {/* Métrica destacada */}
+                                    {/* Métrica */}
                                     <div className="relative z-10 mt-6">
-                                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-4 border border-white/10">
-                                            <div className="flex items-center gap-1">
+                                        <div className="flex items-center justify-between bg-white/[0.07] backdrop-blur-sm rounded-2xl px-5 py-4 border border-white/[0.08]">
+                                            <div className="flex items-center gap-1.5">
                                                 {[...Array(5)].map((_, s) => (
-                                                    <Star key={s} className="w-3.5 h-3.5 fill-current" style={{ color: card.accent }} />
+                                                    <Star key={s} className="w-3 h-3 fill-current" style={{ color: card.accent }} />
                                                 ))}
                                             </div>
-                                            <span className="text-xl font-extrabold" style={{ color: card.accent }}>{card.metric}</span>
+                                            <span className="text-lg font-bold tracking-tight" style={{ color: card.accent }}>{card.metric}</span>
                                         </div>
                                     </div>
                                 </div>
