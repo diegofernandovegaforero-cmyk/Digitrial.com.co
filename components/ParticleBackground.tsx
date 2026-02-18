@@ -61,6 +61,25 @@ export default function ParticleBackground() {
     const mouseRef = useRef({ x: -9999, y: -9999 });
     const animFrameRef = useRef<number>(0);
 
+    // Observar la clase page-dark en el body para mostrar/ocultar el canvas
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        function syncVisibility() {
+            if (!canvas) return;
+            canvas.style.opacity = document.body.classList.contains('page-dark') ? '1' : '0';
+        }
+
+        syncVisibility(); // estado inicial
+
+        const observer = new MutationObserver(syncVisibility);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    // ── Loop de animación principal ────────────────────────────────────────
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -244,8 +263,9 @@ export default function ParticleBackground() {
                 width: '100%',
                 height: '100%',
                 zIndex: 0,
-                pointerEvents: 'none',   // no interfiere con clics
-                opacity: 1,
+                pointerEvents: 'none',
+                opacity: 0,                          // oculto por defecto (fondo blanco)
+                transition: 'opacity 0.6s ease',     // fade suave al cambiar
             }}
         />
     );
