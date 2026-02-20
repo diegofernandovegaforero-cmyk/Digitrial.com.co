@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Mail, MapPin, Phone, Linkedin, Instagram, Facebook } from 'lucide-react';
+import { Mail, MapPin, Phone, Linkedin, Instagram, Facebook, Triangle } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -13,7 +13,7 @@ export default function Footer() {
                     <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
                         <div>
                             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white leading-tight">¿Listo para el siguiente nivel?</h2>
-                            <p className="text-slate-400 italic text-lg mb-8">"En <strong>DIGITRIAL</strong>, diseñamos soluciones que se convierten en el motor de tu crecimiento."</p>
+                            <p className="text-slate-400 italic text-lg mb-8">"En <strong className="text-white">DIGITRIAL</strong>, diseñamos soluciones que se convierten en el motor de tu crecimiento."</p>
                             <div className="flex flex-wrap gap-4">
                                 <a
                                     href="https://wa.me/573123299053"
@@ -54,13 +54,14 @@ export default function Footer() {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 text-sm border-t border-slate-800 pt-16">
                     <div>
-                        <Link href="/" className="inline-block mb-6">
-                            <img
-                                src="https://horizons-cdn.hostinger.com/6b9bdf39-faeb-49b5-9aef-94e01a05f6fc/64cb1933ae82848e86fed46062507d19.png"
-                                alt="DIGITRIAL"
-                                className="h-10 w-auto object-contain transition-transform duration-300 hover:scale-105"
-                            />
-                        </Link>
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                                <Triangle className="text-white fill-white w-4 h-4" />
+                            </div>
+                            <div className="flex items-baseline">
+                                <span className="font-extrabold text-lg uppercase leading-none text-white">DIGI<span className="text-blue-600">TRIAL</span></span>
+                            </div>
+                        </div>
                         <p className="text-slate-500 leading-relaxed mb-6">
                             Transformando ideas en experiencias digitales excepcionales desde Pitalito para el mundo.
                         </p>
@@ -82,7 +83,7 @@ export default function Footer() {
                         <ul className="space-y-4 text-slate-500">
                             <li><Link href="#services" className="hover:text-blue-400 transition">Desarrollo Web</Link></li>
                             <li><Link href="#services" className="hover:text-blue-400 transition">Landing Pages</Link></li>
-                            <li><Link href="#services" className="hover:text-blue-400 transition">Funnels de Venta</Link></li>
+
                             <li><Link href="#services" className="hover:text-blue-400 transition">Manejo de Redes</Link></li>
                         </ul>
                     </div>

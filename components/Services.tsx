@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { useRef } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useInView } from 'framer-motion';
-import { Code, Layout, Filter, Smartphone, Users, Video } from 'lucide-react';
+import { Code, Layout, ShoppingCart, Smartphone, Users, Video } from 'lucide-react';
 import WavesBackground from './WavesBackground';
 
 const services = [
@@ -21,10 +21,10 @@ const services = [
         color: "bg-purple-50 text-purple-600"
     },
     {
-        title: "Embudos de Venta (Funnels)",
-        description: "Sistemas automatizados que guían a tus prospectos hasta la compra 24/7.",
-        icon: <Filter className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80",
+        title: "E-commerce & Tiendas Online",
+        description: "Plataformas robustas y seguras para vender tus productos a todo el mundo sin comisiones.",
+        icon: <ShoppingCart className="w-6 h-6" />,
+        image: "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=600&q=80",
         color: "bg-indigo-50 text-indigo-600"
     },
     {

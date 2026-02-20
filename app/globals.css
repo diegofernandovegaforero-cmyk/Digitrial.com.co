@@ -94,18 +94,7 @@ header * {
 }
 
 
-/* Hide native cursor on desktop when custom cursor is active */
-@media (hover: hover) {
-  body {
-    cursor: none;
-  }
 
-  a,
-  button,
-  [role="button"] {
-    cursor: none;
-  }
-}
 
 html {
   scroll-behavior: smooth;

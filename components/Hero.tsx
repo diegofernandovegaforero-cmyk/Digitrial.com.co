@@ -256,7 +256,24 @@ export default function Hero() {
                         </div>
 
 
-                        {/* Mouse Animado Eliminado */}
+                        {/* Mouse Animado */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 2, duration: 1 }}
+                            className="flex items-center gap-4 py-2 px-4 rounded-full border border-slate-200 bg-white/50 backdrop-blur-sm"
+                        >
+                            <div className="relative w-6 h-10 border-2 border-[#1A2B4C] rounded-full flex justify-center p-1">
+                                <motion.div
+                                    className="w-1 h-2 bg-[#1A2B4C] rounded-full"
+                                    animate={{ y: [0, 12, 0], opacity: [1, 0, 1] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-widest text-[#1A2B4C]">
+                                Scroll
+                            </span>
+                        </motion.div>
                     </motion.div>
                 </motion.div>
 

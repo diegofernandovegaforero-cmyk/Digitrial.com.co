@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { Sun, Menu, X, Triangle } from 'lucide-react';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,12 +10,15 @@ export default function Navbar() {
         <header className="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100">
             <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
                 {/* Logo */}
-                <Link href="/" className="flex items-center">
-                    <img
-                        src="https://horizons-cdn.hostinger.com/6b9bdf39-faeb-49b5-9aef-94e01a05f6fc/64cb1933ae82848e86fed46062507d19.png"
-                        alt="DIGITRIAL"
-                        className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 hover:scale-105"
-                    />
+                <Link href="/" className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
+                        <Triangle className="text-white fill-white w-5 h-5" />
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="font-extrabold text-xl tracking-tight uppercase text-slate-500">
+                            DIGI<span className="text-blue-600">TRIAL</span>
+                        </span>
+                    </div>
                 </Link>
 
                 {/* Desktop Menu */}
@@ -28,7 +31,7 @@ export default function Navbar() {
                     <div className="h-4 w-px bg-gray-200 mx-2"></div>
 
                     <Link href="#" className="text-gray-600 hover:text-blue-600 transition">
-                        <ShoppingCart className="w-5 h-5" />
+                        <Sun className="w-5 h-5" />
                     </Link>
 
                     <Link
