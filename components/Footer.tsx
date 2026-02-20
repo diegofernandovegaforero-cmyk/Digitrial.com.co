@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Mail, MapPin, Phone, Linkedin, Instagram, Facebook, Triangle } from 'lucide-react';
+import { Mail, MapPin, Phone, Linkedin, Instagram, Facebook } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -54,14 +54,13 @@ export default function Footer() {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 text-sm border-t border-slate-800 pt-16">
                     <div>
-                        <div className="flex items-center gap-2 mb-6">
-                            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-                                <Triangle className="text-white fill-white w-4 h-4" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="font-extrabold text-lg uppercase leading-none">DIGI<span className="text-blue-500">TRIAL</span></span>
-                            </div>
-                        </div>
+                        <Link href="/" className="inline-block mb-6">
+                            <img
+                                src="https://horizons-cdn.hostinger.com/6b9bdf39-faeb-49b5-9aef-94e01a05f6fc/64cb1933ae82848e86fed46062507d19.png"
+                                alt="DIGITRIAL"
+                                className="h-10 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                            />
+                        </Link>
                         <p className="text-slate-500 leading-relaxed mb-6">
                             Transformando ideas en experiencias digitales excepcionales desde Pitalito para el mundo.
                         </p>
