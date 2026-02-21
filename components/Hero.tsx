@@ -114,16 +114,14 @@ export default function Hero() {
 
                     {/* Badge */}
                     <motion.div variants={itemVariants}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-7 border"
-                        style={{ background: 'rgba(26,43,76,0.07)', color: '#1A2B4C', borderColor: 'rgba(26,43,76,0.15)' }}>
-                        <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#2ED573' }} />
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-7 border border-[#1A2B4C]/15 bg-[#1A2B4C]/5 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20 transition-colors">
+                        <span className="w-2 h-2 rounded-full animate-pulse bg-[#2ED573]" />
                         Innovación Digital en Colombia
                     </motion.div>
 
                     {/* H1 */}
                     <motion.h1 variants={itemVariants}
-                        className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.08] mb-5 tracking-tight"
-                        style={{ color: '#1A2B4C' }}>
+                        className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.08] mb-5 tracking-tight text-[#1A2B4C] dark:text-white transition-colors">
                         Impulsamos tu{' '}
                         <span className="block" style={{
                             background: 'linear-gradient(90deg, #1E3A8A 0%, #7C3AED 45%, #E11D48 100%)',
@@ -173,8 +171,7 @@ export default function Hero() {
 
                     {/* Descripción */}
                     <motion.p variants={itemVariants}
-                        className="text-lg md:text-xl mb-9 max-w-md leading-relaxed"
-                        style={{ color: '#666666' }}>
+                        className="text-lg md:text-xl mb-9 max-w-md leading-relaxed text-[#666666] dark:text-slate-400 transition-colors">
                         Somos el Centro de Soluciones que transforma desafíos complejos en
                         oportunidades de crecimiento medibles a través de tecnología y estrategia.
                     </motion.p>
@@ -210,19 +207,18 @@ export default function Hero() {
                             scale: { duration: 0.5, delay: 0.8 },
                             y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 },
                         }}
-                        className="inline-flex items-center gap-5 bg-white rounded-2xl px-6 py-5 shadow-2xl border"
-                        style={{ borderColor: 'rgba(46,213,115,0.2)' }}>
+                        className="inline-flex items-center gap-5 bg-white dark:bg-slate-900/90 rounded-2xl px-6 py-5 shadow-2xl border border-green-500/20 dark:border-green-500/30 transition-colors">
                         {/* Icono */}
                         <div className="w-14 h-14 rounded-xl flex items-center justify-center shadow-lg"
                             style={{ background: 'linear-gradient(135deg, rgba(46,213,115,0.15), rgba(46,213,115,0.05))', border: '1.5px solid rgba(46,213,115,0.3)' }}>
                             <TrendingUp className="w-7 h-7" style={{ color: '#2ED573' }} />
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#999' }}>Crecimiento Real</p>
-                            <p className="text-4xl font-extrabold leading-none" style={{ color: '#2ED573' }}>
+                            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5 text-[#999] dark:text-slate-500">Crecimiento Real</p>
+                            <p className="text-4xl font-extrabold leading-none text-[#2ED573]">
                                 +<span ref={counterRef}>{count}</span>%
                             </p>
-                            <p className="text-sm font-bold uppercase tracking-widest mt-1" style={{ color: '#1A2B4C' }}>Confianza Total</p>
+                            <p className="text-sm font-bold uppercase tracking-widest mt-1 text-[#1A2B4C] dark:text-blue-300 transition-colors">Confianza Total</p>
                         </div>
                     </motion.div>
 
@@ -246,13 +242,13 @@ export default function Hero() {
                                     />
                                 ))}
                             </div>
-                            <span className="text-[#1A2B4C]">+100 Empresarios Confiaron</span>
+                            <span className="text-[#1A2B4C] dark:text-slate-300 transition-colors">+100 Empresarios Confiaron</span>
                         </div>
 
                         {/* Resultados */}
                         <div className="flex items-center gap-2">
                             <Zap className="w-5 h-5 text-yellow-400 fill-current" />
-                            <span className="text-[#1A2B4C]">Resultados en 30 días</span>
+                            <span className="text-[#1A2B4C] dark:text-slate-300 transition-colors">Resultados en 30 días</span>
                         </div>
 
 
@@ -287,7 +283,7 @@ export default function Hero() {
                     {portfolioCards.map((card, i) => (
                         <motion.div
                             key={i}
-                            className="bg-white rounded-2xl p-5 shadow-lg border border-slate-100 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 hover:shadow-xl"
+                            className="bg-white dark:bg-slate-900/80 rounded-2xl p-5 shadow-lg border border-slate-100 dark:border-slate-800 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 hover:shadow-xl"
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}>
@@ -311,8 +307,7 @@ export default function Hero() {
 
                                 {/* Contenido: Título y Métrica */}
                                 <div>
-                                    <h3 className="text-base font-bold leading-tight mb-2 group-hover:text-blue-600 transition-colors"
-                                        style={{ color: '#1A2B4C' }}>
+                                    <h3 className="text-base font-bold leading-tight mb-2 group-hover:text-blue-600 transition-colors text-[#1A2B4C] dark:text-slate-200">
                                         {card.title}
                                     </h3>
                                     <div className="flex items-center gap-1.5">
