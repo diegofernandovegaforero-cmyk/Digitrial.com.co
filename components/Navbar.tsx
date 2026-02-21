@@ -1,10 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sun, Menu, X, Triangle } from 'lucide-react';
+import { Sun, Moon, Menu, X, Triangle } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    // Evitar errores de hidratación
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <header className="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100">
@@ -15,7 +23,7 @@ export default function Navbar() {
                         <Triangle className="text-white fill-white w-5 h-5" />
                     </div>
                     <div className="flex items-baseline">
-                        <span className="font-extrabold text-xl tracking-tight uppercase text-slate-500">
+                        <span className="font-extrabold text-xl tracking-tight uppercase text-slate-500 dark:text-white transition-colors">
                             DIGI<span className="text-blue-600">TRIAL</span>
                         </span>
                     </div>
@@ -30,9 +38,14 @@ export default function Navbar() {
 
                     <div className="h-4 w-px bg-gray-200 mx-2"></div>
 
-                    <Link href="#" className="text-gray-600 hover:text-blue-600 transition">
-                        <Sun className="w-5 h-5" />
-                    </Link>
+                    <button
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800"
+                        aria-label="Alternar modo oscuro"
+                    >
+                        {mounted && (theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
+                        {!mounted && <Sun className="w-5 h-5 opacity-0" />}
+                    </button>
 
                     <Link
                         href="https://wa.me/573123299053"

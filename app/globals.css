@@ -15,82 +15,81 @@ body {
   transition: background 0.6s ease;
 }
 
-/* Fondo oscuro activado por ScrollThemeProvider al hacer scroll */
-body.page-dark {
+/* Fondo oscuro activado por ThemeProvider al usar la clase .dark */
+.dark body {
   background: #00050f;
 }
 
-/* ── Secciones: transparentes para que el fondo del body se vea ─────────── */
-body.page-dark section {
+.dark section {
   background: transparent !important;
 }
 
-/* ── Textos principales: se vuelven blancos ─────────────────────────────── */
-body.page-dark h1,
-body.page-dark h2,
-body.page-dark h3,
-body.page-dark h4 {
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4 {
   color: #ffffff !important;
 }
 
-/* ── Párrafos y textos secundarios: gris azulado claro ─────────────────── */
-body.page-dark p,
-body.page-dark span:not(.text-blue-600):not(.text-blue-500):not(.text-green-500):not(.text-purple-600):not(.text-cyan-600):not(.text-indigo-600):not(.text-orange-600) {
+.dark p,
+.dark span:not(.text-blue-600):not(.text-blue-500):not(.text-green-500):not(.text-purple-600):not(.text-cyan-600):not(.text-indigo-600):not(.text-orange-600) {
   color: #94a3b8 !important;
-  /* slate-400 */
 }
 
-/* ── Gradiente del título hero: azul → morado → rosa (más brillante) ────── */
-body.page-dark .animate-gradient-x {
+.dark .animate-gradient-x {
   background-image: linear-gradient(to right, #60a5fa, #a78bfa, #f472b6) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   color: transparent !important;
 }
 
-/* ── Tarjetas de servicios: fondo oscuro translúcido con borde sutil ─────── */
-body.page-dark .group.bg-white {
+.dark .group.bg-white {
   background: rgba(15, 23, 42, 0.75) !important;
-  /* slate-900/75 */
   border-color: rgba(99, 102, 241, 0.2) !important;
 }
 
-/* ── Badge "Innovación Digital" y etiquetas pill ─────────────────────────── */
-body.page-dark .bg-blue-50 {
+.dark .bg-blue-50 {
   background: rgba(37, 99, 235, 0.15) !important;
 }
 
-/* ── Botón WhatsApp secundario ───────────────────────────────────────────── */
-body.page-dark .border-gray-200.bg-white {
+.dark .border-gray-200.bg-white {
   background: rgba(15, 23, 42, 0.6) !important;
   border-color: rgba(99, 102, 241, 0.3) !important;
   color: #e2e8f0 !important;
 }
 
-/* ── Stat card flotante ──────────────────────────────────────────────────── */
-body.page-dark .absolute.-bottom-8.-left-8 {
+.dark .absolute.-bottom-8.-left-8 {
   background: rgba(15, 23, 42, 0.9) !important;
   border-color: rgba(99, 102, 241, 0.2) !important;
 }
 
-body.page-dark .absolute.-bottom-8.-left-8 p {
+.dark .absolute.-bottom-8.-left-8 p {
   color: #ffffff !important;
 }
 
-/* ── About section: números de estadísticas ─────────────────────────────── */
-body.page-dark .text-slate-900 {
+.dark .text-slate-900 {
   color: #ffffff !important;
 }
 
-/* ── Navbar: SIEMPRE blanca, no se toca ──────────────────────────────────── */
+/* ── Navbar ────────────────────────────────────────────────────────────── */
 header {
   background: rgba(255, 255, 255, 0.92) !important;
   color: inherit;
+  transition: background 0.3s ease, border-color 0.3s ease !important;
 }
 
-header * {
-  /* Preservar colores originales de la navbar */
-  transition: none;
+.dark header {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(30, 41, 59, 0.5) !important;
+}
+
+.dark header a:not([style*="background"]), 
+.dark header button:not([style*="background"]) {
+  color: #e2e8f0 !important;
+}
+
+.dark header .bg-gray-200 {
+  background-color: #334155 !important;
 }
 
 
