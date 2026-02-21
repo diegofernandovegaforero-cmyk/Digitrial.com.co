@@ -66,12 +66,22 @@ export default function Footer() {
                             Transformando ideas en experiencias digitales excepcionales desde Pitalito para el mundo.
                         </p>
                         <div className="flex gap-4">
-                            <Link href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all">
+                            <a
+                                href="https://www.facebook.com/profile.php?id=61588332091249"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all"
+                            >
                                 <Facebook className="w-4 h-4" />
-                            </Link>
-                            <Link href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-pink-600 hover:text-white transition-all">
+                            </a>
+                            <a
+                                href="https://www.instagram.com/digitrialcs/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-pink-600 hover:text-white transition-all"
+                            >
                                 <Instagram className="w-4 h-4" />
-                            </Link>
+                            </a>
                             <Link href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-700 hover:text-white transition-all">
                                 <Linkedin className="w-4 h-4" />
                             </Link>
