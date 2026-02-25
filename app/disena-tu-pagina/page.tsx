@@ -81,13 +81,10 @@ export default function DisenaPage() {
     const rejectCookies = () => { localStorage.setItem('digitrial_cookies', 'rejected'); setCookiesAccepted(false); };
 
     // Form state
-    const [form, setForm] = useState({ nombre: '', sector: '', productos: '', estilo: '' });
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+    const [descripcion, setDescripcion] = useState('');
 
-    // Formulario válido cuando: productos ≥ 500 chars O hay audio grabado
-    const productosValido = form.productos.length >= MIN_CHARS_PRODUCTOS || audioBlob !== null;
+    // Formulario válido cuando: descripcion ≥ 500 chars O hay audio grabado
+    const productosValido = descripcion.length >= MIN_CHARS_PRODUCTOS || audioBlob !== null;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,7 +96,7 @@ export default function DisenaPage() {
             const res = await fetch('/api/generar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify({ descripcion }),
             });
             const data = await res.json();
             clearInterval(interval);
@@ -127,7 +124,7 @@ export default function DisenaPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...form,
+                    descripcion,
                     nombre_contacto: nombreContacto,
                     email: emailContacto,
                 }),
@@ -182,22 +179,10 @@ export default function DisenaPage() {
                     )}
 
                     <form onSubmit={handleGenerate} className="space-y-5">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">🏢 Nombre de tu negocio *</label>
-                                <input type="text" name="nombre" value={form.nombre} onChange={handleChange} required
-                                    placeholder='Ej: "Cafetería El Grano", "Estudio Fotos Lima"'
-                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">🏷️ Sector / Actividad económica *</label>
-                                <input type="text" name="sector" value={form.sector} onChange={handleChange} required
-                                    placeholder='Ej: "Gastronomía local", "Fotografía", "Moda y ropa"'
-                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
-                            </div>
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
-                                    ⭐ Productos / Servicios estrella *
+                                    💡 Describe tu idea
                                     <span className="ml-2 text-xs font-normal text-slate-500">mín. 500 caracteres o audio de 45s</span>
                                 </label>
 
@@ -205,26 +190,26 @@ export default function DisenaPage() {
                                 {!audioBlob && (
                                     <>
                                         <textarea
-                                            name="productos"
-                                            value={form.productos}
-                                            onChange={handleChange}
-                                            rows={5}
-                                            placeholder='Descríbenos a detalle tus productos, servicios, beneficios, clientes ideales, zona de atención, precios orientativos y cualquier elemento diferenciador. (Mínimo 500 caracteres)'
+                                            name="descripcion"
+                                            value={descripcion}
+                                            onChange={e => setDescripcion(e.target.value)}
+                                            rows={7}
+                                            placeholder='Cuéntanos todo sobre tu idea: qué vendes, a quién va dirigido, qué te hace especial, precios, zona de atención, nombres propios... Entre más detalle des, mejor será tu página. (Mínimo 500 caracteres)'
                                             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none text-sm"
                                         />
                                         <div className="mt-2">
                                             <div className="flex justify-between text-xs mb-1">
-                                                <span className={form.productos.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-500'}>
-                                                    {form.productos.length >= MIN_CHARS_PRODUCTOS ? '✅ ¡Suficiente detalle!' : `${form.productos.length} / ${MIN_CHARS_PRODUCTOS} caracteres mínimos`}
+                                                <span className={descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-500'}>
+                                                    {descripcion.length >= MIN_CHARS_PRODUCTOS ? '✅ ¡Suficiente detalle!' : `${descripcion.length} / ${MIN_CHARS_PRODUCTOS} caracteres mínimos`}
                                                 </span>
-                                                {form.productos.length < MIN_CHARS_PRODUCTOS && (
-                                                    <span className="text-slate-600">{MIN_CHARS_PRODUCTOS - form.productos.length} restantes</span>
+                                                {descripcion.length < MIN_CHARS_PRODUCTOS && (
+                                                    <span className="text-slate-600">{MIN_CHARS_PRODUCTOS - descripcion.length} restantes</span>
                                                 )}
                                             </div>
                                             <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-300 ${form.productos.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
-                                                    style={{ width: `${Math.min((form.productos.length / MIN_CHARS_PRODUCTOS) * 100, 100)}%` }}
+                                                    className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
+                                                    style={{ width: `${Math.min((descripcion.length / MIN_CHARS_PRODUCTOS) * 100, 100)}%` }}
                                                 />
                                             </div>
                                         </div>
@@ -279,26 +264,13 @@ export default function DisenaPage() {
                                     )}
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">🎨 Estilo visual / Tono de marca *</label>
-                                <select name="estilo" value={form.estilo} onChange={handleChange} required
-                                    className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
-                                    <option value="">Selecciona un estilo...</option>
-                                    <option value="Moderno y minimalista">🖤 Moderno y minimalista</option>
-                                    <option value="Cálido y familiar">🧡 Cálido y familiar</option>
-                                    <option value="Profesional y corporativo">💼 Profesional y corporativo</option>
-                                    <option value="Vibrante y colorido">🌈 Vibrante y colorido</option>
-                                    <option value="Elegante y lujoso">💎 Elegante y lujoso</option>
-                                    <option value="Fresco y natural">🌿 Fresco y natural</option>
-                                </select>
-                            </div>
                         </div>
 
                         <button type="submit"
-                            disabled={!productosValido || !form.nombre || !form.sector || !form.estilo}
+                            disabled={!productosValido}
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/30 text-lg">
                             <Sparkles className="w-5 h-5" />
-                            {productosValido ? 'Generar mi Página Web con IA' : `Faltan ${MIN_CHARS_PRODUCTOS - form.productos.length} caracteres...`}
+                            {productosValido ? 'Generar mi Página Web con IA' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`}
                             <ArrowRight className="w-5 h-5" />
                         </button>
                         <p className="text-center text-xs text-slate-500">✅ 100% gratuito · Sin registro previo · Lista en segundos</p>

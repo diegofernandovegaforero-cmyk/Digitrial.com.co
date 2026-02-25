@@ -41,20 +41,20 @@ ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown. NO envuelvas tu respuesta e
 
 export async function POST(req: NextRequest) {
   try {
-    const { nombre, sector, productos, estilo, nombre_contacto, email } = await req.json();
+    const { descripcion, nombre_contacto, email } = await req.json();
 
-    if (!nombre || !sector || !productos || !estilo) {
+    if (!descripcion || descripcion.trim().length < 10) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
-    // Construir el input completo del usuario para el prompt
-    const inputUsuario = `Negocio: "${nombre}" | Sector: "${sector}" | Productos/Servicios: "${productos}" | Estilo visual: "${estilo}"`;
+    // Usar la descripción directamente como input
+    const inputUsuario = descripcion;
 
     const apiKey = process.env.GEMINI_API_KEY;
     let html: string;
 
     if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
-      html = buildFallbackHTML(nombre, sector, productos);
+      html = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);
     } else {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
           .trim();
       } catch (geminiError) {
         console.warn('Gemini API falló, usando fallback:', geminiError);
-        html = buildFallbackHTML(nombre, sector, productos);
+        html = buildFallbackHTML(descripcion.substring(0, 60), descripcion);
       }
     }
 
@@ -80,12 +80,10 @@ export async function POST(req: NextRequest) {
           const existing = await docRef.get();
           if (!existing.exists) {
             await docRef.set({
-              nombre_negocio: nombre,
+              nombre_negocio: descripcion.substring(0, 60),
               nombre_contacto: nombre_contacto || '',
               email: email.toLowerCase().trim(),
-              sector,
-              productos,
-              estilo,
+              descripcion,
               codigo_actual: html,
               creditos_restantes: 15,
               fecha_creacion: new Date().toISOString(),
@@ -110,23 +108,19 @@ export async function POST(req: NextRequest) {
 }
 
 // ─── FALLBACK HTML ────────────────────────────────────────────────────────────
-function buildFallbackHTML(nombre: string, sector: string, productos: string): string {
+function buildFallbackHTML(titulo: string, descripcion: string): string {
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${nombre}</title>
+  <title>${titulo}</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="font-sans bg-white text-gray-800">
   <section class="bg-gradient-to-br from-blue-900 via-purple-800 to-pink-700 text-white py-24 px-6 text-center">
-    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
-      Bienvenido a <span class="text-yellow-300">${nombre}</span>
-    </h1>
-    <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto mb-8">
-      Especialistas en ${sector}. Ofrecemos ${productos} para llevar tu negocio al siguiente nivel.
-    </p>
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">${titulo}</h1>
+    <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto mb-8">${descripcion}</p>
     <a href="#contacto" class="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-full text-lg hover:bg-yellow-300 transition shadow-xl">
       ¡Quiero empezar ahora!
     </a>
