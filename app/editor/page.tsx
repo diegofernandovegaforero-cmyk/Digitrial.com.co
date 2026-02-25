@@ -1,0 +1,456 @@
+'use client';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+
+const CREDITOS_POR_EDICION = 3;
+const MAX_AUDIO_SEGUNDOS = 45;
+const MAX_TEXTO_CHARS = 500;
+
+export default function EditorPage() {
+    const [whatsapp, setWhatsapp] = useState('');
+    const [identificado, setIdentificado] = useState(false);
+    const [userData, setUserData] = useState<{
+        nombre: string;
+        creditos_restantes: number;
+        codigo_actual: string;
+    } | null>(null);
+    const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState('');
+
+    // Editor state
+    const [instruccion, setInstruccion] = useState('');
+    const [editando, setEditando] = useState(false);
+    const [exito, setExito] = useState('');
+    const [transcripcion, setTranscripcion] = useState('');
+
+    // Audio recording
+    const [grabando, setGrabando] = useState(false);
+    const [segundosGrabacion, setSegundosGrabacion] = useState(0);
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+
+    // Listener de Firestore en tiempo real
+    useEffect(() => {
+        if (!identificado || !whatsapp) return;
+        const numeroLimpio = whatsapp.replace(/\D/g, '');
+        const docRef = doc(db, 'usuarios_leads', numeroLimpio);
+
+        const unsubscribe = onSnapshot(docRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                setUserData({
+                    nombre: data.nombre || 'Tu negocio',
+                    creditos_restantes: data.creditos_restantes ?? 0,
+                    codigo_actual: data.codigo_actual || '',
+                });
+                setError('');
+            } else {
+                setError('No encontramos tu cuenta. Primero genera tu página web.');
+            }
+            setCargando(false);
+        }, (err) => {
+            console.error(err);
+            setError('Error conectando con Firebase. Verifica la configuración.');
+            setCargando(false);
+        });
+
+        return () => unsubscribe();
+    }, [identificado, whatsapp]);
+
+    const handleIdentificar = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!whatsapp.trim()) return;
+        setCargando(true);
+        setIdentificado(true);
+    };
+
+    // ── Grabación de audio ──
+    const iniciarGrabacion = useCallback(async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) audioChunksRef.current.push(e.data);
+            };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                stream.getTracks().forEach(t => t.stop());
+            };
+
+            mediaRecorder.start();
+            setGrabando(true);
+            setSegundosGrabacion(0);
+
+            audioIntervalRef.current = setInterval(() => {
+                setSegundosGrabacion(prev => {
+                    if (prev >= MAX_AUDIO_SEGUNDOS - 1) {
+                        detenerGrabacion();
+                        return MAX_AUDIO_SEGUNDOS;
+                    }
+                    return prev + 1;
+                });
+            }, 1000);
+        } catch {
+            setError('No se pudo acceder al micrófono. Verifica los permisos.');
+        }
+    }, []);
+
+    const detenerGrabacion = useCallback(() => {
+        if (mediaRecorderRef.current && grabando) {
+            mediaRecorderRef.current.stop();
+            setGrabando(false);
+            if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
+        }
+    }, [grabando]);
+
+    const limpiarAudio = () => {
+        setAudioBlob(null);
+        setSegundosGrabacion(0);
+        setTranscripcion('');
+    };
+
+    // ── Enviar edición ──
+    const handleEditar = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!instruccion.trim() && !audioBlob) {
+            setError('Escribe una instrucción o graba un audio.');
+            return;
+        }
+        if ((userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION) return;
+
+        setEditando(true);
+        setError('');
+        setExito('');
+
+        let audio_base64 = '';
+        if (audioBlob) {
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+            let binary = '';
+            uint8Array.forEach(b => binary += String.fromCharCode(b));
+            audio_base64 = btoa(binary);
+        }
+
+        try {
+            const res = await fetch('/api/editar-pagina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    whatsapp: whatsapp.replace(/\D/g, ''),
+                    instruccion_texto: instruccion,
+                    audio_base64,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.status === 402) {
+                setError('¡Créditos insuficientes! Habla con nosotros para recargar.');
+            } else if (data.error) {
+                setError(data.error);
+            } else {
+                setExito('¡Diseño actualizado! Los cambios ya están aplicados. 🎉');
+                if (data.transcripcion_audio) setTranscripcion(data.transcripcion_audio);
+                setInstruccion('');
+                limpiarAudio();
+            }
+        } catch {
+            setError('Error de conexión. Intenta de nuevo.');
+        } finally {
+            setEditando(false);
+        }
+    };
+
+    const creditosBajos = (userData?.creditos_restantes ?? 0) <= 3;
+    const sinCreditos = (userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION;
+
+    // ── UI: Pantalla de identificación ──
+    if (!identificado) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex flex-col">
+                <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                    <Link href="/" className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <Triangle className="text-white fill-white w-4 h-4" />
+                        </div>
+                        <span className="font-extrabold text-lg tracking-tight uppercase text-slate-300">
+                            DIGI<span className="text-blue-400">TRIAL</span>
+                        </span>
+                    </Link>
+                    <Link href="/disena-tu-pagina" className="text-sm text-slate-400 hover:text-white transition-colors">
+                        ← Generar nueva página
+                    </Link>
+                </nav>
+
+                <main className="flex-1 flex items-center justify-center px-6">
+                    <div className="max-w-md w-full text-center">
+                        <div className="text-5xl mb-6">✏️</div>
+                        <h1 className="text-3xl font-extrabold mb-3">Editor de tu Página Web</h1>
+                        <p className="text-slate-400 mb-8">Ingresa tu número de WhatsApp para acceder a tu diseño y editarlo con IA.</p>
+
+                        <form onSubmit={handleIdentificar} className="space-y-4">
+                            <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-3">
+                                <span className="text-green-400 text-lg">📱</span>
+                                <input
+                                    type="tel"
+                                    value={whatsapp}
+                                    onChange={e => setWhatsapp(e.target.value)}
+                                    placeholder="Ej: 3123299053"
+                                    required
+                                    className="flex-1 bg-transparent text-white placeholder-slate-500 focus:outline-none"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Zap className="w-4 h-4" />
+                                Acceder a mi editor
+                            </button>
+                        </form>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    // ── UI: Cargando datos de Firebase ──
+    if (cargando) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-blue-400 mx-auto mb-4" />
+                    <p className="text-slate-400">Cargando tu diseño...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // ── UI: Error de acceso ──
+    if (error && !userData) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-center px-6">
+                <div className="max-w-md text-center">
+                    <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold mb-2">Cuenta no encontrada</h2>
+                    <p className="text-slate-400 mb-6">{error}</p>
+                    <Link href="/disena-tu-pagina"
+                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-block">
+                        Generar mi página gratis
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // ── UI: Editor principal ──
+    return (
+        <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+            {/* Navbar */}
+            <nav className="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+                <Link href="/" className="flex items-center gap-2">
+                    <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <Triangle className="text-white fill-white w-3.5 h-3.5" />
+                    </div>
+                    <span className="font-extrabold text-base tracking-tight uppercase text-slate-300">
+                        DIGI<span className="text-blue-400">TRIAL</span>
+                    </span>
+                </Link>
+
+                {/* Contador de créditos */}
+                <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold border ${creditosBajos
+                    ? 'bg-red-500/20 border-red-500/40 text-red-300'
+                    : 'bg-blue-500/20 border-blue-500/30 text-blue-300'
+                    }`}>
+                    <Zap className="w-4 h-4" />
+                    {userData?.creditos_restantes ?? 0} créditos restantes
+                </div>
+            </nav>
+
+            <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
+                {/* ─── Panel izquierdo: Editor ─── */}
+                <div className="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-white/10 bg-slate-900 overflow-y-auto">
+                    <div className="p-6">
+                        <h2 className="text-lg font-bold mb-1">Editar diseño de <span className="text-blue-400">{userData?.nombre}</span></h2>
+                        <p className="text-slate-500 text-xs mb-6">Cada edición cuesta {CREDITOS_POR_EDICION} créditos · Gemini aplica tus cambios en tiempo real</p>
+
+                        {/* Alerta de créditos bajos */}
+                        {creditosBajos && (
+                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
+                                ⚠️ Te quedan <strong>{userData?.creditos_restantes}</strong> créditos.{' '}
+                                <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
+                                    Contacta a un asesor
+                                </a>{' '}para recargar o llevar el diseño a producción.
+                            </div>
+                        )}
+
+                        {exito && (
+                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                                {exito}
+                            </div>
+                        )}
+
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                {error}
+                            </div>
+                        )}
+
+                        {transcripcion && (
+                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
+                                🎤 Transcripción: <em>"{transcripcion}"</em>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleEditar} className="space-y-4">
+                            {/* Instrucción de texto */}
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                    ✍️ Instrucción en texto
+                                </label>
+                                <textarea
+                                    value={instruccion}
+                                    onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
+                                    placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios con 2 planes"'
+                                    rows={4}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
+                                />
+                                <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
+                            </div>
+
+                            {/* Grabación de audio */}
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                    🎤 Instrucción por audio (máx {MAX_AUDIO_SEGUNDOS}s)
+                                </label>
+                                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                    {!audioBlob ? (
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                {grabando ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                                                        <span className="text-red-400 font-bold text-sm">
+                                                            Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEGUNDOS}s
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-slate-500 text-sm">Graba tu instrucción en voz</p>
+                                                )}
+                                                {grabando && (
+                                                    <div className="mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden w-40">
+                                                        <div
+                                                            className="h-full bg-red-500 rounded-full transition-all"
+                                                            style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEGUNDOS) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={grabando ? detenerGrabacion : iniciarGrabacion}
+                                                className={`p-3 rounded-full transition-colors ${grabando
+                                                    ? 'bg-red-500 hover:bg-red-400'
+                                                    : 'bg-blue-600 hover:bg-blue-500'
+                                                    }`}
+                                            >
+                                                {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+                                                <CheckCircle className="w-4 h-4" />
+                                                Audio listo ({segundosGrabacion}s)
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={limpiarAudio}
+                                                className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1"
+                                            >
+                                                <RefreshCw className="w-3 h-3" /> Regrabar
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="text-xs text-slate-600 mt-1">
+                                    Si grabas audio, tiene prioridad sobre el texto.
+                                </p>
+                            </div>
+
+                            {/* Botón de envío */}
+                            <button
+                                type="submit"
+                                disabled={editando || sinCreditos || (!instruccion.trim() && !audioBlob)}
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
+                            >
+                                {editando ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Aplicando cambios con IA...
+                                    </>
+                                ) : sinCreditos ? (
+                                    <>
+                                        <AlertCircle className="w-4 h-4" />
+                                        Sin créditos disponibles
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="w-4 h-4" />
+                                        Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)
+                                        <Send className="w-4 h-4" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="mt-6 pt-6 border-t border-white/10">
+                            <a
+                                href="https://wa.me/573123299053"
+                                target="_blank"
+                                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors text-sm"
+                            >
+                                📱 Llevar a producción · Hablar con asesor
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ─── Panel derecho: Preview en tiempo real ─── */}
+                <div className="flex-1 relative hidden md:block">
+                    {editando && (
+                        <div className="absolute inset-0 z-10 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center">
+                            <div className="text-center">
+                                <Loader2 className="w-10 h-10 animate-spin text-blue-400 mx-auto mb-3" />
+                                <p className="text-blue-300 font-medium">Gemini está aplicando tus cambios...</p>
+                                <p className="text-slate-500 text-sm mt-1">Esto puede tomar hasta 30 segundos</p>
+                            </div>
+                        </div>
+                    )}
+                    {userData?.codigo_actual ? (
+                        <iframe
+                            srcDoc={userData.codigo_actual}
+                            className="w-full h-full border-none"
+                            title="Vista previa en tiempo real"
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-slate-600">
+                            <p>No hay diseño cargado aún.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
