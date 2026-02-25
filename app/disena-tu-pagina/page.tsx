@@ -30,8 +30,9 @@ export default function DisenaPage() {
     const [submitting, setSubmitting] = useState(false);
 
     // Audio recording for productos field
-    const MAX_AUDIO_SEG = 45;
-    const MIN_CHARS_PRODUCTOS = 500;
+    const MAX_AUDIO_SEG = 25;
+    const MIN_CHARS_PRODUCTOS = 50;
+    const MAX_CHARS_PRODUCTOS = 100;
     const [grabando, setGrabando] = useState(false);
     const [segundosGrabacion, setSegundosGrabacion] = useState(0);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -83,8 +84,8 @@ export default function DisenaPage() {
     // Form state
     const [descripcion, setDescripcion] = useState('');
 
-    // Formulario válido cuando: descripcion ≥ 500 chars O hay audio grabado
-    const productosValido = descripcion.length >= MIN_CHARS_PRODUCTOS || audioBlob !== null;
+    // Formulario válido: descripcion entre 50-100 chars O hay audio grabado
+    const productosValido = (descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS) || audioBlob !== null;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -183,7 +184,7 @@ export default function DisenaPage() {
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     💡 Describe tu idea
-                                    <span className="ml-2 text-xs font-normal text-slate-500">mín. 500 caracteres o audio de 45s</span>
+                                    <span className="ml-2 text-xs font-normal text-slate-500">entre {MIN_CHARS_PRODUCTOS}-{MAX_CHARS_PRODUCTOS} caracteres o audio de {MAX_AUDIO_SEG}s</span>
                                 </label>
 
                                 {/* Textarea con contador */}
@@ -192,24 +193,37 @@ export default function DisenaPage() {
                                         <textarea
                                             name="descripcion"
                                             value={descripcion}
-                                            onChange={e => setDescripcion(e.target.value)}
-                                            rows={7}
-                                            placeholder='Cuéntanos todo sobre tu idea: qué vendes, a quién va dirigido, qué te hace especial, precios, zona de atención, nombres propios... Entre más detalle des, mejor será tu página. (Mínimo 500 caracteres)'
+                                            onChange={e => setDescripcion(e.target.value.slice(0, MAX_CHARS_PRODUCTOS))}
+                                            rows={4}
+                                            maxLength={MAX_CHARS_PRODUCTOS}
+                                            placeholder={`Describe tu idea en pocas palabras (${MIN_CHARS_PRODUCTOS}-${MAX_CHARS_PRODUCTOS} caracteres).`}
                                             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none text-sm"
                                         />
                                         <div className="mt-2">
                                             <div className="flex justify-between text-xs mb-1">
-                                                <span className={descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-500'}>
-                                                    {descripcion.length >= MIN_CHARS_PRODUCTOS ? '✅ ¡Suficiente detalle!' : `${descripcion.length} / ${MIN_CHARS_PRODUCTOS} caracteres mínimos`}
+                                                <span className={
+                                                    descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS
+                                                        ? 'text-green-400 font-semibold'
+                                                        : descripcion.length > MAX_CHARS_PRODUCTOS
+                                                            ? 'text-red-400 font-semibold'
+                                                            : 'text-slate-500'
+                                                }>
+                                                    {descripcion.length > MAX_CHARS_PRODUCTOS
+                                                        ? `¡Máximo ${MAX_CHARS_PRODUCTOS} caracteres!`
+                                                        : descripcion.length >= MIN_CHARS_PRODUCTOS
+                                                            ? '✅ ¡Listo para generar!'
+                                                            : `${descripcion.length} / ${MIN_CHARS_PRODUCTOS} mínimo`
+                                                    }
                                                 </span>
-                                                {descripcion.length < MIN_CHARS_PRODUCTOS && (
-                                                    <span className="text-slate-600">{MIN_CHARS_PRODUCTOS - descripcion.length} restantes</span>
-                                                )}
+                                                <span className="text-slate-600">{descripcion.length}/{MAX_CHARS_PRODUCTOS}</span>
                                             </div>
                                             <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
-                                                    style={{ width: `${Math.min((descripcion.length / MIN_CHARS_PRODUCTOS) * 100, 100)}%` }}
+                                                    className={`h-full rounded-full transition-all duration-300 ${descripcion.length > MAX_CHARS_PRODUCTOS ? 'bg-red-500'
+                                                            : descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500'
+                                                                : 'bg-blue-500'
+                                                        }`}
+                                                    style={{ width: `${Math.min((descripcion.length / MAX_CHARS_PRODUCTOS) * 100, 100)}%` }}
                                                 />
                                             </div>
                                         </div>
@@ -241,7 +255,7 @@ export default function DisenaPage() {
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <p className="text-slate-400 text-sm">🎤 Graba hasta <strong>45 segundos</strong> describiendo tu negocio</p>
+                                                    <p className="text-slate-400 text-sm">🎤 Graba hasta <strong>{MAX_AUDIO_SEG} segundos</strong> describiendo tu idea</p>
                                                 )}
                                             </div>
                                             <button type="button"
