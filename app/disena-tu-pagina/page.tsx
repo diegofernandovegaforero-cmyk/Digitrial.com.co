@@ -32,7 +32,7 @@ export default function DisenaPage() {
     // Audio recording for productos field
     const MAX_AUDIO_SEG = 25;
     const MIN_CHARS_PRODUCTOS = 50;
-    const MAX_CHARS_PRODUCTOS = 100;
+    const MAX_CHARS_PRODUCTOS = 500;
     const [grabando, setGrabando] = useState(false);
     const [segundosGrabacion, setSegundosGrabacion] = useState(0);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -184,99 +184,90 @@ export default function DisenaPage() {
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     💡 Describe tu idea
-                                    <span className="ml-2 text-xs font-normal text-slate-500">entre {MIN_CHARS_PRODUCTOS}-{MAX_CHARS_PRODUCTOS} caracteres o audio de {MAX_AUDIO_SEG}s</span>
+                                    <span className="ml-2 text-xs font-normal text-slate-500">mín. {MIN_CHARS_PRODUCTOS} · máx. {MAX_CHARS_PRODUCTOS} caracteres</span>
                                 </label>
 
-                                {/* Textarea con contador */}
-                                {!audioBlob && (
-                                    <>
-                                        <textarea
-                                            name="descripcion"
-                                            value={descripcion}
-                                            onChange={e => setDescripcion(e.target.value.slice(0, MAX_CHARS_PRODUCTOS))}
-                                            rows={4}
-                                            maxLength={MAX_CHARS_PRODUCTOS}
-                                            placeholder={`Describe tu idea en pocas palabras (${MIN_CHARS_PRODUCTOS}-${MAX_CHARS_PRODUCTOS} caracteres).`}
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none text-sm"
-                                        />
-                                        <div className="mt-2">
-                                            <div className="flex justify-between text-xs mb-1">
-                                                <span className={
-                                                    descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS
-                                                        ? 'text-green-400 font-semibold'
-                                                        : descripcion.length > MAX_CHARS_PRODUCTOS
-                                                            ? 'text-red-400 font-semibold'
-                                                            : 'text-slate-500'
-                                                }>
-                                                    {descripcion.length > MAX_CHARS_PRODUCTOS
-                                                        ? `¡Máximo ${MAX_CHARS_PRODUCTOS} caracteres!`
-                                                        : descripcion.length >= MIN_CHARS_PRODUCTOS
-                                                            ? '✅ ¡Listo para generar!'
-                                                            : `${descripcion.length} / ${MIN_CHARS_PRODUCTOS} mínimo`
-                                                    }
-                                                </span>
-                                                <span className="text-slate-600">{descripcion.length}/{MAX_CHARS_PRODUCTOS}</span>
-                                            </div>
-                                            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                                                <div
-                                                    className={`h-full rounded-full transition-all duration-300 ${descripcion.length > MAX_CHARS_PRODUCTOS ? 'bg-red-500'
-                                                            : descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500'
-                                                                : 'bg-blue-500'
-                                                        }`}
-                                                    style={{ width: `${Math.min((descripcion.length / MAX_CHARS_PRODUCTOS) * 100, 100)}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
+                                {/* Textarea + botón mic integrado */}
+                                <div className="relative">
+                                    <textarea
+                                        name="descripcion"
+                                        value={audioBlob ? '' : descripcion}
+                                        onChange={e => !audioBlob && setDescripcion(e.target.value.slice(0, MAX_CHARS_PRODUCTOS))}
+                                        disabled={!!audioBlob}
+                                        rows={8}
+                                        maxLength={MAX_CHARS_PRODUCTOS}
+                                        placeholder={audioBlob ? '' : `Cuéntanos tu idea: qué vendes, a quién va dirigido, qué te hace especial, zona de atención, precios... (mín. ${MIN_CHARS_PRODUCTOS} caracteres)`}
+                                        className={`w-full bg-white/10 border rounded-xl px-4 py-3 pb-10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm ${audioBlob
+                                                ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20'
+                                                : 'border-white/20 focus:border-blue-500 focus:ring-blue-500/20'
+                                            }`}
+                                    />
 
-                                {/* Separador OR */}
-                                {!audioBlob && (
-                                    <div className="flex items-center gap-3 my-3">
-                                        <div className="flex-1 h-px bg-white/10" />
-                                        <span className="text-xs text-slate-500 uppercase tracking-wider">o graba audio</span>
-                                        <div className="flex-1 h-px bg-white/10" />
-                                    </div>
-                                )}
-
-                                {/* Grabación de audio */}
-                                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                                    {!audioBlob ? (
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex-1">
-                                                {grabando ? (
-                                                    <>
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-                                                            <span className="text-red-400 font-bold text-sm">Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEG}s</span>
-                                                        </div>
-                                                        <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-red-500 rounded-full transition-all" style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEG) * 100}%` }} />
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <p className="text-slate-400 text-sm">🎤 Graba hasta <strong>{MAX_AUDIO_SEG} segundos</strong> describiendo tu idea</p>
-                                                )}
-                                            </div>
-                                            <button type="button"
-                                                onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-                                                className={`ml-4 p-3 rounded-full transition-colors ${grabando ? 'bg-red-500 hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-500'}`}>
-                                                {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
+                                    {/* Overlay cuando hay audio grabado */}
+                                    {audioBlob && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-green-900/30 border border-green-500/40">
+                                            <div className="flex items-center gap-2 text-green-400 font-semibold text-sm">
                                                 <CheckCircle className="w-5 h-5" />
-                                                Audio listo ({segundosGrabacion}s) — en lugar del texto ✅
+                                                Audio grabado ({segundosGrabacion}s) ✅
                                             </div>
                                             <button type="button" onClick={limpiarAudio}
-                                                className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1 ml-3">
-                                                <RefreshCw className="w-3 h-3" /> Regrabar
+                                                className="mt-2 text-xs text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1">
+                                                <RefreshCw className="w-3 h-3" /> Eliminar y escribir
                                             </button>
                                         </div>
                                     )}
+
+                                    {/* Controles inferiores dentro del textarea */}
+                                    <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between pointer-events-none">
+                                        {/* Contador de caracteres */}
+                                        {!audioBlob && (
+                                            <span className={`text-xs pointer-events-none ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-600'
+                                                }`}>
+                                                {descripcion.length >= MIN_CHARS_PRODUCTOS ? '✅' : ''} {descripcion.length}/{MAX_CHARS_PRODUCTOS}
+                                            </span>
+                                        )}
+                                        {audioBlob && <span />}
+
+                                        {/* Botón de micrófono — esquina inferior derecha */}
+                                        <button type="button"
+                                            onClick={grabando ? detenerGrabacion : iniciarGrabacion}
+                                            disabled={!!audioBlob}
+                                            title={grabando ? 'Detener grabación' : `Grabar audio (hasta ${MAX_AUDIO_SEG}s)`}
+                                            className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${grabando
+                                                    ? 'bg-red-500 text-white animate-pulse'
+                                                    : audioBlob
+                                                        ? 'bg-green-600/40 text-green-300 cursor-not-allowed'
+                                                        : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
+                                                }`}>
+                                            {grabando ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                                            {grabando ? `${segundosGrabacion}s` : '🎤 Audio'}
+                                        </button>
+                                    </div>
                                 </div>
+
+                                {/* Barra de progreso de caracteres */}
+                                {!audioBlob && (
+                                    <div className="mt-1.5 h-1 bg-slate-700 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'
+                                                }`}
+                                            style={{ width: `${Math.min((descripcion.length / MAX_CHARS_PRODUCTOS) * 100, 100)}%` }}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Estado de grabación (barra de progreso de audio) */}
+                                {grabando && (
+                                    <div className="mt-2">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                            <span className="text-red-400 text-xs font-semibold">Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEG}s</span>
+                                        </div>
+                                        <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
+                                            <div className="h-full bg-red-500 rounded-full transition-all" style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEG) * 100}%` }} />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
