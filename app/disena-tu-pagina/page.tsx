@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Triangle, ArrowRight, Sparkles, Lock, Mail, CheckCircle, Loader2 } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Mail, CheckCircle, Loader2, Mic, MicOff, RefreshCw } from 'lucide-react';
 
 type Step = 'form' | 'loading' | 'preview';
 
@@ -29,6 +29,49 @@ export default function DisenaPage() {
     const [submitError, setSubmitError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // Audio recording for productos field
+    const MAX_AUDIO_SEG = 45;
+    const MIN_CHARS_PRODUCTOS = 500;
+    const [grabando, setGrabando] = useState(false);
+    const [segundosGrabacion, setSegundosGrabacion] = useState(0);
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+
+    const iniciarGrabacion = useCallback(async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mr = new MediaRecorder(stream);
+            mediaRecorderRef.current = mr;
+            audioChunksRef.current = [];
+            mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+            mr.onstop = () => {
+                setAudioBlob(new Blob(audioChunksRef.current, { type: 'audio/webm' }));
+                stream.getTracks().forEach(t => t.stop());
+            };
+            mr.start();
+            setGrabando(true);
+            setSegundosGrabacion(0);
+            audioIntervalRef.current = setInterval(() => {
+                setSegundosGrabacion(prev => {
+                    if (prev >= MAX_AUDIO_SEG - 1) { detenerGrabacion(); return MAX_AUDIO_SEG; }
+                    return prev + 1;
+                });
+            }, 1000);
+        } catch { setError('No se pudo acceder al micrófono. Verifica los permisos.'); }
+    }, []);
+
+    const detenerGrabacion = useCallback(() => {
+        if (mediaRecorderRef.current && grabando) {
+            mediaRecorderRef.current.stop();
+            setGrabando(false);
+            if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
+        }
+    }, [grabando]);
+
+    const limpiarAudio = () => { setAudioBlob(null); setSegundosGrabacion(0); };
+
     useEffect(() => {
         const saved = localStorage.getItem('digitrial_cookies');
         setCookiesAccepted(saved === 'accepted' ? true : saved === 'rejected' ? false : null);
@@ -42,6 +85,9 @@ export default function DisenaPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
+
+    // Formulario válido cuando: productos ≥ 500 chars O hay audio grabado
+    const productosValido = form.productos.length >= MIN_CHARS_PRODUCTOS || audioBlob !== null;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -150,10 +196,88 @@ export default function DisenaPage() {
                                     className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">⭐ Productos / Servicios estrella *</label>
-                                <textarea name="productos" value={form.productos} onChange={handleChange} required rows={3}
-                                    placeholder='Ej: "Café de especialidad, postres artesanales, desayunos ejecutivos"'
-                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none" />
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
+                                    ⭐ Productos / Servicios estrella *
+                                    <span className="ml-2 text-xs font-normal text-slate-500">mín. 500 caracteres o audio de 45s</span>
+                                </label>
+
+                                {/* Textarea con contador */}
+                                {!audioBlob && (
+                                    <>
+                                        <textarea
+                                            name="productos"
+                                            value={form.productos}
+                                            onChange={handleChange}
+                                            rows={5}
+                                            placeholder='Descríbenos a detalle tus productos, servicios, beneficios, clientes ideales, zona de atención, precios orientativos y cualquier elemento diferenciador. (Mínimo 500 caracteres)'
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none text-sm"
+                                        />
+                                        <div className="mt-2">
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className={form.productos.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-500'}>
+                                                    {form.productos.length >= MIN_CHARS_PRODUCTOS ? '✅ ¡Suficiente detalle!' : `${form.productos.length} / ${MIN_CHARS_PRODUCTOS} caracteres mínimos`}
+                                                </span>
+                                                {form.productos.length < MIN_CHARS_PRODUCTOS && (
+                                                    <span className="text-slate-600">{MIN_CHARS_PRODUCTOS - form.productos.length} restantes</span>
+                                                )}
+                                            </div>
+                                            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-300 ${form.productos.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
+                                                    style={{ width: `${Math.min((form.productos.length / MIN_CHARS_PRODUCTOS) * 100, 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Separador OR */}
+                                {!audioBlob && (
+                                    <div className="flex items-center gap-3 my-3">
+                                        <div className="flex-1 h-px bg-white/10" />
+                                        <span className="text-xs text-slate-500 uppercase tracking-wider">o graba audio</span>
+                                        <div className="flex-1 h-px bg-white/10" />
+                                    </div>
+                                )}
+
+                                {/* Grabación de audio */}
+                                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                    {!audioBlob ? (
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                {grabando ? (
+                                                    <>
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                                                            <span className="text-red-400 font-bold text-sm">Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEG}s</span>
+                                                        </div>
+                                                        <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-red-500 rounded-full transition-all" style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEG) * 100}%` }} />
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <p className="text-slate-400 text-sm">🎤 Graba hasta <strong>45 segundos</strong> describiendo tu negocio</p>
+                                                )}
+                                            </div>
+                                            <button type="button"
+                                                onClick={grabando ? detenerGrabacion : iniciarGrabacion}
+                                                className={`ml-4 p-3 rounded-full transition-colors ${grabando ? 'bg-red-500 hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-500'}`}>
+                                                {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
+                                                <CheckCircle className="w-5 h-5" />
+                                                Audio listo ({segundosGrabacion}s) — en lugar del texto ✅
+                                            </div>
+                                            <button type="button" onClick={limpiarAudio}
+                                                className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1 ml-3">
+                                                <RefreshCw className="w-3 h-3" /> Regrabar
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">🎨 Estilo visual / Tono de marca *</label>
@@ -171,9 +295,10 @@ export default function DisenaPage() {
                         </div>
 
                         <button type="submit"
-                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/30 text-lg">
+                            disabled={!productosValido || !form.nombre || !form.sector || !form.estilo}
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/30 text-lg">
                             <Sparkles className="w-5 h-5" />
-                            Generar mi Página Web con IA
+                            {productosValido ? 'Generar mi Página Web con IA' : `Faltan ${MIN_CHARS_PRODUCTOS - form.productos.length} caracteres...`}
                             <ArrowRight className="w-5 h-5" />
                         </button>
                         <p className="text-center text-xs text-slate-500">✅ 100% gratuito · Sin registro previo · Lista en segundos</p>
