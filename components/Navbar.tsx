@@ -53,12 +53,11 @@ export default function Navbar() {
 
                     {/* Desktop CTA (Hidden on mobile < sm) */}
                     <Link
-                        href="https://wa.me/573123299053"
-                        target="_blank"
+                        href="/disena-tu-pagina"
                         className="hidden sm:flex text-white px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 whitespace-nowrap"
                         style={{ background: 'linear-gradient(90deg, #1E3A8A 0%, #7C3AED 50%, #E11D48 100%)' }}
                     >
-                        Asesoría Premium
+                        Diseña tu Página Web Gratis
                     </Link>
 
                     {/* Mobile Menu Button */}
@@ -79,10 +78,10 @@ export default function Navbar() {
                         <Link href="#services" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Servicios</Link>
                         <Link href="#services" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
                         <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
-                        <Link href="https://wa.me/573123299053" onClick={() => setIsOpen(false)}
+                        <Link href="/disena-tu-pagina" onClick={() => setIsOpen(false)}
                             className="text-white px-6 py-3 rounded-lg text-center font-bold shadow-lg"
                             style={{ background: 'linear-gradient(90deg, #1E3A8A 0%, #7C3AED 50%, #E11D48 100%)' }}>
-                            Asesoría Premium
+                            Diseña tu Página Web Gratis
                         </Link>
                     </div>
                 </div>
