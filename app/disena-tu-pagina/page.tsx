@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Triangle, ArrowRight, Sparkles, Lock, MessageCircle, CheckCircle, Loader2 } from 'lucide-react';
 
@@ -22,6 +22,26 @@ export default function DisenaPage() {
     const [unlocked, setUnlocked] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
+    const [cookiesAccepted, setCookiesAccepted] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('digitrial_cookies');
+        if (saved === 'accepted' || saved === 'rejected') {
+            setCookiesAccepted(saved === 'accepted');
+        } else {
+            setCookiesAccepted(null); // mostrar banner
+        }
+    }, []);
+
+    const acceptCookies = () => {
+        localStorage.setItem('digitrial_cookies', 'accepted');
+        setCookiesAccepted(true);
+    };
+
+    const rejectCookies = () => {
+        localStorage.setItem('digitrial_cookies', 'rejected');
+        setCookiesAccepted(false);
+    };
 
     // Form state
     const [form, setForm] = useState({
@@ -345,6 +365,37 @@ export default function DisenaPage() {
                             title="Tu página web generada"
                         />
                     )}
+                </div>
+            )}
+
+            {/* ─── BANNER DE COOKIES ─── */}
+            {cookiesAccepted === null && (
+                <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">
+                    <div className="max-w-4xl mx-auto bg-slate-800/95 border border-white/10 rounded-2xl p-5 shadow-2xl backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center gap-4">
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-white mb-1">🍪 Política de Cookies</p>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                                Usamos cookies para mejorar tu experiencia, analizar el tráfico y personalizar el contenido de esta herramienta.
+                                Al hacer clic en <strong className="text-white">"Aceptar"</strong>, consientes el uso de cookies.
+                                Puedes consultar nuestra{' '}
+                                <a href="#" className="text-blue-400 hover:underline">Política de Privacidad</a>.
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                            <button
+                                onClick={rejectCookies}
+                                className="text-xs text-slate-400 hover:text-white border border-white/20 hover:border-white/40 px-4 py-2 rounded-xl transition-colors"
+                            >
+                                Rechazar
+                            </button>
+                            <button
+                                onClick={acceptCookies}
+                                className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-xl transition-colors shadow-lg shadow-blue-600/30"
+                            >
+                                Aceptar cookies
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
