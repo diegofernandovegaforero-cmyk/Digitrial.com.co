@@ -6,31 +6,112 @@ const getAdminDb = async () => {
   if (!process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.FIREBASE_ADMIN_PROJECT_ID === 'TU_PROYECTO_ID') {
     return null;
   }
-  const { adminDb } = await import('@/lib/firebase-admin');
-  return adminDb;
+  const { getAdminDbSafe } = await import('@/lib/firebase-admin');
+  return getAdminDbSafe();
 };
 
-const buildPrompt = (nombre: string, sector: string, productos: string, estilo: string) => `
-Rol: Actúa como un Diseñador Web Senior y Experto en Embudos de Ventas (CRO).
+// ─── PROMPT MAESTRO DEFINITIVO ───────────────────────────────────────────────
+const buildPrompt = (input: string) => `
+Rol:
+Eres el Desarrollador Front-End Senior y Experto en Embudos de Venta (CRO) de Digitrial centro de soluciones. Tu objetivo es transformar la idea del cliente en una Landing Page de alta conversión, moderna y lista para vender.
 
-Instrucciones ESTRICTAS:
-- Devuelve ÚNICAMENTE código HTML válido, empezando con <!DOCTYPE html> y terminando con </html>.
-- Usa Tailwind CSS vía CDN: <script src="https://cdn.tailwindcss.com"></script>
-- NO incluyas explicaciones, comentarios externos ni bloques de código markdown.
-- Diseño responsivo (md:, lg:), colores modernos, texto real en español (sin Lorem Ipsum).
-- Incluye estas secciones: Hero (H1 + subtítulo + CTA), Problema/Solución, Servicios en cards, Testimonios placeholder, Footer con CTA.
+Contexto de Entrada:
+Instrucción del cliente: ${input}
 
-Datos del cliente:
-- Nombre del Negocio: ${nombre}
-- Sector / Actividad: ${sector}
-- Productos / Servicios Estrella: ${productos}
-- Estilo Visual / Tono: ${estilo}
+Instrucciones de Construcción:
 
-Genera una landing page completa, persuasiva y orientada a ventas para este negocio.
+Análisis e Inferencia: Si el cliente da poca información, infiere las mejores prácticas de su sector. Inventa textos persuasivos (Copywriting) orientados a los beneficios. NUNCA uses "Lorem Ipsum".
+
+Estructura de Alta Conversión:
+- Hero Section: Título impactante (H1), subtítulo que resuelva un problema y un Botón de Llamado a la Acción (CTA) llamativo.
+- Propuesta de Valor: 3 razones de peso para elegirlos (con iconos).
+- Servicios/Productos: Grilla de tarjetas (cards) atractivas.
+- Footer: Información de contacto, enlaces y derechos reservados.
+
+Tecnología y Estilo:
+- Utiliza HTML5 semántico.
+- Usa el CDN oficial de Tailwind CSS (<script src="https://cdn.tailwindcss.com"></script>) en el <head>.
+- Aplica un diseño muy moderno, sombras suaves (shadow-lg), bordes redondeados (rounded-2xl) y colores coherentes con el sector.
+- Diseño 100% responsivo (md:, lg:).
+- Usa source.unsplash.com con palabras clave del sector para las imágenes.
+
+Reglas de Salida (CRÍTICO Y ESTRICTO):
+ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown. NO envuelvas tu respuesta en \`\`\`html ni \`\`\`. Cero explicaciones, cero saludos. Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar EXACTAMENTE con </html>.
 `;
 
-const buildFallbackHTML = (nombre: string, sector: string, productos: string) => `
-<!DOCTYPE html>
+export async function POST(req: NextRequest) {
+  try {
+    const { nombre, sector, productos, estilo, nombre_contacto, email } = await req.json();
+
+    if (!nombre || !sector || !productos || !estilo) {
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    }
+
+    // Construir el input completo del usuario para el prompt
+    const inputUsuario = `Negocio: "${nombre}" | Sector: "${sector}" | Productos/Servicios: "${productos}" | Estilo visual: "${estilo}"`;
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    let html: string;
+
+    if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
+      html = buildFallbackHTML(nombre, sector, productos);
+    } else {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const result = await model.generateContent(buildPrompt(inputUsuario));
+        html = result.response.text()
+          .replace(/```html\n?/gi, '')
+          .replace(/```\n?/g, '')
+          .trim();
+      } catch (geminiError) {
+        console.warn('Gemini API falló, usando fallback:', geminiError);
+        html = buildFallbackHTML(nombre, sector, productos);
+      }
+    }
+
+    // Guardar lead en Firestore si Firebase y email están disponibles
+    if (email) {
+      try {
+        const adminDb = await getAdminDb();
+        if (adminDb) {
+          const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+          const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+          const existing = await docRef.get();
+          if (!existing.exists) {
+            await docRef.set({
+              nombre_negocio: nombre,
+              nombre_contacto: nombre_contacto || '',
+              email: email.toLowerCase().trim(),
+              sector,
+              productos,
+              estilo,
+              codigo_actual: html,
+              creditos_restantes: 15,
+              fecha_creacion: new Date().toISOString(),
+            });
+          } else {
+            await docRef.update({
+              codigo_actual: html,
+              ultima_generacion: new Date().toISOString(),
+            });
+          }
+        }
+      } catch (fbErr) {
+        console.warn('Firebase no disponible:', fbErr);
+      }
+    }
+
+    return NextResponse.json({ html });
+  } catch (error) {
+    console.error('Error generando página:', error);
+    return NextResponse.json({ error: 'Error generando la página' }, { status: 500 });
+  }
+}
+
+// ─── FALLBACK HTML ────────────────────────────────────────────────────────────
+function buildFallbackHTML(nombre: string, sector: string, productos: string): string {
+  return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -44,10 +125,10 @@ const buildFallbackHTML = (nombre: string, sector: string, productos: string) =>
       Bienvenido a <span class="text-yellow-300">${nombre}</span>
     </h1>
     <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto mb-8">
-      Ofrecemos ${productos} para llevar tu negocio al siguiente nivel.
+      Especialistas en ${sector}. Ofrecemos ${productos} para llevar tu negocio al siguiente nivel.
     </p>
-    <a href="https://wa.me/573123299053" class="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-full text-lg hover:bg-yellow-300 transition shadow-xl">
-      Contáctanos ahora
+    <a href="#contacto" class="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-full text-lg hover:bg-yellow-300 transition shadow-xl">
+      ¡Quiero empezar ahora!
     </a>
   </section>
   <section id="contacto" class="bg-blue-900 text-white py-16 px-6 text-center">
@@ -57,62 +138,5 @@ const buildFallbackHTML = (nombre: string, sector: string, productos: string) =>
     </a>
   </section>
 </body>
-</html>
-`;
-
-export async function POST(req: NextRequest) {
-  try {
-    const { nombre, sector, productos, estilo, whatsapp } = await req.json();
-
-    if (!nombre || !sector || !productos || !estilo) {
-      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    let html: string;
-
-    if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
-      html = buildFallbackHTML(nombre, sector, productos);
-    } else {
-      try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        const result = await model.generateContent(buildPrompt(nombre, sector, productos, estilo));
-        html = result.response.text().replace(/```html\n?/gi, '').replace(/```\n?/g, '').trim();
-      } catch (geminiError) {
-        console.warn('Gemini API falló, usando fallback:', geminiError);
-        html = buildFallbackHTML(nombre, sector, productos);
-      }
-    }
-
-    // Guardar lead en Firestore si Firebase está configurado y hay WhatsApp
-    if (whatsapp) {
-      try {
-        const adminDb = await getAdminDb();
-        if (adminDb) {
-          const numeroLimpio = whatsapp.replace(/\D/g, '');
-          const docRef = adminDb.collection('usuarios_leads').doc(numeroLimpio);
-          const existing = await docRef.get();
-          if (!existing.exists) {
-            await docRef.set({
-              nombre, sector, productos, estilo,
-              whatsapp: numeroLimpio,
-              codigo_actual: html,
-              creditos_restantes: 15,
-              fecha_creacion: new Date().toISOString(),
-            });
-          } else {
-            await docRef.update({ codigo_actual: html, ultima_generacion: new Date().toISOString() });
-          }
-        }
-      } catch (fbErr) {
-        console.warn('Firebase no disponible:', fbErr);
-      }
-    }
-
-    return NextResponse.json({ html });
-  } catch (error) {
-    console.error('Error generando página:', error);
-    return NextResponse.json({ error: 'Error generando la página' }, { status: 500 });
-  }
+</html>`;
 }

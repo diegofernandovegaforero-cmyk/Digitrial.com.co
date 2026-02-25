@@ -2,132 +2,123 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getAdminDbSafe } from '@/lib/firebase-admin';
 
-
-const CREDITOS_POR_EDICION = 3;
-
-const buildEditPrompt = (
-    codigoActual: string,
-    instruccionTexto: string,
-    transcripcionAudio: string,
-    creditosRestantes: number
-) => `
-Rol:
-Actúa como Desarrollador Web Front-End Senior de Digitrial centro de soluciones. Tu objetivo es modificar y perfeccionar una maqueta web existente (en HTML y Tailwind CSS) basándote estrictamente en las nuevas instrucciones del cliente.
-
-Código Base Actual:
-${codigoActual}
-
-Instrucción en Texto (máx 500 caracteres):
-${instruccionTexto || '(Ninguna)'}
-
-Instrucción por Audio (Transcripción):
-${transcripcionAudio || '(Ninguna)'}
-
-Créditos Restantes Post-Edición: ${creditosRestantes}
-
-Instrucciones de Edición:
-1. Lee el "Código Base Actual" y aplica ÚNICAMENTE los cambios solicitados. No reescribas secciones que el usuario no ha pedido alterar.
-2. Si el texto y el audio piden cosas contradictorias, dale prioridad absoluta al audio.
-3. Mantén el diseño responsivo (md:, lg:) y usa paletas de colores modernas de Tailwind.
-4. Si ${creditosRestantes} es igual a 3 o 0, inserta justo antes de </body> este banner exacto:
-   <div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fef2f2;border-top:2px solid #ef4444;color:#b91c1c;padding:12px 24px;font-family:sans-serif;font-size:14px;text-align:center;">
-     ⚠️ Atención: Te quedan ${creditosRestantes} créditos de edición. Contacta a un asesor para llevar este diseño a producción o recargar tu cuenta.
-   </div>
-
-Formato de Salida (ESTRICTO):
-Devuelve ÚNICAMENTE el nuevo código HTML válido. Cero explicaciones. Inicia con <!DOCTYPE html> y termina con </html>.
-`;
+// Sanitizar email igual que en el frontend
+const emailToDocId = (email: string) =>
+    email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
 
 export async function POST(req: NextRequest) {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    // Verificar Firebase
+    const db = getAdminDbSafe();
+    if (!db) {
+        return NextResponse.json({ error: 'Firebase no configurado en el servidor.' }, { status: 503 });
+    }
+
     try {
-        const { whatsapp, instruccion_texto, audio_base64 } = await req.json();
+        const { email, instruccion_texto, audio_base64 } = await req.json();
 
-        if (!whatsapp) {
-            return NextResponse.json({ error: 'WhatsApp requerido' }, { status: 400 });
+        if (!email) {
+            return NextResponse.json({ error: 'Se requiere el correo electrónico.' }, { status: 400 });
         }
 
-        // Normalizar número (solo dígitos)
-        const numeroLimpio = whatsapp.replace(/\D/g, '');
-
-        // 1. Obtener documento del usuario desde Firestore
-        const db = getAdminDbSafe();
-        if (!db) {
-            return NextResponse.json({ error: 'Firebase no configurado en el servidor.' }, { status: 503 });
-        }
-        const docRef = db.collection('usuarios_leads').doc(numeroLimpio);
+        const docId = emailToDocId(email);
+        const docRef = db.collection('usuarios_leads').doc(docId);
         const docSnap = await docRef.get();
 
         if (!docSnap.exists) {
-            return NextResponse.json({ error: 'Usuario no encontrado. Primero genera tu página.' }, { status: 404 });
+            return NextResponse.json({ error: 'Usuario no encontrado. Genera primero tu página web.' }, { status: 404 });
         }
 
         const userData = docSnap.data()!;
-        const creditosActuales: number = userData.creditos_restantes ?? 0;
-        const codigoActual: string = userData.codigo_actual ?? '';
+        const creditos = userData.creditos_restantes ?? 0;
 
-        // 2. Validar créditos
-        if (creditosActuales < CREDITOS_POR_EDICION) {
-            return NextResponse.json({
-                error: 'creditos_insuficientes',
-                creditos: creditosActuales,
-                message: '¡Créditos insuficientes! Habla con nosotros para recargar tu cuenta.'
-            }, { status: 402 });
+        if (creditos < 3) {
+            return NextResponse.json(
+                { error: 'Créditos insuficientes. Contacta a un asesor para recargar.', creditos_restantes: creditos },
+                { status: 402 }
+            );
         }
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        const codigoActual = userData.codigo_actual || '';
 
-        // 3. Transcribir audio si se envió
-        let transcripcionAudio = '';
-        if (audio_base64) {
+        // ── Transcripción de audio (si aplica) ──
+        let transcripcion_audio = '';
+        if (audio_base64 && apiKey) {
             try {
-                const audioModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-                const audioResult = await audioModel.generateContent([
-                    {
-                        inlineData: {
-                            mimeType: 'audio/webm',
-                            data: audio_base64,
-                        },
-                    },
-                    'Transcribe este audio exactamente en español. Solo devuelve el texto transcrito, sin explicaciones.'
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                const audioResult = await model.generateContent([
+                    { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
+                    { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
                 ]);
-                transcripcionAudio = audioResult.response.text().trim();
-            } catch (audioErr) {
-                console.warn('Error transcribiendo audio:', audioErr);
-                transcripcionAudio = '';
+                transcripcion_audio = audioResult.response.text().trim();
+            } catch (err) {
+                console.warn('Error transcribiendo audio:', err);
             }
         }
 
-        // 4. Llamar a Gemini con el Prompt Maestro
-        const creditosPostEdicion = creditosActuales - CREDITOS_POR_EDICION;
-        const editModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        const prompt = buildEditPrompt(codigoActual, instruccion_texto || '', transcripcionAudio, creditosPostEdicion);
+        // ── Construir instrucción final ──
+        const instruccionFinal = transcripcion_audio || instruccion_texto || '';
+        if (!instruccionFinal.trim()) {
+            return NextResponse.json({ error: 'No se recibió ninguna instrucción de edición.' }, { status: 400 });
+        }
 
-        const result = await editModel.generateContent(prompt);
-        let nuevoHtml = result.response.text();
+        // ── Prompt Maestro de Edición ──
+        const promptEdicion = `
+Eres el Desarrollador Front-End Senior de Digitrial centro de soluciones.
 
-        // Limpiar markdown si Gemini lo agrega
-        nuevoHtml = nuevoHtml.replace(/```html\n?/gi, '').replace(/```\n?/g, '').trim();
+Se te entrega el código HTML actual de una landing page y una instrucción del cliente para modificarla.
 
-        // 5. Actualizar Firestore (descontar créditos + guardar nuevo código)
+CÓDIGO HTML ACTUAL:
+${codigoActual}
+
+INSTRUCCIÓN DEL CLIENTE:
+"${instruccionFinal}"
+
+CRÉDITOS RESTANTES DEL CLIENTE (después de esta edición): ${creditos - 3}
+
+REGLAS ESTRICTAS DE SALIDA:
+- Devuelve SOLO el HTML completo modificado.
+- PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
+- Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
+- Mantén todas las secciones existentes a menos que el cliente pida eliminarlas.
+- Si el cliente menciona colores, aplícalos. Si menciona textos, cámbialos exactamente.
+- Mantén Tailwind CSS CDN y el diseño responsivo.
+        `.trim();
+
+        if (!apiKey) {
+            return NextResponse.json({ error: 'API key de Gemini no configurada.' }, { status: 503 });
+        }
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const result = await model.generateContent(promptEdicion);
+        let nuevoHtml = result.response.text()
+            .replace(/```html\n?/gi, '')
+            .replace(/```\n?/g, '')
+            .trim();
+
+        // ── Actualizar Firestore atómicamente ──
         const dbForUpdate = getAdminDbSafe();
         if (dbForUpdate) {
-            await dbForUpdate.collection('usuarios_leads').doc(numeroLimpio).update({
+            await dbForUpdate.collection('usuarios_leads').doc(docId).update({
                 codigo_actual: nuevoHtml,
-                creditos_restantes: creditosPostEdicion,
+                creditos_restantes: creditos - 3,
                 ultima_edicion: new Date().toISOString(),
                 instruccion_texto: instruccion_texto || '',
-                transcripcion_audio: transcripcionAudio,
+                transcripcion_audio: transcripcion_audio || '',
             });
         }
 
         return NextResponse.json({
             html: nuevoHtml,
-            creditos_restantes: creditosPostEdicion,
-            transcripcion_audio: transcripcionAudio,
+            creditos_restantes: creditos - 3,
+            transcripcion_audio,
         });
 
     } catch (error) {
         console.error('Error editando página:', error);
-        return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+        return NextResponse.json({ error: 'Error interno del servidor.' }, { status: 500 });
     }
 }

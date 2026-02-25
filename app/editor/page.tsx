@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap } from 'lucide-react';
+import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
@@ -9,15 +10,23 @@ const CREDITOS_POR_EDICION = 3;
 const MAX_AUDIO_SEGUNDOS = 45;
 const MAX_TEXTO_CHARS = 500;
 
-export default function EditorPage() {
-    const [whatsapp, setWhatsapp] = useState('');
-    const [identificado, setIdentificado] = useState(false);
+// Sanitizar email para usarlo como Firestore doc ID (igual que en el backend)
+const emailToDocId = (email: string) =>
+    email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+
+function EditorContent() {
+    const searchParams = useSearchParams();
+    const emailFromUrl = searchParams.get('email') || '';
+
+    const [email, setEmail] = useState(emailFromUrl);
+    const [identificado, setIdentificado] = useState(!!emailFromUrl);
     const [userData, setUserData] = useState<{
-        nombre: string;
+        nombre_negocio: string;
+        nombre_contacto: string;
         creditos_restantes: number;
         codigo_actual: string;
     } | null>(null);
-    const [cargando, setCargando] = useState(false);
+    const [cargando, setCargando] = useState(!!emailFromUrl);
     const [error, setError] = useState('');
 
     // Editor state
@@ -36,15 +45,17 @@ export default function EditorPage() {
 
     // Listener de Firestore en tiempo real
     useEffect(() => {
-        if (!identificado || !whatsapp) return;
-        const numeroLimpio = whatsapp.replace(/\D/g, '');
-        const docRef = doc(db, 'usuarios_leads', numeroLimpio);
+        if (!identificado || !email) return;
+        const docId = emailToDocId(email);
+        const docRef = doc(db, 'usuarios_leads', docId);
+        setCargando(true);
 
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.data();
                 setUserData({
-                    nombre: data.nombre || 'Tu negocio',
+                    nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
+                    nombre_contacto: data.nombre_contacto || '',
                     creditos_restantes: data.creditos_restantes ?? 0,
                     codigo_actual: data.codigo_actual || '',
                 });
@@ -55,17 +66,16 @@ export default function EditorPage() {
             setCargando(false);
         }, (err) => {
             console.error(err);
-            setError('Error conectando con Firebase. Verifica la configuración.');
+            setError('Error conectando con Firebase.');
             setCargando(false);
         });
 
         return () => unsubscribe();
-    }, [identificado, whatsapp]);
+    }, [identificado, email]);
 
     const handleIdentificar = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!whatsapp.trim()) return;
-        setCargando(true);
+        if (!email.trim()) return;
         setIdentificado(true);
     };
 
@@ -145,7 +155,7 @@ export default function EditorPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    whatsapp: whatsapp.replace(/\D/g, ''),
+                    email: email.toLowerCase().trim(),
                     instruccion_texto: instruccion,
                     audio_base64,
                 }),
@@ -173,7 +183,7 @@ export default function EditorPage() {
     const creditosBajos = (userData?.creditos_restantes ?? 0) <= 3;
     const sinCreditos = (userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION;
 
-    // ── UI: Pantalla de identificación ──
+    // ── UI: Pantalla de identificación por email ──
     if (!identificado) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex flex-col">
@@ -195,28 +205,34 @@ export default function EditorPage() {
                     <div className="max-w-md w-full text-center">
                         <div className="text-5xl mb-6">✏️</div>
                         <h1 className="text-3xl font-extrabold mb-3">Editor de tu Página Web</h1>
-                        <p className="text-slate-400 mb-8">Ingresa tu número de WhatsApp para acceder a tu diseño y editarlo con IA.</p>
+                        <p className="text-slate-400 mb-8">
+                            Ingresa el correo con el que generaste tu diseño para acceder al editor con tus créditos gratuitos.
+                        </p>
 
                         <form onSubmit={handleIdentificar} className="space-y-4">
                             <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-3">
-                                <span className="text-green-400 text-lg">📱</span>
+                                <Mail className="text-blue-400 w-5 h-5 flex-shrink-0" />
                                 <input
-                                    type="tel"
-                                    value={whatsapp}
-                                    onChange={e => setWhatsapp(e.target.value)}
-                                    placeholder="Ej: 3123299053"
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder="tu@correo.com"
                                     required
                                     className="flex-1 bg-transparent text-white placeholder-slate-500 focus:outline-none"
                                 />
                             </div>
-                            <button
-                                type="submit"
-                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
-                            >
+                            <button type="submit"
+                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
                                 <Zap className="w-4 h-4" />
                                 Acceder a mi editor
                             </button>
                         </form>
+                        <p className="text-xs text-slate-600 mt-4">
+                            ¿No tienes cuenta?{' '}
+                            <Link href="/disena-tu-pagina" className="text-blue-400 hover:text-blue-300 underline">
+                                Genera tu página gratis aquí
+                            </Link>
+                        </p>
                     </div>
                 </main>
             </div>
@@ -266,13 +282,13 @@ export default function EditorPage() {
                     </span>
                 </Link>
 
-                {/* Contador de créditos */}
+                {/* Créditos */}
                 <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold border ${creditosBajos
                     ? 'bg-red-500/20 border-red-500/40 text-red-300'
                     : 'bg-blue-500/20 border-blue-500/30 text-blue-300'
                     }`}>
                     <Zap className="w-4 h-4" />
-                    {userData?.creditos_restantes ?? 0} créditos restantes
+                    {userData?.creditos_restantes ?? 0} créditos
                 </div>
             </nav>
 
@@ -280,36 +296,38 @@ export default function EditorPage() {
                 {/* ─── Panel izquierdo: Editor ─── */}
                 <div className="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-white/10 bg-slate-900 overflow-y-auto">
                     <div className="p-6">
-                        <h2 className="text-lg font-bold mb-1">Editar diseño de <span className="text-blue-400">{userData?.nombre}</span></h2>
-                        <p className="text-slate-500 text-xs mb-6">Cada edición cuesta {CREDITOS_POR_EDICION} créditos · Gemini aplica tus cambios en tiempo real</p>
+                        <h2 className="text-lg font-bold mb-1">
+                            Editando: <span className="text-blue-400">{userData?.nombre_negocio}</span>
+                        </h2>
+                        <p className="text-slate-500 text-xs mb-6">
+                            {userData?.nombre_contacto && `Hola, ${userData.nombre_contacto.split(' ')[0]} · `}
+                            Cada edición cuesta {CREDITOS_POR_EDICION} créditos
+                        </p>
 
-                        {/* Alerta de créditos bajos */}
                         {creditosBajos && (
                             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
                                 ⚠️ Te quedan <strong>{userData?.creditos_restantes}</strong> créditos.{' '}
                                 <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
-                                    Contacta a un asesor
-                                </a>{' '}para recargar o llevar el diseño a producción.
+                                    Contáctanos
+                                </a>{' '}para recargar.
                             </div>
                         )}
 
                         {exito && (
                             <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                                {exito}
+                                <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
                             </div>
                         )}
 
                         {error && (
                             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                {error}
+                                <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
                             </div>
                         )}
 
                         {transcripcion && (
                             <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
-                                🎤 Transcripción: <em>"{transcripcion}"</em>
+                                🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
                             </div>
                         )}
 
@@ -322,7 +340,7 @@ export default function EditorPage() {
                                 <textarea
                                     value={instruccion}
                                     onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
-                                    placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios con 2 planes"'
+                                    placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
                                     rows={4}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
                                 />
@@ -357,14 +375,9 @@ export default function EditorPage() {
                                                     </div>
                                                 )}
                                             </div>
-                                            <button
-                                                type="button"
+                                            <button type="button"
                                                 onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-                                                className={`p-3 rounded-full transition-colors ${grabando
-                                                    ? 'bg-red-500 hover:bg-red-400'
-                                                    : 'bg-blue-600 hover:bg-blue-500'
-                                                    }`}
-                                            >
+                                                className={`p-3 rounded-full transition-colors ${grabando ? 'bg-red-500 hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-500'}`}>
                                                 {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                                             </button>
                                         </div>
@@ -374,53 +387,33 @@ export default function EditorPage() {
                                                 <CheckCircle className="w-4 h-4" />
                                                 Audio listo ({segundosGrabacion}s)
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={limpiarAudio}
-                                                className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1"
-                                            >
+                                            <button type="button" onClick={limpiarAudio}
+                                                className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
                                                 <RefreshCw className="w-3 h-3" /> Regrabar
                                             </button>
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-slate-600 mt-1">
-                                    Si grabas audio, tiene prioridad sobre el texto.
-                                </p>
+                                <p className="text-xs text-slate-600 mt-1">Si grabas audio, tiene prioridad sobre el texto.</p>
                             </div>
 
                             {/* Botón de envío */}
-                            <button
-                                type="submit"
+                            <button type="submit"
                                 disabled={editando || sinCreditos || (!instruccion.trim() && !audioBlob)}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
-                            >
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
                                 {editando ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Aplicando cambios con IA...
-                                    </>
+                                    <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios con IA...</>
                                 ) : sinCreditos ? (
-                                    <>
-                                        <AlertCircle className="w-4 h-4" />
-                                        Sin créditos disponibles
-                                    </>
+                                    <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
                                 ) : (
-                                    <>
-                                        <Sparkles className="w-4 h-4" />
-                                        Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)
-                                        <Send className="w-4 h-4" />
-                                    </>
+                                    <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
                                 )}
                             </button>
                         </form>
 
                         <div className="mt-6 pt-6 border-t border-white/10">
-                            <a
-                                href="https://wa.me/573123299053"
-                                target="_blank"
-                                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors text-sm"
-                            >
+                            <a href="https://wa.me/573123299053" target="_blank"
+                                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors text-sm">
                                 📱 Llevar a producción · Hablar con asesor
                             </a>
                         </div>
@@ -439,11 +432,7 @@ export default function EditorPage() {
                         </div>
                     )}
                     {userData?.codigo_actual ? (
-                        <iframe
-                            srcDoc={userData.codigo_actual}
-                            className="w-full h-full border-none"
-                            title="Vista previa en tiempo real"
-                        />
+                        <iframe srcDoc={userData.codigo_actual} className="w-full h-full border-none" title="Vista previa en tiempo real" />
                     ) : (
                         <div className="flex items-center justify-center h-full text-slate-600">
                             <p>No hay diseño cargado aún.</p>
@@ -452,5 +441,17 @@ export default function EditorPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function EditorPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-center">
+                <Loader2 className="w-12 h-12 animate-spin text-blue-400" />
+            </div>
+        }>
+            <EditorContent />
+        </Suspense>
     );
 }
