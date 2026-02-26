@@ -16,6 +16,18 @@ const LOADING_MESSAGES = [
 
 export default function DisenaPage() {
     const [step, setStep] = useState<Step>('form');
+    const [showHero, setShowHero] = useState(true);
+    const [heroVisible, setHeroVisible] = useState(true);
+    const [formVisible, setFormVisible] = useState(false);
+
+    const handleStartDesigning = () => {
+        // Fade hero out
+        setHeroVisible(false);
+        setTimeout(() => {
+            setShowHero(false);
+            setFormVisible(true);
+        }, 500);
+    };
     const [loadingMsg, setLoadingMsg] = useState(0);
     const [generatedHtml, setGeneratedHtml] = useState('');
     const [unlocked, setUnlocked] = useState(false);
@@ -140,9 +152,9 @@ export default function DisenaPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
+        <div className="min-h-screen bg-[#09090b] text-white overflow-x-hidden">
             {/* Navbar */}
-            <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 relative z-50">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
                         <Triangle className="text-white fill-white w-4 h-4" />
@@ -154,22 +166,95 @@ export default function DisenaPage() {
                 <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
             </nav>
 
+            {/* ─── HERO SECTION ─── */}
+            {showHero && step === 'form' && (
+                <section
+                    className="relative min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden"
+                    style={{
+                        opacity: heroVisible ? 1 : 0,
+                        transform: heroVisible ? 'translateY(0)' : 'translateY(-40px)',
+                        transition: 'opacity 0.5s ease, transform 0.5s ease',
+                    }}
+                >
+                    {/* Glow Effects */}
+                    <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+                        <div className="w-[50vw] h-[50vw] bg-purple-600/20 rounded-full blur-[130px]" />
+                        <div className="w-[35vw] h-[35vw] bg-blue-600/15 rounded-full blur-[100px] absolute translate-y-24" />
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
+
+                        {/* Social Proof */}
+                        <div className="flex flex-wrap items-center justify-center gap-2 mb-8 text-sm sm:text-base text-gray-300">
+                            <span className="font-semibold text-white">Excelente</span>
+                            <span className="text-green-400 text-xl tracking-widest leading-none">★★★★★</span>
+                            <span className="opacity-70">La agencia digital preferida en Colombia</span>
+                        </div>
+
+                        {/* H1 */}
+                        <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+                            Diseña tu web{' '}
+                            <br className="hidden md:block" />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400">
+                                hoy mismo
+                            </span>
+                        </h1>
+
+                        {/* Subtitle */}
+                        <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed">
+                            Crea la página web profesional para tu negocio simplemente
+                            describiendo tu idea. La IA de Digitrial la diseña en tiempo real,
+                            sin código, lista para atraer clientes.
+                        </p>
+
+                        {/* CTA */}
+                        <div className="flex flex-col items-center">
+                            <button
+                                onClick={handleStartDesigning}
+                                className="bg-white text-black font-bold text-lg px-10 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 hover:scale-105 shadow-[0_0_50px_rgba(255,255,255,0.15)] flex items-center gap-2"
+                            >
+                                <Sparkles className="w-5 h-5" />
+                                Empezar a diseñar gratis
+                            </button>
+                            <span className="text-sm text-gray-500 mt-4 font-medium tracking-wide">
+                                No necesitas tarjeta de crédito · Obtienes 15 créditos de regalo
+                            </span>
+                        </div>
+
+                        {/* Scroll hint */}
+                        <div className="mt-16 flex flex-col items-center gap-2 opacity-40">
+                            <span className="text-xs text-gray-500 uppercase tracking-widest">Generado con IA</span>
+                            <div className="w-px h-8 bg-gradient-to-b from-gray-500 to-transparent" />
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* ─── PASO 1: FORMULARIO ─── */}
             {step === 'form' && (
-                <main className="max-w-2xl mx-auto px-6 py-16">
+                <main
+                    className="max-w-2xl mx-auto px-6 py-16"
+                    style={{
+                        display: showHero ? 'none' : undefined,
+                        opacity: formVisible ? 1 : 0,
+                        transform: formVisible ? 'translateY(0)' : 'translateY(40px)',
+                        transition: 'opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s',
+                    }}
+                >
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 text-purple-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
                             <Sparkles className="w-4 h-4" />
                             Generado con Inteligencia Artificial
                         </div>
                         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-                            Diseña tu Página Web
-                            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                                Gratis en 60 segundos
+                            Describe tu idea
+                            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                                y la IA hará el resto
                             </span>
                         </h1>
                         <p className="text-slate-400 text-lg max-w-lg mx-auto">
-                            Cuéntanos sobre tu negocio y nuestra IA creará una landing page profesional optimizada para ventas.
+                            Cuéntanos tu idea en al menos 50 caracteres. Cuanto más detalle des, mejor será tu página.
                         </p>
                     </div>
 
@@ -198,8 +283,8 @@ export default function DisenaPage() {
                                         maxLength={MAX_CHARS_PRODUCTOS}
                                         placeholder={audioBlob ? '' : `Cuéntanos tu idea: qué vendes, a quién va dirigido, qué te hace especial, zona de atención, precios... (mín. ${MIN_CHARS_PRODUCTOS} caracteres)`}
                                         className={`w-full bg-white/10 border rounded-xl px-4 py-3 pb-10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm ${audioBlob
-                                                ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20'
-                                                : 'border-white/20 focus:border-blue-500 focus:ring-blue-500/20'
+                                            ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20'
+                                            : 'border-white/20 focus:border-blue-500 focus:ring-blue-500/20'
                                             }`}
                                     />
 
@@ -234,10 +319,10 @@ export default function DisenaPage() {
                                             disabled={!!audioBlob}
                                             title={grabando ? 'Detener grabación' : `Grabar audio (hasta ${MAX_AUDIO_SEG}s)`}
                                             className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${grabando
-                                                    ? 'bg-red-500 text-white animate-pulse'
-                                                    : audioBlob
-                                                        ? 'bg-green-600/40 text-green-300 cursor-not-allowed'
-                                                        : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
+                                                ? 'bg-red-500 text-white animate-pulse'
+                                                : audioBlob
+                                                    ? 'bg-green-600/40 text-green-300 cursor-not-allowed'
+                                                    : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
                                                 }`}>
                                             {grabando ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
                                             {grabando ? `${segundosGrabacion}s` : '🎤 Audio'}
