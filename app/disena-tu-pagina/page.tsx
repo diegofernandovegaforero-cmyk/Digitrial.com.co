@@ -1,7 +1,10 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Triangle, ArrowRight, Sparkles, Mail, CheckCircle, Loader2, Mic, MicOff, RefreshCw } from 'lucide-react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 type Step = 'form' | 'loading' | 'preview';
 
@@ -14,19 +17,36 @@ const LOADING_MESSAGES = [
     '✨ Dando los últimos toques...',
 ];
 
-export default function DisenaPage() {
+function DisenaPageContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [step, setStep] = useState<Step>('form');
     const [showHero, setShowHero] = useState(true);
     const [heroVisible, setHeroVisible] = useState(true);
     const [formVisible, setFormVisible] = useState(false);
+    const [authUser, setAuthUser] = useState<{ email: string | null; displayName: string | null } | null>(null);
 
+    // Detect auth state + ?form=true param to skip hero
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setAuthUser({ email: user.email, displayName: user.displayName });
+                // If redirected from login, skip hero
+                if (searchParams.get('form') === 'true') {
+                    setShowHero(false);
+                    setFormVisible(true);
+                    // Pre-fill email for lead capture
+                    if (user.email) setEmailContacto(user.email);
+                    if (user.displayName) setNombreContacto(user.displayName);
+                }
+            }
+        });
+        return unsub;
+    }, [searchParams]);
+
+    // Hero CTA → go to /login
     const handleStartDesigning = () => {
-        // Fade hero out
-        setHeroVisible(false);
-        setTimeout(() => {
-            setShowHero(false);
-            setFormVisible(true);
-        }, 500);
+        router.push('/login?redirect=' + encodeURIComponent('/disena-tu-pagina?form=true'));
     };
     const [loadingMsg, setLoadingMsg] = useState(0);
     const [generatedHtml, setGeneratedHtml] = useState('');
@@ -522,5 +542,13 @@ export default function DisenaPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function DisenaPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#09090b]" />}>
+            <DisenaPageContent />
+        </Suspense>
     );
 }
