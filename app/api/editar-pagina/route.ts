@@ -82,9 +82,10 @@ REGLAS ESTRICTAS DE SALIDA:
 - Devuelve SOLO el HTML completo modificado.
 - PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
-- Mantén todas las secciones existentes a menos que el cliente pida eliminarlas.
+- Mantén TODAS las secciones existentes a menos que el cliente pida eliminarlas expresamente.
+- ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo de Unsplash (<img src="..."> o background-image: url(...)) por simples gradientes o fondos estáticos. Mantén el diseño rico y estructurado.
 - Si el cliente menciona colores, aplícalos. Si menciona textos, cámbialos exactamente.
-- Mantén Tailwind CSS CDN y el diseño responsivo.
+- Mantén Tailwind CSS CDN, AOS animations y el diseño responsivo.
         `.trim();
 
         if (!apiKey) {
