@@ -2,27 +2,130 @@
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, ArrowRight, Sparkles, Mail, CheckCircle, Loader2, Mic, MicOff, RefreshCw } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Triangle, ArrowRight, Sparkles, CheckCircle, Loader2, Mic, MicOff, RefreshCw, Link2 } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 type Step = 'form' | 'loading' | 'preview';
 
 const LOADING_MESSAGES = [
-    '✏️ Diseñando tu Hero Section...',
-    '🎨 Aplicando tu estilo visual...',
-    '📦 Creando tarjetas de servicios...',
-    '🖼️ Seleccionando imágenes profesionales...',
-    '🚀 Optimizando el embudo de ventas...',
-    '✨ Dando los últimos toques...',
+    'Analizando tu descripción...',
+    'Diseñando el Hero Section premium...',
+    'Aplicando estilo visual y paleta de colores...',
+    'Creando tarjetas de servicios con animaciones...',
+    'Seleccionando imágenes profesionales de Unsplash...',
+    'Configurando animaciones AOS al scroll...',
+    'Integrando Google Fonts premium...',
+    'Optimizando el embudo de ventas...',
+    'Añadiendo microinteracciones y parallax...',
+    'Dando los últimos toques premium...',
 ];
+
+// ─── IMMERSIVE LOADING SCREEN ─────────────────────────────────────────────────
+function ImmersiveLoader({ msgIdx }: { msgIdx: number }) {
+    const [percent, setPercent] = useState(0);
+
+    useEffect(() => {
+        setPercent(0);
+        const checkpoints = [
+            { target: 20, step: 2, delay: 80 },
+            { target: 70, step: 1, delay: 200 },
+            { target: 95, step: 1, delay: 140 },
+            { target: 100, step: 1, delay: 60 },
+        ];
+        let current = 0;
+        let cpIdx = 0;
+        let timer: ReturnType<typeof setInterval>;
+
+        const runNext = () => {
+            if (cpIdx >= checkpoints.length) return;
+            const cp = checkpoints[cpIdx];
+            timer = setInterval(() => {
+                current += cp.step;
+                setPercent(Math.min(current, 100));
+                if (current >= cp.target) {
+                    clearInterval(timer);
+                    cpIdx++;
+                    setTimeout(runNext, 100);
+                }
+            }, cp.delay);
+        };
+
+        runNext();
+        return () => clearInterval(timer);
+    }, []);
+
+    const msg = LOADING_MESSAGES[msgIdx % LOADING_MESSAGES.length];
+
+    return (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#09090b]">
+            <div className="absolute w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[120px] pointer-events-none" />
+            <div className="absolute w-[300px] h-[300px] rounded-full bg-purple-600/10 blur-[100px] translate-y-20 pointer-events-none" />
+
+            <div className="relative mb-8">
+                <div
+                    className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center shadow-2xl"
+                    style={{ animation: 'digitrialGlow 2s ease-in-out infinite' }}
+                >
+                    <Triangle className="text-white fill-white w-10 h-10" />
+                </div>
+                <div
+                    className="absolute -inset-3 rounded-2xl border-2 border-blue-500/30"
+                    style={{ animation: 'orbitPulse 2s ease-in-out infinite' }}
+                />
+            </div>
+
+            <p className="text-slate-400 text-sm font-semibold uppercase tracking-[0.3em] mb-6">
+                DIGI<span className="text-blue-400">TRIAL</span>
+            </p>
+
+            <div className="text-7xl font-black text-white mb-6" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {percent}<span className="text-blue-400 text-4xl">%</span>
+            </div>
+
+            <div className="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden mb-8">
+                <div
+                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                    style={{ width: `${percent}%`, transition: 'width 0.2s ease' }}
+                />
+            </div>
+
+            <AnimatePresence mode="wait">
+                <motion.p
+                    key={msg}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.35 }}
+                    className="text-slate-400 text-sm text-center max-w-xs px-6"
+                >
+                    {msg}
+                </motion.p>
+            </AnimatePresence>
+
+            <p className="text-slate-600 text-xs mt-6">Esto puede tomar entre 15 y 30 segundos</p>
+
+            <style>{`
+                @keyframes digitrialGlow {
+                    0%, 100% { box-shadow: 0 0 30px rgba(99,102,241,0.4), 0 0 60px rgba(99,102,241,0.1); transform: scale(1); }
+                    50%       { box-shadow: 0 0 50px rgba(99,102,241,0.7), 0 0 100px rgba(139,92,246,0.2); transform: scale(1.04); }
+                }
+                @keyframes orbitPulse {
+                    0%, 100% { opacity: 0.3; transform: scale(1); }
+                    50%       { opacity: 0.8; transform: scale(1.06); }
+                }
+            `}</style>
+        </div>
+    );
+}
 
 function DisenaPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [step, setStep] = useState<Step>('form');
     const [showHero, setShowHero] = useState(true);
-    const [heroVisible, setHeroVisible] = useState(true);
+    const [heroVisible] = useState(true);
     const [formVisible, setFormVisible] = useState(false);
     const [authUser, setAuthUser] = useState<{ email: string | null; displayName: string | null } | null>(null);
 
@@ -31,13 +134,9 @@ function DisenaPageContent() {
         const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setAuthUser({ email: user.email, displayName: user.displayName });
-                // If redirected from login, skip hero
                 if (searchParams.get('form') === 'true') {
                     setShowHero(false);
                     setFormVisible(true);
-                    // Pre-fill email for lead capture
-                    if (user.email) setEmailContacto(user.email);
-                    if (user.displayName) setNombreContacto(user.displayName);
                 }
             }
         });
@@ -48,20 +147,13 @@ function DisenaPageContent() {
     const handleStartDesigning = () => {
         router.push('/login?redirect=' + encodeURIComponent('/disena-tu-pagina?form=true'));
     };
+
     const [loadingMsg, setLoadingMsg] = useState(0);
     const [generatedHtml, setGeneratedHtml] = useState('');
-    const [unlocked, setUnlocked] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
     const [cookiesAccepted, setCookiesAccepted] = useState<boolean | null>(null);
 
-    // Lead capture state
-    const [nombreContacto, setNombreContacto] = useState('');
-    const [emailContacto, setEmailContacto] = useState('');
-    const [submitError, setSubmitError] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-
-    // Audio recording for productos field
+    // Audio recording
     const MAX_AUDIO_SEG = 25;
     const MIN_CHARS_PRODUCTOS = 50;
     const MAX_CHARS_PRODUCTOS = 500;
@@ -113,10 +205,7 @@ function DisenaPageContent() {
     const acceptCookies = () => { localStorage.setItem('digitrial_cookies', 'accepted'); setCookiesAccepted(true); };
     const rejectCookies = () => { localStorage.setItem('digitrial_cookies', 'rejected'); setCookiesAccepted(false); };
 
-    // Form state
     const [descripcion, setDescripcion] = useState('');
-
-    // Formulario válido: descripcion entre 50-100 chars O hay audio grabado
     const productosValido = (descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS) || audioBlob !== null;
 
     const handleGenerate = async (e: React.FormEvent) => {
@@ -124,7 +213,7 @@ function DisenaPageContent() {
         setStep('loading');
         setError('');
         let idx = 0;
-        const interval = setInterval(() => { idx = (idx + 1) % LOADING_MESSAGES.length; setLoadingMsg(idx); }, 1800);
+        const interval = setInterval(() => { idx = (idx + 1) % LOADING_MESSAGES.length; setLoadingMsg(idx); }, 2200);
         try {
             const res = await fetch('/api/generar-pagina', {
                 method: 'POST',
@@ -147,29 +236,8 @@ function DisenaPageContent() {
         }
     };
 
-    const handleEmailSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSubmitError('');
-        setSubmitting(true);
-        try {
-            // Guardar en Firebase con email + código generado
-            await fetch('/api/generar-pagina', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    descripcion,
-                    nombre_contacto: nombreContacto,
-                    email: emailContacto,
-                }),
-            });
-            setSubmitted(true);
-            setUnlocked(true);
-        } catch {
-            setSubmitError('Error enviando. Intenta de nuevo.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
+    // Email del usuario autenticado para el enlace al editor
+    const userEmail = authUser?.email || '';
 
     return (
         <div className="min-h-screen bg-[#09090b] text-white overflow-x-hidden">
@@ -196,23 +264,18 @@ function DisenaPageContent() {
                         transition: 'opacity 0.5s ease, transform 0.5s ease',
                     }}
                 >
-                    {/* Glow Effects */}
                     <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
                         <div className="w-[50vw] h-[50vw] bg-purple-600/20 rounded-full blur-[130px]" />
                         <div className="w-[35vw] h-[35vw] bg-blue-600/15 rounded-full blur-[100px] absolute translate-y-24" />
                     </div>
 
-                    {/* Main Content */}
                     <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
-
-                        {/* Social Proof */}
                         <div className="flex flex-wrap items-center justify-center gap-2 mb-8 text-sm sm:text-base text-gray-300">
                             <span className="font-semibold text-white">Excelente</span>
                             <span className="text-green-400 text-xl tracking-widest leading-none">★★★★★</span>
                             <span className="opacity-70">La agencia digital preferida en Colombia</span>
                         </div>
 
-                        {/* H1 */}
                         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight">
                             Diseña tu web{' '}
                             <br className="hidden md:block" />
@@ -221,14 +284,12 @@ function DisenaPageContent() {
                             </span>
                         </h1>
 
-                        {/* Subtitle */}
                         <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed">
                             Crea la página web profesional para tu negocio simplemente
                             describiendo tu idea. La IA de Digitrial la diseña en tiempo real,
                             sin código, lista para atraer clientes.
                         </p>
 
-                        {/* CTA */}
                         <div className="flex flex-col items-center">
                             <button
                                 onClick={handleStartDesigning}
@@ -242,7 +303,6 @@ function DisenaPageContent() {
                             </span>
                         </div>
 
-                        {/* Scroll hint */}
                         <div className="mt-16 flex flex-col items-center gap-2 opacity-40">
                             <span className="text-xs text-gray-500 uppercase tracking-widest">Generado con IA</span>
                             <div className="w-px h-8 bg-gradient-to-b from-gray-500 to-transparent" />
@@ -292,7 +352,6 @@ function DisenaPageContent() {
                                     <span className="ml-2 text-xs font-normal text-slate-500">mín. {MIN_CHARS_PRODUCTOS} · máx. {MAX_CHARS_PRODUCTOS} caracteres</span>
                                 </label>
 
-                                {/* Textarea + botón mic integrado */}
                                 <div className="relative">
                                     <textarea
                                         name="descripcion"
@@ -308,7 +367,6 @@ function DisenaPageContent() {
                                             }`}
                                     />
 
-                                    {/* Overlay cuando hay audio grabado */}
                                     {audioBlob && (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-green-900/30 border border-green-500/40">
                                             <div className="flex items-center gap-2 text-green-400 font-semibold text-sm">
@@ -322,18 +380,14 @@ function DisenaPageContent() {
                                         </div>
                                     )}
 
-                                    {/* Controles inferiores dentro del textarea */}
                                     <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between pointer-events-none">
-                                        {/* Contador de caracteres */}
                                         {!audioBlob && (
-                                            <span className={`text-xs pointer-events-none ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-600'
-                                                }`}>
+                                            <span className={`text-xs pointer-events-none ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-600'}`}>
                                                 {descripcion.length >= MIN_CHARS_PRODUCTOS ? '✅' : ''} {descripcion.length}/{MAX_CHARS_PRODUCTOS}
                                             </span>
                                         )}
                                         {audioBlob && <span />}
 
-                                        {/* Botón de micrófono — esquina inferior derecha */}
                                         <button type="button"
                                             onClick={grabando ? detenerGrabacion : iniciarGrabacion}
                                             disabled={!!audioBlob}
@@ -354,14 +408,12 @@ function DisenaPageContent() {
                                 {!audioBlob && (
                                     <div className="mt-1.5 h-1 bg-slate-700 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'
-                                                }`}
+                                            className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
                                             style={{ width: `${Math.min((descripcion.length / MAX_CHARS_PRODUCTOS) * 100, 100)}%` }}
                                         />
                                     </div>
                                 )}
 
-                                {/* Estado de grabación (barra de progreso de audio) */}
                                 {grabando && (
                                     <div className="mt-2">
                                         <div className="flex items-center gap-2 mb-1">
@@ -373,6 +425,15 @@ function DisenaPageContent() {
                                         </div>
                                     </div>
                                 )}
+
+                                {/* ── URL HINT NOTE ── */}
+                                <div className="mt-3 flex items-start gap-2 text-xs text-slate-500 border-t border-white/5 pt-3">
+                                    <Link2 className="w-3.5 h-3.5 flex-shrink-0 text-slate-600 mt-0.5" />
+                                    <span>
+                                        ¿Tienes una página de referencia? Inclúyela directamente en tu descripción
+                                        (ej: <em className="text-slate-400">&quot;…similar a apple.com&quot;</em>) y la IA se inspirará en ella.
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -388,134 +449,40 @@ function DisenaPageContent() {
                 </main>
             )}
 
-            {/* ─── PASO 2: LOADING ─── */}
+            {/* ─── PASO 2: LOADING INMERSIVO ─── */}
             {step === 'loading' && (
-                <main className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
-                    <div className="relative mb-10">
-                        <div className="w-24 h-24 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Sparkles className="w-8 h-8 text-blue-400 animate-pulse" />
-                        </div>
-                    </div>
-                    <h2 className="text-2xl font-bold mb-3">La IA está construyendo tu página...</h2>
-                    <p className="text-blue-300 text-lg animate-pulse">{LOADING_MESSAGES[loadingMsg]}</p>
-                    <p className="text-slate-500 text-sm mt-4">Esto puede tomar entre 15 y 30 segundos</p>
-                </main>
+                <ImmersiveLoader msgIdx={loadingMsg} />
             )}
 
             {/* ─── PASO 3: PREVIEW ─── */}
             {step === 'preview' && (
-                <main className="relative">
-                    {/* Preview del diseño */}
-                    <div className="relative">
-                        <iframe
-                            srcDoc={generatedHtml}
-                            className="w-full border-none transition-all duration-500"
-                            style={{
-                                height: '100vh',
-                                filter: unlocked ? 'none' : 'blur(6px)',
-                                pointerEvents: unlocked ? 'auto' : 'none',
-                            }}
-                            title="Tu página web generada"
-                        />
+                <main className="flex flex-col" style={{ height: 'calc(100vh - 57px)' }}>
+                    {/* Iframe sin blur — visible de inmediato */}
+                    <iframe
+                        srcDoc={generatedHtml}
+                        className="flex-1 w-full border-none"
+                        title="Tu página web generada"
+                    />
 
-                        {/* MURO DE LEADS - Modal Email */}
-                        {!unlocked && (
-                            <div className="absolute inset-0 flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-                                <div className="bg-slate-800/95 border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center">
-                                    {/* Ícono animado */}
-                                    <div className="text-6xl mb-4 animate-bounce">🚀</div>
-
-                                    <h2 className="text-2xl font-extrabold mb-2 text-white">
-                                        ¡Tu diseño está listo y optimizado!
-                                    </h2>
-                                    <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                                        Hemos creado una estructura de alta conversión para tu negocio. Ingresa tu mejor correo electrónico para <strong className="text-white">enviarte el código fuente</strong>, desbloquear el editor con tus <strong className="text-blue-400">15 créditos gratuitos</strong> y guardar tu proyecto.
-                                    </p>
-
-                                    {!submitted ? (
-                                        <form onSubmit={handleEmailSubmit} className="space-y-3 text-left">
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wide">
-                                                    👤 Nombre *
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={nombreContacto}
-                                                    onChange={e => setNombreContacto(e.target.value)}
-                                                    placeholder="Ej: Carlos Rodríguez"
-                                                    required
-                                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wide">
-                                                    📧 Correo electrónico *
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    value={emailContacto}
-                                                    onChange={e => setEmailContacto(e.target.value)}
-                                                    placeholder="Ej: carlos@minegocio.com"
-                                                    required
-                                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm"
-                                                />
-                                            </div>
-
-                                            {submitError && (
-                                                <p className="text-red-400 text-xs">{submitError}</p>
-                                            )}
-
-                                            <button type="submit" disabled={submitting}
-                                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg mt-2 text-sm">
-                                                {submitting ? (
-                                                    <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
-                                                ) : (
-                                                    <><Mail className="w-4 h-4" /> 📧 Enviarme mi diseño ahora</>
-                                                )}
-                                            </button>
-                                            <p className="text-center text-xs text-slate-600 mt-2">
-                                                🔒 Sin spam. Tu información es privada y segura.
-                                            </p>
-                                        </form>
-                                    ) : (
-                                        <div className="text-center py-4">
-                                            <CheckCircle className="w-14 h-14 text-green-400 mx-auto mb-4" />
-                                            <h3 className="text-xl font-bold text-white mb-2">¡Revisa tu correo, {nombreContacto.split(' ')[0]}!</h3>
-                                            <p className="text-slate-400 text-sm mb-4">
-                                                Te hemos enviado el diseño a <strong className="text-blue-300">{emailContacto}</strong>. Incluye el link para acceder al editor con tus 15 créditos.
-                                            </p>
-                                            <Link href={`/editor?email=${encodeURIComponent(emailContacto)}`}
-                                                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm">
-                                                <Lock className="w-4 h-4" />
-                                                Acceder al editor ahora →
-                                            </Link>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Barra de acción post-unlock */}
-                    {unlocked && (
-                        <div className="sticky bottom-0 bg-slate-900/95 border-t border-white/10 backdrop-blur-xl py-4 px-6 flex items-center justify-between gap-4">
-                            <div>
-                                <p className="font-bold text-white text-sm">¡Tu diseño está desbloqueado! 🎉</p>
-                                <p className="text-slate-400 text-xs">Edítalo con IA o habla con un asesor para llevarlo a producción.</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Link href={`/editor?email=${encodeURIComponent(emailContacto)}`}
-                                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap">
-                                    ✏️ Editar con IA
-                                </Link>
-                                <a href="https://wa.me/573123299053" target="_blank"
-                                    className="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap">
-                                    📱 Asesor
-                                </a>
-                            </div>
+                    {/* Barra de acción inferior */}
+                    <div className="bg-slate-900/95 border-t border-white/10 backdrop-blur-xl py-3 px-6 flex items-center justify-between gap-4 flex-shrink-0">
+                        <div>
+                            <p className="font-bold text-white text-sm">¡Tu página está lista! 🎉</p>
+                            <p className="text-slate-400 text-xs">Edítala con IA o habla con un asesor para llevarla a producción.</p>
                         </div>
-                    )}
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href={`/editor${userEmail ? `?email=${encodeURIComponent(userEmail)}` : ''}`}
+                                className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap"
+                            >
+                                ✏️ Editar con IA
+                            </Link>
+                            <a href="https://wa.me/573123299053" target="_blank"
+                                className="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap">
+                                📱 Asesor
+                            </a>
+                        </div>
+                    </div>
                 </main>
             )}
 
@@ -527,7 +494,7 @@ function DisenaPageContent() {
                             <p className="text-sm font-semibold text-white mb-1">🍪 Política de Cookies</p>
                             <p className="text-xs text-slate-400 leading-relaxed">
                                 Usamos cookies para mejorar tu experiencia y personalizar el contenido.
-                                Al hacer clic en <strong className="text-white">"Aceptar"</strong>, consientes el uso de cookies.
+                                Al hacer clic en <strong className="text-white">&quot;Aceptar&quot;</strong>, consientes el uso de cookies.
                             </p>
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">
