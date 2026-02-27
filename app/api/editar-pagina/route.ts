@@ -84,8 +84,9 @@ REGLAS ESTRICTAS DE SALIDA:
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
 - Mantén TODAS las secciones existentes a menos que el cliente pida eliminarlas expresamente.
 - ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo de Unsplash (<img src="..."> o background-image: url(...)) por simples gradientes o fondos estáticos. Mantén el diseño rico y estructurado.
+- ¡CRÍTICO! MANTÉN el carácter dinámico de la página web (microinteracciones, animaciones de entrada, efectos hover). Nunca estaticices el diseño.
 - Si el cliente menciona colores, aplícalos. Si menciona textos, cámbialos exactamente.
-- Mantén Tailwind CSS CDN, AOS animations y el diseño responsivo.
+- Mantén Tailwind CSS CDN, animaciones y el diseño responsivo.
         `.trim();
 
         if (!apiKey) {
