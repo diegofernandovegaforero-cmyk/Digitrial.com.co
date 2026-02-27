@@ -29,8 +29,12 @@ Recontextualización: Extraer inteligentemente los patrones y conceptos de dise�
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Esto significa implementar movimientos y animaciones modernas en todo el sitio para dar vida a la página (efectos de paralaje, scroll-triggered animations vía AOS.js o GSAP desde CDN, microinteracciones visuales fluidas). El objetivo es una experiencia fluida y viva.
 Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. Se prefiere encarecidamente "Premium Dark Mode" con brillos "glow", incorporando secciones de "Social proof" y direct copy. ¡No crear fondos de color sólido simples como recurso principal!
 
-3. IMÁGENES Y CONTENIDO:
-Integración de Imágenes: Incorporar imágenes relevantes y de alta calidad estratégicamente (usando por ejemplo https://source.unsplash.com/1600x900/?[keyword]) para mejorar el atractivo visual y la narración. Mencione explícitamente contenido visual de stock o placeholders para IA. TODA sección principal y sub-elemento (como cards de servicio) debe contener recursos visuales/imágenes integradas, es PROHIBIDO usar solo color o degradado. Usa backdrop-filter: blur() (glassmorphism) para legibilidad.
+3. IMÁGENES Y CONTENIDO (100% GRATIS POR IA):
+Integración de Imágenes: Es OBLIGATORIO usar imágenes generadas por IA en tiempo real sin costo usando la API de Pollinations. ¡NO uses source.unsplash.com porque está deprecado!
+Para cada imagen, construye una URL así: https://image.pollinations.ai/prompt/[descripcion_detallada_en_ingles]?width=[ancho]&height=[alto]&nologo=true
+Ejemplo para fondo de Hero: https://image.pollinations.ai/prompt/professional%20modern%20startup%20office%20with%20people%20working?width=1600&height=900&nologo=true
+Ejemplo para card de producto: https://image.pollinations.ai/prompt/delicious%20gourmet%20burger%20restaurant?width=600&height=400&nologo=true
+TODA sección principal, testimonios y sub-elemento (como cards de servicio) debe contener estas imágenes dinámicas. Describe la solicitud de imagen de forma muy detallada y en INGLÉS en la URL (separando las palabras con %20). Usa backdrop-filter: blur() (glassmorphism) para legibilidad de textos sobre ellas.
 
 4. USO DE LENGUAJES DE PROGRAMACIÓN:
 Stack Moderno en un archivo: Dado el requerimiento técnico, debe simular un ecosistema completo (frontend interconectado) mediante HTML5, CSS avanzado, Tailwind via CDN y Vanilla JS / AOS.js via CDN <script>. El output debe estar optimizado y renderizado sin dependencias externas complejas.

@@ -83,7 +83,8 @@ REGLAS ESTRICTAS DE SALIDA:
 - PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
 - Mantén TODAS las secciones existentes a menos que el cliente pida eliminarlas expresamente.
-- ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo de Unsplash (<img src="..."> o background-image: url(...)) por simples gradientes o fondos estáticos. Mantén el diseño rico y estructurado.
+- ¡CRÍTICO! SI AGREGAS O MODIFICAS IMÁGENES, OBLIGATORIAMENTE usa la API gratuita de IA Pollinations: https://image.pollinations.ai/prompt/[descripción_en_ingles]?width=[ancho]&height=[alto]&nologo=true. NO uses source.unsplash.com.
+- ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo (<img> o background-image) por simples gradientes o colores estáticos. Mantén el diseño rico y estructurado.
 - ¡CRÍTICO! MANTÉN el carácter dinámico de la página web (microinteracciones, animaciones de entrada, efectos hover). Nunca estaticices el diseño.
 - Si el cliente menciona colores, aplícalos. Si menciona textos, cámbialos exactamente.
 - Mantén Tailwind CSS CDN, animaciones y el diseño responsivo.
