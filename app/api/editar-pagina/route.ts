@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         if (audio_base64 && apiKey) {
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
                 const audioResult = await model.generateContent([
                     { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
                     { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
@@ -94,7 +94,7 @@ REGLAS ESTRICTAS DE SALIDA:
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         const result = await model.generateContent(promptEdicion);
         let nuevoHtml = result.response.text()
             .replace(/```html\n?/gi, '')
