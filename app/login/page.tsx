@@ -31,8 +31,13 @@ const TESTIMONIALS = [
     },
 ];
 
+const emailToDocId = (email: string) =>
+    email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+
 async function saveUserToFirestore(user: { uid: string; email: string | null; displayName: string | null; photoURL: string | null }) {
-    const ref = doc(db, 'usuarios_leads', user.uid);
+    if (!user.email) return;
+    const docId = emailToDocId(user.email);
+    const ref = doc(db, 'usuarios_leads', docId);
     const snap = await getDoc(ref);
     if (!snap.exists()) {
         await setDoc(ref, {

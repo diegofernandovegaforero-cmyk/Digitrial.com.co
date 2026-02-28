@@ -262,13 +262,17 @@ function DisenaPageContent() {
             const res = await fetch('/api/generar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ descripcion, imagenes_base64: base64Images }),
+                body: JSON.stringify({
+                    descripcion,
+                    imagenes_base64: base64Images,
+                    email: authUser?.email,
+                    nombre_contacto: authUser?.displayName || ''
+                }),
             });
 
             clearInterval(interval);
 
             if (res.ok && res.body) {
-                setStep('preview');
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
                 let htmlTemp = '';
@@ -280,6 +284,9 @@ function DisenaPageContent() {
                     const cleanHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
                     setGeneratedHtml(cleanHtml);
                 }
+
+                // Mostrar la vista preliminar SOLO cuando la IA haya terminado de armar toda la web
+                setStep('preview');
             } else {
                 const data = await res.json().catch(() => ({}));
                 setError(data.error || 'Hubo un error generando tu página. Intenta de nuevo.');
