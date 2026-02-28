@@ -30,16 +30,16 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
 Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. ¡ATENCIÓN! NO generes páginas exclusivamente en color oscuro (Dark Mode) por defecto. Los colores, la paleta y el estilo visual general deben estar ESTRICTAMENTE CONDICIONADOS por las indicaciones del texto, el audio descriptivo o el estilo de las imágenes adjuntas. Elije creativamente la paleta que mejor represente la actividad del negocio, incorporando siempre secciones de "Social proof" al estilo del diseño premium.
 
-3. IMÁGENES ÚNICAS Y STOCK DE VIDEOS (NANO BANANA 2 + POLLINATIONS + STICK DE VIDS):
-¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar color gradients genéricos o placeholders. 
-Debes integrar imágenes fotorrealistas de alta calidad generadas en tiempo real O videos de stock ("Stick de vids") para fondos y hero sections.
+3. IMÁGENES ÚNICAS Y STOCK DE VIDEOS (LOREMFLICKR + STICK DE VIDS):
+¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar color gradients genéricos o placeholders simples. 
+Debes integrar imágenes fotográficas reales de alta calidad (via LoremFlickr) O videos de stock ("Stick de vids") para fondos y hero sections.
 
-PARA IMÁGENES (Pollinations / Nano Banana 2):
-Usa esta estructura de URL para las imágenes, con prompts EXTREMADAMENTE detallados, en INGLÉS, enfocados en la actividad del usuario:
-https://image.pollinations.ai/prompt/[descripcion-detallada-en-ingles]?width=[ancho]&height=[alto]&nologo=true
+PARA IMÁGENES (LoremFlickr):
+Usa esta estructura de URL para las imágenes, buscando UNA o DOS palabras clave precisas y en INGLÉS enfocadas en la actividad del usuario:
+https://loremflickr.com/1600/900/[palabra_clave_1],[palabra_clave_2]/all
 
-¡CRÍTICO Y VITAL! REEMPLAZA TODOS LOS ESPACIOS EN BLANCO EN LA DESCRIPCIÓN EXCLUSIVAMENTE POR GUIONES MEDIOS ('-'). NINGÚN ESPACIO LITERAL.
-Ejemplo correcto: https://image.pollinations.ai/prompt/macro-photorealistic-high-end-photography-of-roasted-coffee-bean-in-boutique-farm?width=1600&height=900&nologo=true
+¡CRÍTICO Y VITAL! REEMPLAZA LOS ESPACIOS EN BLANCO EN LA BÚSQUEDA EXCLUSIVAMENTE POR COMAS (','). NO DEJES ESPACIOS EN LA URL PUES SE ROMPERÁ.
+Ejemplo correcto: https://loremflickr.com/1600/900/coffee,shop/all
 
 PARA VIDEOS DE FONDOS (Stock de videos / Stick de vids):
 Puedes usar libremente estos enlaces de videos MP4 de alta calidad libres de derechos como fondo de Hero sections o bloques divisorios (usa la etiqueta <video autoplay loop muted playsinline class="..."></video>):
