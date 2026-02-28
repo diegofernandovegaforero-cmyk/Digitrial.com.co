@@ -89,7 +89,10 @@ REGLAS ESTRICTAS DE SALIDA:
 - PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
 - Mantén TODAS las secciones existentes a menos que el cliente pida eliminarlas expresamente.
-- ¡CRÍTICO Y VITAL! SI AGREGAS O MODIFICAS IMÁGENES, OBLIGATORIAMENTE usa la URL: https://loremflickr.com/1600/900/[palabra_clave_1],[palabra_clave_2]/all . REEMPLAZA LOS ESPACIOS EN LA BÚSQUEDA EXCLUSIVAMENTE CON COMAS (','). NO DEJES ESPACIOS EN BLANCO EN LA URL. EJEMPLO: https://loremflickr.com/1600/900/office,modern,team/all
+- ¡CRÍTICO Y VITAL! SI AGREGAS O MODIFICAS IMÁGENES, DEBES IMPLEMENTAR UN SISTEMA DE DOS RUTINES:
+  1. 'src' principal: https://image.pollinations.ai/prompt/[descripcion-en-ingles]?width=[ancho]&height=[alto]&nologo=true (REEMPLAZA ESPACIOS POR GUIONES '-').
+  2. 'onerror' de respaldo OBLIGATORIO: onerror="this.onerror=null; this.src='https://loremflickr.com/1600/900/[palabra_clave_1],[palabra_clave_2]/all';" (REEMPLAZA ESPACIOS POR COMAS ',').
+  Ejemplo: <img src="https://image.pollinations.ai/prompt/office-modern-team?width=1600&height=900&nologo=true" onerror="this.onerror=null; this.src='https://loremflickr.com/1600/900/office,modern/all';" ...>
 - ¡VIDEOS DE STOCK (Stick de vids)! Si necesitas fondos en video, usa <video autoplay loop muted playsinline>: https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-4174-large.mp4 o https://assets.mixkit.co/videos/preview/mixkit-people-in-a-business-meeting-working-on-a-project-4180-large.mp4 o https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-laptop-in-a-coffee-shop-4171-large.mp4 o https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-connection-background-27202-large.mp4
 - ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo (<img> o background-image) por simples gradientes o colores estáticos. Mantén el diseño rico y estructurado con una paleta de colores adaptada al giro del negocio.
 - ¡ATENCIÓN A LOS COLORES! La paleta de colores (oscuro, claro, colores específicos) DEBE estar estrictamente condicionada por la instrucción de audio o texto. Si el cliente pide colores claros, quita el dark mode; si pide colores específicos, aplícalos en el CSS.
