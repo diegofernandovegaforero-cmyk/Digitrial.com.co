@@ -294,21 +294,40 @@ function DisenaPageContent() {
 
     // Email del usuario autenticado para el enlace al editor
     const userEmail = authUser?.email || '';
+    const [editPanelOpen, setEditPanelOpen] = useState(false);
+    const [editInstruction, setEditInstruction] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleEditRequest = async () => {
+        if (!editInstruction.trim() || !userEmail) return;
+        setIsEditing(true);
+        // Lógica futura para conectar directamente aquí con /api/editar-pagina
+        // O redirigir al editor con la instrucción. Por ahora redirige al editor pro:
+        router.push(`/editor?email=${encodeURIComponent(userEmail)}&instruccion=${encodeURIComponent(editInstruction)}`);
+    };
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-white overflow-x-hidden">
-            {/* Navbar */}
-            <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 relative z-50">
-                <Link href="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
-                        <Triangle className="text-white fill-white w-4 h-4" />
-                    </div>
-                    <span className="font-extrabold text-lg tracking-tight uppercase text-slate-300">
-                        DIGI<span className="text-blue-400">TRIAL</span>
-                    </span>
-                </Link>
-                <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
-            </nav>
+        <div className="min-h-screen bg-[#09090b] text-white overflow-hidden relative">
+            {/* Navbar - Solo visible si no estamos en preview */}
+            <AnimatePresence>
+                {step !== 'preview' && (
+                    <motion.nav
+                        initial={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="flex items-center justify-between px-6 py-4 border-b border-white/10 relative z-50"
+                    >
+                        <Link href="/" className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
+                                <Triangle className="text-white fill-white w-4 h-4" />
+                            </div>
+                            <span className="font-extrabold text-lg tracking-tight uppercase text-slate-300">
+                                DIGI<span className="text-blue-400">TRIAL</span>
+                            </span>
+                        </Link>
+                        <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
+                    </motion.nav>
+                )}
+            </AnimatePresence>
 
             {/* ─── HERO SECTION ─── */}
             {showHero && step === 'form' && (
@@ -480,8 +499,8 @@ function DisenaPageContent() {
                                                 disabled={!!audioBlob || imagenesAdjuntas.length >= 3}
                                                 title="Adjuntar capturas de pantalla o referencias (Máx. 3)"
                                                 className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${audioBlob || imagenesAdjuntas.length >= 3
-                                                        ? 'bg-white/5 text-slate-500 cursor-not-allowed'
-                                                        : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
+                                                    ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                                    : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
                                                     }`}>
                                                 <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
                                             </button>
@@ -555,33 +574,110 @@ function DisenaPageContent() {
 
             {/* ─── PASO 3: PREVIEW ─── */}
             {step === 'preview' && (
-                <main className="flex flex-col" style={{ height: 'calc(100vh - 57px)' }}>
-                    {/* Iframe sin blur — visible de inmediato */}
+                <main className="h-screen w-screen relative bg-white">
+                    {/* Iframe ocupando el 100% de la pantalla */}
                     <iframe
                         srcDoc={generatedHtml}
-                        className="flex-1 w-full border-none"
+                        className="w-full h-full border-none"
                         title="Tu página web generada"
                     />
 
-                    {/* Barra de acción inferior */}
-                    <div className="bg-slate-900/95 border-t border-white/10 backdrop-blur-xl py-3 px-6 flex items-center justify-between gap-4 flex-shrink-0">
-                        <div>
-                            <p className="font-bold text-white text-sm">¡Tu página está lista! 🎉</p>
-                            <p className="text-slate-400 text-xs">Edítala con IA o habla con un asesor para llevarla a producción.</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Link
-                                href={`/editor${userEmail ? `?email=${encodeURIComponent(userEmail)}` : ''}`}
-                                className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap"
-                            >
-                                ✏️ Editar con IA
-                            </Link>
-                            <a href="https://wa.me/573123299053" target="_blank"
-                                className="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm whitespace-nowrap">
-                                📱 Asesor
-                            </a>
-                        </div>
-                    </div>
+                    {/* Botón Flotante para abrir panel lateral */}
+                    <motion.button
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: editPanelOpen ? 100 : 0 }}
+                        onClick={() => setEditPanelOpen(true)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-600 text-white p-3 md:p-4 rounded-l-2xl shadow-[-10px_0_30px_rgba(37,99,235,0.3)] backdrop-blur-md border border-r-0 border-white/20 transition-all z-40 group flex items-center gap-2"
+                    >
+                        <Sparkles className="w-5 h-5 group-hover:animate-pulse" />
+                        <span className="font-bold text-sm tracking-wide mr-1 shadow-black drop-shadow-md">Editar Web</span>
+                    </motion.button>
+
+                    {/* Panel flotante de Edición */}
+                    <AnimatePresence>
+                        {editPanelOpen && (
+                            <>
+                                {/* Overlay oscuro al abrir el panel */}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40"
+                                    onClick={() => setEditPanelOpen(false)}
+                                />
+
+                                {/* Drawer lateral derecho */}
+                                <motion.div
+                                    initial={{ x: '100%' }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: '100%' }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    className="absolute right-0 top-0 bottom-0 w-full md:w-[400px] bg-slate-900 border-l border-white/10 shadow-2xl z-50 flex flex-col"
+                                >
+                                    <div className="p-5 border-b border-white/10 flex items-center justify-between bg-slate-800/50">
+                                        <div className="flex items-center gap-2 text-white">
+                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                                <Triangle className="w-4 h-4 fill-white text-white" />
+                                            </div>
+                                            <h3 className="font-bold text-lg">Modificar Diseño</h3>
+                                        </div>
+                                        <button
+                                            onClick={() => setEditPanelOpen(false)}
+                                            className="text-slate-400 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"
+                                        >
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+
+                                    <div className="p-6 flex-1 overflow-y-auto">
+                                        <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                                            ¿Qué te gustaría cambiar? Dale instrucciones a nuestra IA para ajustar colores, tipografías, reordenar secciones o cambiar estilos.
+                                        </p>
+
+                                        <div className="space-y-4">
+                                            <div className="bg-slate-950/50 rounded-xl border border-white/10 p-4">
+                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">
+                                                    ✨ Instrucciones de edición
+                                                </label>
+                                                <textarea
+                                                    value={editInstruction}
+                                                    onChange={e => setEditInstruction(e.target.value)}
+                                                    placeholder="Ej: Haz que el fondo sea claro en lugar de oscuro, cambia las imágenes por ilustraciones 3D y usa rojo como color principal..."
+                                                    className="w-full bg-transparent text-sm text-white border-0 p-0 focus:ring-0 resize-none min-h-[120px] placeholder:text-slate-600"
+                                                />
+                                            </div>
+
+                                            <button
+                                                onClick={handleEditRequest}
+                                                disabled={!editInstruction.trim() || isEditing || !userEmail}
+                                                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-400 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
+                                            >
+                                                {isEditing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                                                {isEditing ? 'Procesando cambios...' : (!userEmail ? 'Inicia sesión para editar' : 'Aplicar Modificaciones')}
+                                            </button>
+
+                                            {!userEmail && (
+                                                <p className="text-xs text-amber-400 text-center flex items-center justify-center gap-1 mt-2">
+                                                    Debes tener una cuenta activa para guardar ediciones de IA.
+                                                </p>
+                                            )}
+
+                                            <div className="mt-8">
+                                                <p className="text-xs text-slate-500 text-center mb-3">Otras opciones</p>
+                                                <a
+                                                    href="https://wa.me/573123299053"
+                                                    target="_blank"
+                                                    className="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+                                                >
+                                                    📱 Hablar con un asesor real
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 </main>
             )}
 
