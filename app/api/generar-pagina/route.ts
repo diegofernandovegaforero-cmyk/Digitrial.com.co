@@ -90,14 +90,14 @@ export async function POST(req: NextRequest) {
 
           userContent.push({
             type: 'image',
-            image: base64Data,
+            image: new URL(`data:${mimeType};base64,${base64Data}`),
             mimeType: mimeType
           });
         });
       }
 
       const result = streamText({
-        model: customGoogle('gemini-2.5-pro'),
+        model: customGoogle('gemini-1.5-pro'),
         messages: [{ role: 'user', content: userContent }],
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente
