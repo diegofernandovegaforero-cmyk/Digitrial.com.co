@@ -56,6 +56,9 @@ Simula un ecosistema completo mediante HTML5, Tailwind CSS via CDN, y Vanilla JS
 ¡CRÍTICO! Está ESTRICTAMENTE PROHIBIDO generar cualquier tipo de pantalla de carga, preloader, spinner o "loading screen" (como contadores de 0% a 100%) dentro del código HTML.
 El contenido principal de la página web DEBE SER VISIBLE INMEDIATAMENTE. No ocultes el '<body>' ni el '#main-content' con opacidad 0 o 'display: none'. La aplicación principal ya cuenta con su propia pantalla de carga, por lo que generar una segunda pantalla dentro del HTML rompe la experiencia de usuario.
 
+6. FOOTER Y DERECHOS RESERVADOS:
+¡ATENCIÓN! Al final de la página, DEBES incluir obligatoriamente una sección de Footer (Pie de página) que luzca limpio y profesional. En la parte inferior del Footer, DEBES escribir exactamente el símbolo de Copyright seguido del año actual y la frase de derechos reservados de esta forma: "© ${new Date().getFullYear()} Todos los derechos reservados", acompañado del nombre de la marca o empresa generada.
+
 FORMATO DE SALIDA (ESTRICTO):
 Debes retornar UN ÚNICO ARCHIVO HTML COMPLETO.
 ¡PELIGRO! ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown.
