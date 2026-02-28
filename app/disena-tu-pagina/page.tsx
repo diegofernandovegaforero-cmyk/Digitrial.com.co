@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, CheckCircle, Loader2, Mic, MicOff, RefreshCw, Link2 } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, CheckCircle, Loader2, Mic, MicOff, RefreshCw, Link2, ImagePlus, X } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -205,6 +205,49 @@ function DisenaPageContent() {
     const acceptCookies = () => { localStorage.setItem('digitrial_cookies', 'accepted'); setCookiesAccepted(true); };
     const rejectCookies = () => { localStorage.setItem('digitrial_cookies', 'rejected'); setCookiesAccepted(false); };
 
+    // Image Upload & Drag-and-Drop
+    const [imagenesAdjuntas, setImagenesAdjuntas] = useState<{ url: string, file: File }[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            const newImages = files.map(f => ({ url: URL.createObjectURL(f), file: f }));
+            setImagenesAdjuntas(prev => [...prev, ...newImages].slice(0, 3));
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+    const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); };
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (!audioBlob && e.dataTransfer.files) {
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            const newImages = files.map(f => ({ url: URL.createObjectURL(f), file: f }));
+            setImagenesAdjuntas(prev => [...prev, ...newImages].slice(0, 3));
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setImagenesAdjuntas(prev => {
+            const newImgs = [...prev];
+            URL.revokeObjectURL(newImgs[index].url);
+            newImgs.splice(index, 1);
+            return newImgs;
+        });
+    };
+
+    const getBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const [descripcion, setDescripcion] = useState('');
     const productosValido = (descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS) || audioBlob !== null;
 
@@ -215,10 +258,11 @@ function DisenaPageContent() {
         let idx = 0;
         const interval = setInterval(() => { idx = (idx + 1) % LOADING_MESSAGES.length; setLoadingMsg(idx); }, 2200);
         try {
+            const base64Images = await Promise.all(imagenesAdjuntas.map(img => getBase64(img.file)));
             const res = await fetch('/api/generar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ descripcion }),
+                body: JSON.stringify({ descripcion, imagenes_base64: base64Images }),
             });
 
             clearInterval(interval);
@@ -364,7 +408,13 @@ function DisenaPageContent() {
                                     <span className="ml-2 text-xs font-normal text-slate-500">mín. {MIN_CHARS_PRODUCTOS} · máx. {MAX_CHARS_PRODUCTOS} caracteres</span>
                                 </label>
 
-                                <div className="relative">
+                                <div
+                                    className={`relative rounded-xl overflow-hidden border-2 transition-colors ${isDragging ? 'border-purple-500 bg-purple-500/10' : 'border-transparent'
+                                        }`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
                                     <textarea
                                         name="descripcion"
                                         value={audioBlob ? '' : descripcion}
@@ -372,12 +422,27 @@ function DisenaPageContent() {
                                         disabled={!!audioBlob}
                                         rows={8}
                                         maxLength={MAX_CHARS_PRODUCTOS}
-                                        placeholder={audioBlob ? '' : `Cuéntanos tu idea: qué vendes, a quién va dirigido, qué te hace especial, zona de atención, precios... (mín. ${MIN_CHARS_PRODUCTOS} caracteres)`}
-                                        className={`w-full bg-white/10 border rounded-xl px-4 py-3 pb-10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm ${audioBlob
+                                        placeholder={audioBlob ? '' : `Cuéntanos tu idea, o arrastra imágenes aquí (ej: capturas de pantalla) para diseñar... (mín. ${MIN_CHARS_PRODUCTOS} caracteres)`}
+                                        className={`w-full bg-white/10 border rounded-xl px-4 py-3 pb-16 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm ${audioBlob
                                             ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20'
                                             : 'border-white/20 focus:border-blue-500 focus:ring-blue-500/20'
-                                            }`}
+                                            } ${isDragging ? 'opacity-50' : ''}`}
                                     />
+
+                                    {/* Preview Imágenes Adjuntas */}
+                                    {imagenesAdjuntas.length > 0 && !audioBlob && (
+                                        <div className="absolute bottom-12 left-3 right-3 flex gap-2 overflow-x-auto pb-1">
+                                            {imagenesAdjuntas.map((img, idx) => (
+                                                <div key={idx} className="relative w-12 h-12 rounded-lg border border-white/20 overflow-hidden flex-shrink-0 group">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img src={img.url} alt="Referencia" className="w-full h-full object-cover" />
+                                                    <button type="button" onClick={() => removeImage(idx)} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <X className="w-4 h-4 text-white" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
 
                                     {audioBlob && (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-green-900/30 border border-green-500/40">
@@ -400,19 +465,41 @@ function DisenaPageContent() {
                                         )}
                                         {audioBlob && <span />}
 
-                                        <button type="button"
-                                            onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-                                            disabled={!!audioBlob}
-                                            title={grabando ? 'Detener grabación' : `Grabar audio (hasta ${MAX_AUDIO_SEG}s)`}
-                                            className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${grabando
-                                                ? 'bg-red-500 text-white animate-pulse'
-                                                : audioBlob
-                                                    ? 'bg-green-600/40 text-green-300 cursor-not-allowed'
-                                                    : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
-                                                }`}>
-                                            {grabando ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                                            {grabando ? `${segundosGrabacion}s` : '🎤 Audio'}
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                className="hidden"
+                                                ref={fileInputRef}
+                                                onChange={handleImageSelect}
+                                                disabled={!!audioBlob || imagenesAdjuntas.length >= 3}
+                                            />
+                                            <button type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                disabled={!!audioBlob || imagenesAdjuntas.length >= 3}
+                                                title="Adjuntar capturas de pantalla o referencias (Máx. 3)"
+                                                className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${audioBlob || imagenesAdjuntas.length >= 3
+                                                        ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                                        : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
+                                                    }`}>
+                                                <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
+                                            </button>
+
+                                            <button type="button"
+                                                onClick={grabando ? detenerGrabacion : iniciarGrabacion}
+                                                disabled={!!audioBlob || isDragging}
+                                                title={grabando ? 'Detener grabación' : `Grabar audio (hasta ${MAX_AUDIO_SEG}s)`}
+                                                className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${grabando
+                                                    ? 'bg-red-500 text-white animate-pulse'
+                                                    : audioBlob
+                                                        ? 'bg-green-600/40 text-green-300 cursor-not-allowed'
+                                                        : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
+                                                    }`}>
+                                                {grabando ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                                                {grabando ? `${segundosGrabacion}s` : '🎤 Audio'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 

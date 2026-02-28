@@ -59,7 +59,7 @@ Todos los scripts y estilos deben ir dentro.
 
 export async function POST(req: NextRequest) {
   try {
-    const { descripcion, nombre_contacto, email } = await req.json();
+    const { descripcion, nombre_contacto, email, imagenes_base64 } = await req.json();
 
     if (!descripcion || descripcion.trim().length < 10) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
@@ -78,9 +78,27 @@ export async function POST(req: NextRequest) {
         apiKey: apiKey,
       });
 
+      const promptText = buildPrompt(inputUsuario);
+
+      const userContent: any[] = [{ type: 'text', text: promptText }];
+
+      if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+        imagenes_base64.forEach(imgBase64 => {
+          const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
+          const mimeType = match ? match[1] : 'image/jpeg';
+          const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
+
+          userContent.push({
+            type: 'image',
+            image: base64Data,
+            mimeType: mimeType
+          });
+        });
+      }
+
       const result = streamText({
         model: customGoogle('gemini-2.5-flash'),
-        prompt: buildPrompt(inputUsuario),
+        messages: [{ role: 'user', content: userContent }],
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente
           const html = text.replace(/\\`\\`\\`html\\n?/gi, '').replace(/\\`\\`\\`/g, '').trim();
