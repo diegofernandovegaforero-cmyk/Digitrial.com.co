@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
       }
 
       const result = streamText({
-        model: customGoogle('gemini-2.5-flash'),
+        model: customGoogle('gemini-3.1-pro-preview'),
         messages: [{ role: 'user', content: userContent }],
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente
