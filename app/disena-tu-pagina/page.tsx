@@ -277,7 +277,7 @@ function DisenaPageContent() {
                     const { done, value } = await reader.read();
                     if (done) break;
                     htmlTemp += decoder.decode(value, { stream: true });
-                    const cleanHtml = htmlTemp.replace(/\`\`\`html\n?/gi, '').replace(/\`\`\`\n?/g, '');
+                    const cleanHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
                     setGeneratedHtml(cleanHtml);
                 }
             } else {

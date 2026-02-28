@@ -61,7 +61,9 @@ Genere código que, al ejecutarse en el navegador, muestre PRIMERO una experienc
 
 FORMATO DE SALIDA (ESTRICTO):
 Debes retornar UN ÚNICO ARCHIVO HTML COMPLETO.
-ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown. JAMÁS envuelvas tu respuesta en \`\`\`html ni \`\`\`. CERO explicaciones, preámbulos, ni saludos. Solo presenta el código.
+¡PELIGRO! ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown.
+¡PELIGRO! JAMÁS envuelvas tu respuesta en bloques de código como \`\`\`html ni \`\`\`. Tu respuesta será insertada directamente en el navegador, si usas markdown romperás la página.
+CERO explicaciones, preámbulos, ni saludos. Solo presenta el código fuente puro.
 Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar EXACTAMENTE con </html>.
 Todos los scripts y estilos deben ir dentro.
 `;
@@ -110,7 +112,7 @@ export async function POST(req: NextRequest) {
         messages: [{ role: 'user', content: userContent }],
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente
-          const html = text.replace(/\\`\\`\\`html\\n?/gi, '').replace(/\\`\\`\\`/g, '').trim();
+          const html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
 
           if (email) {
             try {

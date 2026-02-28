@@ -112,7 +112,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
             model: customGoogle('gemini-2.5-pro'),
             prompt: promptEdicion,
             onFinish: async ({ text }) => {
-                const nuevoHtml = text.replace(/\`\`\`html\n?/gi, '').replace(/\`\`\`\n?/g, '').trim();
+                const nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
                 const dbForUpdate = getAdminDbSafe();
                 if (dbForUpdate) {
                     await dbForUpdate.collection('usuarios_leads').doc(docId).update({
