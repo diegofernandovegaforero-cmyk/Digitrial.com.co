@@ -273,20 +273,28 @@ function DisenaPageContent() {
             clearInterval(interval);
 
             if (res.ok && res.body) {
-                const reader = res.body.getReader();
-                const decoder = new TextDecoder();
-                let htmlTemp = '';
+                const contentType = res.headers.get('content-type') || '';
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    htmlTemp += decoder.decode(value, { stream: true });
-                    const cleanHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
-                    setGeneratedHtml(cleanHtml);
+                if (contentType.includes('application/json')) {
+                    const data = await res.json();
+                    setGeneratedHtml(data.html || data.error || '');
+                    setStep('preview');
+                } else {
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let htmlTemp = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        htmlTemp += decoder.decode(value, { stream: true });
+                        const cleanHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
+                        setGeneratedHtml(cleanHtml);
+                    }
+
+                    // Mostrar la vista preliminar SOLO cuando la IA haya terminado de armar toda la web
+                    setStep('preview');
                 }
-
-                // Mostrar la vista preliminar SOLO cuando la IA haya terminado de armar toda la web
-                setStep('preview');
             } else {
                 const data = await res.json().catch(() => ({}));
                 setError(data.error || 'Hubo un error generando tu página. Intenta de nuevo.');
