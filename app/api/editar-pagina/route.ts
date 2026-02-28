@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { streamText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { getAdminDbSafe } from '@/lib/firebase-admin';
 
 // Sanitizar email igual que en el frontend
@@ -102,8 +102,12 @@ Ejecuta los cambios solicitados sobre el código HTML y devuelve el nuevo docume
             return NextResponse.json({ error: 'API key de Gemini no configurada.' }, { status: 503 });
         }
 
+        const customGoogle = createGoogleGenerativeAI({
+            apiKey: apiKey,
+        });
+
         const result = streamText({
-            model: google('gemini-2.5-flash'),
+            model: customGoogle('gemini-2.5-flash'),
             prompt: promptEdicion,
             onFinish: async ({ text }) => {
                 const nuevoHtml = text.replace(/\`\`\`html\n?/gi, '').replace(/\`\`\`\n?/g, '').trim();

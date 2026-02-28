@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { streamText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 // Firebase Admin - solo importar si las variables están configuradas
 const getAdminDb = async () => {
@@ -74,8 +74,12 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      const customGoogle = createGoogleGenerativeAI({
+        apiKey: apiKey,
+      });
+
       const result = streamText({
-        model: google('gemini-2.5-flash'),
+        model: customGoogle('gemini-2.5-flash'),
         prompt: buildPrompt(inputUsuario),
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente
