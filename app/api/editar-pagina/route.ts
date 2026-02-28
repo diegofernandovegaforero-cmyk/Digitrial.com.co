@@ -91,11 +91,12 @@ REGLAS ESTRICTAS DE SALIDA:
 - Mantén TODAS las secciones existentes a menos que el cliente pida eliminarlas expresamente.
 - ¡CRÍTICO! SI AGREGAS O MODIFICAS IMÁGENES, OBLIGATORIAMENTE usa la URL: https://image.pollinations.ai/prompt/[descripción_en_ingles_detallada_y_fotorrealista_estilo_nano_banana_2]?width=[ancho]&height=[alto]&nologo=true . REEMPLAZA CADA ESPACIO CON %20. NO DEJES ESPACIOS EN BLANCO EN LA URL.
 - ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo (<img> o background-image) por simples gradientes o colores estáticos. Mantén el diseño rico y estructurado con una paleta de colores adaptada al giro del negocio.
+- ¡ATENCIÓN A LOS COLORES! La paleta de colores (oscuro, claro, colores específicos) DEBE estar estrictamente condicionada por la instrucción de audio o texto. Si el cliente pide colores claros, quita el dark mode; si pide colores específicos, aplícalos en el CSS.
 - Mantén el carácter dinámico de la página web (GSAP, AOS, Framer Motion, microinteracciones, animaciones de entrada).
 - MANTÉN LA EXPERIENCIA DE CARGA INMERSIVA INICIAL (el contador 0-100% y el icono dinámico) si ya existen en el código actual.
 - Alerta al final: Si los créditos restantes mencionados arriba son 0 o 3, DEBES incluir un banner sutil, elegante y muy premium pegado encima del footer actual que diga exactamente: "Atención: Te quedan {{creditos_restantes}} créditos de edición. Contacta a un asesor para llevar este diseño a producción o recargar tu cuenta." Reemplaza {{creditos_restantes}} por el número real.
 
-Ejecuta los cambios solicitados sobre el código HTML y devuelve el nuevo documento renderizado.
+Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de colores pedidas y devuelve el nuevo documento renderizado.
         `.trim();
 
         if (!apiKey) {

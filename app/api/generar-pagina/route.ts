@@ -28,7 +28,7 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 
 2. DISEÑO DINÁMICO Y MOVIMIENTO (CRÍTICO):
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
-Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. Aplica "Premium Dark Mode" con brillos morados y azules "glow", incorporando secciones de "Social proof" y direct copy, al estilo del diseño premium.
+Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. ¡ATENCIÓN! NO generes páginas exclusivamente en color oscuro (Dark Mode) por defecto. Los colores, la paleta y el estilo visual general deben estar ESTRICTAMENTE CONDICIONADOS por las indicaciones del texto, el audio descriptivo o el estilo de las imágenes adjuntas. Elije creativamente la paleta que mejor represente la actividad del negocio, incorporando siempre secciones de "Social proof" al estilo del diseño premium.
 
 3. IMÁGENES ÚNICAS Y FOTORREALISTAS (NANO BANANA 2 + POLLINATIONS):
 ¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar imágenes estáticas de unsplash, color gradients genéricos o placeholders.
