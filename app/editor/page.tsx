@@ -2,7 +2,7 @@
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail } from 'lucide-react';
+import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
@@ -25,9 +25,14 @@ function EditorContent() {
         nombre_contacto: string;
         creditos_restantes: number;
         codigo_actual: string;
+        historial_disenos?: { id: string; codigo_actual: string; descripcion: string; fecha: string }[];
     } | null>(null);
     const [cargando, setCargando] = useState(!!emailFromUrl);
     const [error, setError] = useState('');
+
+    // Pestañas
+    const [activeTab, setActiveTab] = useState<'editor' | 'history'>('editor');
+    const [selectedDesignId, setSelectedDesignId] = useState<string | null>(null);
 
     // Editor state
     const [instruccion, setInstruccion] = useState('');
@@ -58,6 +63,7 @@ function EditorContent() {
                     nombre_contacto: data.nombre_contacto || '',
                     creditos_restantes: data.creditos_restantes ?? 0,
                     codigo_actual: data.codigo_actual || '',
+                    historial_disenos: data.historial_disenos || [],
                 });
                 setError('');
                 setCargando(false);
@@ -73,6 +79,7 @@ function EditorContent() {
                                 nombre_contacto: data.nombre_contacto || '',
                                 creditos_restantes: data.creditos_restantes ?? 0,
                                 codigo_actual: data.codigo_actual || '',
+                                historial_disenos: data.historial_disenos || [],
                             });
                             setError('');
                         } else {
@@ -180,6 +187,7 @@ function EditorContent() {
                     email: email.toLowerCase().trim(),
                     instruccion_texto: instruccion,
                     audio_base64,
+                    id_diseno_base: selectedDesignId,
                 }),
             });
 
@@ -345,126 +353,182 @@ function EditorContent() {
             <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
                 {/* ─── Panel izquierdo: Editor ─── */}
                 <div className="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-white/10 bg-slate-900 overflow-y-auto">
+                    <div className="flex border-b border-white/10 sticky top-0 bg-slate-900 z-10">
+                        <button
+                            onClick={() => setActiveTab('editor')}
+                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'editor' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>
+                            <Sparkles className="w-4 h-4" /> Editor
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('history')}
+                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'history' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>
+                            <History className="w-4 h-4" /> ({userData?.historial_disenos?.length || 0}) Diseños
+                        </button>
+                    </div>
+
                     <div className="p-6">
-                        <h2 className="text-lg font-bold mb-1">
-                            Editando: <span className="text-blue-400">{userData?.nombre_negocio}</span>
-                        </h2>
-                        <p className="text-slate-500 text-xs mb-6">
-                            {userData?.nombre_contacto && `Hola, ${userData.nombre_contacto.split(' ')[0]} · `}
-                            Cada edición cuesta {CREDITOS_POR_EDICION} créditos
-                        </p>
+                        {activeTab === 'editor' ? (
+                            <>
+                                <h2 className="text-lg font-bold mb-1">
+                                    Editando: <span className="text-blue-400">{userData?.nombre_negocio}</span>
+                                </h2>
+                                <p className="text-slate-500 text-xs mb-6">
+                                    {userData?.nombre_contacto && `Hola, ${userData.nombre_contacto.split(' ')[0]} · `}
+                                    Cada edición cuesta {CREDITOS_POR_EDICION} créditos
+                                </p>
 
-                        {creditosBajos && (
-                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
-                                ⚠️ Te quedan <strong>{userData?.creditos_restantes}</strong> créditos.{' '}
-                                <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
-                                    Contáctanos
-                                </a>{' '}para recargar.
-                            </div>
-                        )}
-
-                        {exito && (
-                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
-                            </div>
-                        )}
-
-                        {transcripcion && (
-                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
-                                🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleEditar} className="space-y-4">
-                            {/* Instrucción de texto */}
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                    ✍️ Instrucción en texto
-                                </label>
-                                <textarea
-                                    value={instruccion}
-                                    onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
-                                    placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
-                                    rows={4}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
-                                />
-                                <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
-                            </div>
-
-                            {/* Grabación de audio */}
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                    🎤 Instrucción por audio (máx {MAX_AUDIO_SEGUNDOS}s)
-                                </label>
-                                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                                    {!audioBlob ? (
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                {grabando ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-                                                        <span className="text-red-400 font-bold text-sm">
-                                                            Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEGUNDOS}s
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-slate-500 text-sm">Graba tu instrucción en voz</p>
-                                                )}
-                                                {grabando && (
-                                                    <div className="mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden w-40">
-                                                        <div
-                                                            className="h-full bg-red-500 rounded-full transition-all"
-                                                            style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEGUNDOS) * 100}%` }}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <button type="button"
-                                                onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-                                                className={`p-3 rounded-full transition-colors ${grabando ? 'bg-red-500 hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-500'}`}>
-                                                {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
-                                                <CheckCircle className="w-4 h-4" />
-                                                Audio listo ({segundosGrabacion}s)
-                                            </div>
-                                            <button type="button" onClick={limpiarAudio}
-                                                className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
-                                                <RefreshCw className="w-3 h-3" /> Regrabar
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                                <p className="text-xs text-slate-600 mt-1">Si grabas audio, tiene prioridad sobre el texto.</p>
-                            </div>
-
-                            {/* Botón de envío */}
-                            <button type="submit"
-                                disabled={editando || sinCreditos || (!instruccion.trim() && !audioBlob)}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
-                                {editando ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios con IA...</>
-                                ) : sinCreditos ? (
-                                    <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
-                                ) : (
-                                    <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
+                                {creditosBajos && (
+                                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
+                                        ⚠️ Te quedan <strong>{userData?.creditos_restantes}</strong> créditos.{' '}
+                                        <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
+                                            Contáctanos
+                                        </a>{' '}para recargar.
+                                    </div>
                                 )}
-                            </button>
-                        </form>
+
+                                {exito && (
+                                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
+                                        <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
+                                    </div>
+                                )}
+
+                                {error && (
+                                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
+                                    </div>
+                                )}
+
+                                {transcripcion && (
+                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
+                                        🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleEditar} className="space-y-4">
+                                    {/* Instrucción de texto */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                            ✍️ Instrucción en texto
+                                        </label>
+                                        <textarea
+                                            value={instruccion}
+                                            onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
+                                            placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
+                                            rows={4}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
+                                        />
+                                        <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
+                                    </div>
+
+                                    {/* Grabación de audio */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                            🎤 Instrucción por audio (máx {MAX_AUDIO_SEGUNDOS}s)
+                                        </label>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                            {!audioBlob ? (
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        {grabando ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                                                                <span className="text-red-400 font-bold text-sm">
+                                                                    Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEGUNDOS}s
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-slate-500 text-sm">Graba tu instrucción en voz</p>
+                                                        )}
+                                                        {grabando && (
+                                                            <div className="mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden w-40">
+                                                                <div
+                                                                    className="h-full bg-red-500 rounded-full transition-all"
+                                                                    style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEGUNDOS) * 100}%` }}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <button type="button"
+                                                        onClick={grabando ? detenerGrabacion : iniciarGrabacion}
+                                                        className={`p-3 rounded-full transition-colors ${grabando ? 'bg-red-500 hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-500'}`}>
+                                                        {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                        Audio listo ({segundosGrabacion}s)
+                                                    </div>
+                                                    <button type="button" onClick={limpiarAudio}
+                                                        className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
+                                                        <RefreshCw className="w-3 h-3" /> Regrabar
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-slate-600 mt-1">Si grabas audio, tiene prioridad sobre el texto.</p>
+                                    </div>
+
+                                    {/* Botón de envío */}
+                                    <button type="submit"
+                                        disabled={editando || sinCreditos || (!instruccion.trim() && !audioBlob)}
+                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                                        {editando ? (
+                                            <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios con IA...</>
+                                        ) : sinCreditos ? (
+                                            <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
+                                        ) : (
+                                            <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
+                                        )}
+                                    </button>
+                                </form>
+                            </>
+                        ) : (
+                            <div className="space-y-4">
+                                <h3 className="font-bold text-lg mb-4 text-white">Tus últimos diseños</h3>
+                                {(!userData?.historial_disenos || userData.historial_disenos.length === 0) ? (
+                                    <div className="text-center p-6 bg-white/5 border border-white/10 rounded-xl">
+                                        <Code className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                                        <p className="text-slate-500 text-sm">Aún no hay diseños en el historial.</p>
+                                        <p className="text-slate-600 text-xs mt-1">Has un cambio para guardar el actual.</p>
+                                    </div>
+                                ) : (
+                                    userData.historial_disenos.map((diseno, index) => (
+                                        <div
+                                            key={diseno.id}
+                                            onClick={() => {
+                                                setSelectedDesignId(diseno.id);
+                                                setUserData(prev => prev ? { ...prev, codigo_actual: diseno.codigo_actual } : null);
+                                            }}
+                                            className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedDesignId === diseno.id || (!selectedDesignId && index === 0) ? 'bg-blue-600/20 border-blue-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                        >
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">
+                                                    {index === 0 ? 'Diseño más reciente' : `Versión anterior`}
+                                                </span>
+                                                <span className="text-[10px] bg-black/30 px-2 py-0.5 rounded text-slate-400">
+                                                    {new Date(diseno.fecha).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-slate-300 line-clamp-3 italic">
+                                                "{diseno.descripcion}"
+                                            </p>
+                                            {(selectedDesignId === diseno.id || (!selectedDesignId && index === 0)) && (
+                                                <div className="mt-3 flex items-center gap-2 text-xs text-green-400 font-semibold bg-green-500/10 p-2 rounded-lg border border-green-500/20">
+                                                    <Eye className="w-4 h-4" /> Diseñando esta versión
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
 
                         <div className="mt-6 pt-6 border-t border-white/10">
                             <a href="https://wa.me/573123299053" target="_blank"
-                                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors text-sm">
-                                📱 Llevar a producción · Hablar con asesor
+                                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                                📱 Llevar a producción · Contactar
                             </a>
                         </div>
                     </div>

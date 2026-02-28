@@ -127,6 +127,14 @@ export async function POST(req: NextRequest) {
                 const emailKey = email.toLowerCase().trim().replace(/[.#$[\\]]/g, '_');
                 const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
                 const existing = await docRef.get();
+
+                const newDesign = {
+                  id: Date.now().toString(),
+                  codigo_actual: html,
+                  descripcion: descripcion.substring(0, 200), // Guardar un extracto de la desc original
+                  fecha: new Date().toISOString(),
+                };
+
                 if (!existing.exists) {
                   await docRef.set({
                     nombre_negocio: descripcion.substring(0, 60),
@@ -134,12 +142,30 @@ export async function POST(req: NextRequest) {
                     email: email.toLowerCase().trim(),
                     descripcion,
                     codigo_actual: html,
+                    historial_disenos: [newDesign],
                     creditos_restantes: 15,
                     fecha_creacion: new Date().toISOString(),
                   });
                 } else {
+                  const data = existing.data() || {};
+                  let historial = data.historial_disenos || [];
+
+                  // Migración silenciosa: si no había historial, registrar el diseño vigente primero
+                  if (historial.length === 0 && data.codigo_actual) {
+                    historial.push({
+                      id: (Date.now() - 1000).toString(),
+                      codigo_actual: data.codigo_actual,
+                      descripcion: data.descripcion ? data.descripcion.substring(0, 200) : 'Diseño anterior',
+                      fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString()
+                    });
+                  }
+
+                  historial.unshift(newDesign);
+                  historial = historial.slice(0, 8); // Mantener un máximo de 8 diseños recientes
+
                   await docRef.update({
                     codigo_actual: html,
+                    historial_disenos: historial,
                     ultima_generacion: new Date().toISOString(),
                   });
                 }

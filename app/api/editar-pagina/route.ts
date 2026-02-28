@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { email, instruccion_texto, audio_base64 } = await req.json();
+        const { email, instruccion_texto, audio_base64, id_diseno_base } = await req.json();
 
         if (!email) {
             return NextResponse.json({ error: 'Se requiere el correo electrónico.' }, { status: 400 });
@@ -53,7 +53,15 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const codigoActual = userData.codigo_actual || '';
+        // Si el usuario seleccionó un diseño antiguo del historial, lo buscamos.
+        let codigoActual = userData.codigo_actual || '';
+        if (id_diseno_base && userData.historial_disenos) {
+            const disenoAntiguo = userData.historial_disenos.find((d: any) => d.id === id_diseno_base);
+            if (disenoAntiguo) {
+                codigoActual = disenoAntiguo.codigo_actual;
+            }
+        }
+
         const nuevosCreditos = creditos - 3;
 
         // ── Transcripción de audio (si aplica) ──
@@ -127,8 +135,30 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                 const nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
                 const dbForUpdate = getAdminDbSafe();
                 if (dbForUpdate) {
+                    let historial = userData.historial_disenos || [];
+
+                    // Migración silenciosa
+                    if (historial.length === 0 && userData.codigo_actual) {
+                        historial.push({
+                            id: (Date.now() - 1000).toString(),
+                            codigo_actual: userData.codigo_actual,
+                            descripcion: userData.descripcion || 'Diseño base',
+                            fecha: userData.ultima_edicion || userData.fecha_creacion || new Date().toISOString()
+                        });
+                    }
+
+                    historial.unshift({
+                        id: Date.now().toString(),
+                        codigo_actual: nuevoHtml,
+                        descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición por voz/texto',
+                        fecha: new Date().toISOString()
+                    });
+
+                    historial = historial.slice(0, 8); // Guardar historial de 8 maximo
+
                     await dbForUpdate.collection('usuarios_leads').doc(docRef.id).update({
                         codigo_actual: nuevoHtml,
+                        historial_disenos: historial,
                         creditos_restantes: nuevosCreditos,
                         ultima_edicion: new Date().toISOString(),
                         instruccion_texto: instruccion_texto || '',
