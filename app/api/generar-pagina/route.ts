@@ -31,23 +31,17 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
 Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. ¡ATENCIÓN! NO generes páginas exclusivamente en color oscuro (Dark Mode) por defecto. Los colores, la paleta y el estilo visual general deben estar ESTRICTAMENTE CONDICIONADOS por las indicaciones del texto, el audio descriptivo o el estilo de las imágenes adjuntas. Elije creativamente la paleta que mejor represente la actividad del negocio, incorporando siempre secciones de "Social proof" al estilo del diseño premium.
 
-3. IMÁGENES ÚNICAS Y STOCK DE VIDEOS (UNSPLASH + NANO BANANA 2):
-¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar color gradients genéricos o placeholders simples. 
-Debes integrar imágenes fotográficas reales de alta calidad (vía Unsplash) O videos de stock ("Stick de vids") para fondos y hero sections.
+3. IMÁGENES PROFESIONALES (UNSPLASH - PROVEEDOR ÚNICO):
+¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar color gradients genéricos, placeholders o imágenes generadas por IA. 
+Debes integrar EXCLUSIVAMENTE imágenes fotográficas reales de alta calidad de Unsplash O videos de stock ("Stick de vids") para fondos y hero sections.
 
-**PARA IMÁGENES (SISTEMA PRIMARIO + RESPALDO AI):**
-Tu **PRIMERA OPCIÓN SIEMPRE** debe ser Unsplash.
+**REGLA DE PROVEEDOR ÚNICO:**
+Tu **ÚNICO PROVEEDOR** de imágenes debe ser Unsplash. NO uses fallbacks a Pollinations, Nano Banana, LoremFlickr ni ningún otro.
 Usa esta estructura EXACTA para el atributo 'src' de la imagen:
 https://images.unsplash.com/featured/1600x900/?[palabras-clave-en-ingles-separadas-por-coma]
 
-**SISTEMA DE RESPALDO INTELIGENTE (FALLBACK AI - NANO BANANA 2):**
-Como Unsplash puede no tener la imagen exacta, es **OBLIGATORIO Y ESTRICTO** que TODAS las etiquetas <img> incluyan un atributo 'onerror' que cargue una imagen generada por IA (Nano Banana 2 / Pollinations) como respaldo.
-El atributo 'onerror' debe tener esta estructura EXACTA:
-onerror="this.onerror=null; this.src='https://image.pollinations.ai/prompt/[descripcion-detallada-en-ingles]?width=1600&height=900&nologo=true';"
-¡CRÍTICO! EN LA URL DE RESPALDO AI, REEMPLAZA LOS ESPACIOS EN BLANCO EXCLUSIVAMENTE POR GUIONES MEDIOS ('-').
-
 **Ejemplo Perfecto de etiqueta <img>:**
-<img src="https://images.unsplash.com/featured/1600x900/?modern,coffee,shop" onerror="this.onerror=null; this.src='https://image.pollinations.ai/prompt/photorealistic-modern-high-end-coffee-shop-interior-cinematic-lighting?width=1600&height=900&nologo=true';" alt="Interior Cafe" class="...">
+<img src="https://images.unsplash.com/featured/1600x900/?modern,coffee,shop" alt="Interior Cafe" class="...">
 
 PARA VIDEOS DE FONDOS (Stock de videos / Stick de vids):
 Puedes usar libremente estos enlaces de videos MP4 de alta calidad libres de derechos como fondo de Hero sections o bloques divisorios (usa la etiqueta <video autoplay loop muted playsinline class="..."></video>):
