@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { email, instruccion_texto, audio_base64, id_diseno_base } = await req.json();
+        const { email, instruccion_texto, id_diseno_base } = await req.json();
 
         if (!email) {
             return NextResponse.json({ error: 'Se requiere el correo electrónico.' }, { status: 400 });
@@ -64,24 +64,8 @@ export async function POST(req: NextRequest) {
 
         const nuevosCreditos = creditos - 3;
 
-        // ── Transcripción de audio (si aplica) ──
-        let transcripcion_audio = '';
-        if (audio_base64 && apiKey) {
-            try {
-                const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-                const audioResult = await model.generateContent([
-                    { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
-                    { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
-                ]);
-                transcripcion_audio = audioResult.response.text().trim();
-            } catch (err) {
-                console.warn('Error transcribiendo audio:', err);
-            }
-        }
-
         // ── Construir instrucción final ──
-        const instruccionFinal = transcripcion_audio || instruccion_texto || '';
+        const instruccionFinal = instruccion_texto || '';
         if (!instruccionFinal.trim()) {
             return NextResponse.json({ error: 'No se recibió ninguna instrucción de edición.' }, { status: 400 });
         }
@@ -95,9 +79,7 @@ Se te entrega el código HTML actual de una landing page y una instrucción del 
 CÓDIGO HTML ACTUAL:
 ${codigoActual}
 
-INSTRUCCIÓN DE AUDIO (PRIORIDAD ABSOLUTA): "${transcripcion_audio}"
-INSTRUCCIÓN DE TEXTO: "${instruccion_texto}"
-(Nota: Si existe instrucción de audio y contradice a la de texto, DEBES obedecer ÚNICAMENTE al audio. Si son complementarias, úsalas juntas. Si solo hay una, usa esa).
+INSTRUCCIÓN DE CLIENTE: "${instruccion_texto}"
 
 CRÉDITOS RESTANTES DEL CLIENTE (después de esta edición): ${nuevosCreditos}
 
@@ -150,7 +132,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                     historial.unshift({
                         id: Date.now().toString(),
                         codigo_actual: nuevoHtml,
-                        descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición por voz/texto',
+                        descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición de texto',
                         fecha: new Date().toISOString()
                     });
 
@@ -162,7 +144,6 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                         creditos_restantes: nuevosCreditos,
                         ultima_edicion: new Date().toISOString(),
                         instruccion_texto: instruccion_texto || '',
-                        transcripcion_audio: transcripcion_audio || '',
                     });
                 }
             },
@@ -171,7 +152,6 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
         // Retornamos el stream. Adicionalmente, podríamos retornar cabeceras extra si se necesitan.
         return result.toTextStreamResponse({
             headers: {
-                'x-transcripcion-audio': Buffer.from(transcripcion_audio).toString('base64'),
                 'x-creditos-restantes': nuevosCreditos.toString()
             }
         });

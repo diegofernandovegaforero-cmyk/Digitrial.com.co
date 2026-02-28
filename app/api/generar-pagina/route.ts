@@ -68,33 +68,15 @@ Todos los scripts y estilos deben ir dentro.
 
 export async function POST(req: NextRequest) {
   try {
-    const { descripcion, nombre_contacto, email, imagenes_base64, audio_base64 } = await req.json();
+    const { descripcion, nombre_contacto, email, imagenes_base64 } = await req.json();
 
-    if ((!descripcion || descripcion.trim().length < 10) && !audio_base64) {
+    if (!descripcion || descripcion.trim().length < 10) {
       return NextResponse.json({ error: 'Faltan campos requeridos o descripción muy corta' }, { status: 400 });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // ── Transcripción de audio (si aplica) ──
-    let transcripcion_audio = '';
-    if (audio_base64 && apiKey) {
-      try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const transcribeModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-        const audioResult = await transcribeModel.generateContent([
-          { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
-          { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
-        ]);
-        transcripcion_audio = audioResult.response.text().trim();
-      } catch (err) {
-        console.warn('Error transcribiendo audio inicial:', err);
-      }
-    }
-
-    const inputUsuario = transcripcion_audio
-      ? `[AUDIO TRANSCRITO]: "${transcripcion_audio}". ${descripcion || ''}`
-      : descripcion;
+    const inputUsuario = descripcion;
 
     if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
       const fallbackHtml = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);

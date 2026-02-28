@@ -153,50 +153,6 @@ function DisenaPageContent() {
     const [error, setError] = useState('');
     const [cookiesAccepted, setCookiesAccepted] = useState<boolean | null>(null);
 
-    // Audio recording
-    const MAX_AUDIO_SEG = 25;
-    const MIN_CHARS_PRODUCTOS = 50;
-    const MAX_CHARS_PRODUCTOS = 500;
-    const [grabando, setGrabando] = useState(false);
-    const [segundosGrabacion, setSegundosGrabacion] = useState(0);
-    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
-
-    const iniciarGrabacion = useCallback(async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mr = new MediaRecorder(stream);
-            mediaRecorderRef.current = mr;
-            audioChunksRef.current = [];
-            mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-            mr.onstop = () => {
-                setAudioBlob(new Blob(audioChunksRef.current, { type: 'audio/webm' }));
-                stream.getTracks().forEach(t => t.stop());
-            };
-            mr.start();
-            setGrabando(true);
-            setSegundosGrabacion(0);
-            audioIntervalRef.current = setInterval(() => {
-                setSegundosGrabacion(prev => {
-                    if (prev >= MAX_AUDIO_SEG - 1) { detenerGrabacion(); return MAX_AUDIO_SEG; }
-                    return prev + 1;
-                });
-            }, 1000);
-        } catch { setError('No se pudo acceder al micrófono. Verifica los permisos.'); }
-    }, []);
-
-    const detenerGrabacion = useCallback(() => {
-        if (mediaRecorderRef.current && grabando) {
-            mediaRecorderRef.current.stop();
-            setGrabando(false);
-            if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
-        }
-    }, [grabando]);
-
-    const limpiarAudio = () => { setAudioBlob(null); setSegundosGrabacion(0); };
-
     useEffect(() => {
         const saved = localStorage.getItem('digitrial_cookies');
         setCookiesAccepted(saved === 'accepted' ? true : saved === 'rejected' ? false : null);
@@ -223,7 +179,7 @@ function DisenaPageContent() {
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
-        if (!audioBlob && e.dataTransfer.files) {
+        if (e.dataTransfer.files) {
             const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
             const newImages = files.map(f => ({ url: URL.createObjectURL(f), file: f }));
             setImagenesAdjuntas(prev => [...prev, ...newImages].slice(0, 3));
@@ -248,8 +204,10 @@ function DisenaPageContent() {
         });
     };
 
+    const MIN_CHARS_PRODUCTOS = 50;
+    const MAX_CHARS_PRODUCTOS = 500;
     const [descripcion, setDescripcion] = useState('');
-    const productosValido = (descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS) || audioBlob !== null;
+    const productosValido = (descripcion.length >= MIN_CHARS_PRODUCTOS && descripcion.length <= MAX_CHARS_PRODUCTOS);
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -260,22 +218,12 @@ function DisenaPageContent() {
         try {
             const base64Images = await Promise.all(imagenesAdjuntas.map(img => getBase64(img.file)));
 
-            let audio_base64 = '';
-            if (audioBlob) {
-                const arrayBuffer = await audioBlob.arrayBuffer();
-                const uint8Array = new Uint8Array(arrayBuffer);
-                let binary = '';
-                uint8Array.forEach(b => binary += String.fromCharCode(b));
-                audio_base64 = btoa(binary);
-            }
-
             const res = await fetch('/api/generar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     descripcion,
                     imagenes_base64: base64Images,
-                    audio_base64,
                     email: authUser?.email,
                     nombre_contacto: authUser?.displayName || ''
                 }),
@@ -462,20 +410,17 @@ function DisenaPageContent() {
                                 >
                                     <textarea
                                         name="descripcion"
-                                        value={audioBlob ? '' : descripcion}
-                                        onChange={e => !audioBlob && setDescripcion(e.target.value.slice(0, MAX_CHARS_PRODUCTOS))}
-                                        disabled={!!audioBlob}
+                                        value={descripcion}
+                                        onChange={e => setDescripcion(e.target.value.slice(0, MAX_CHARS_PRODUCTOS))}
                                         rows={8}
                                         maxLength={MAX_CHARS_PRODUCTOS}
-                                        placeholder={audioBlob ? '' : `Cuéntanos tu idea, o arrastra imágenes aquí (ej: capturas de pantalla) para diseñar... (mín. ${MIN_CHARS_PRODUCTOS} caracteres)`}
-                                        className={`w-full bg-white/10 border rounded-xl px-4 py-3 pb-16 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm ${audioBlob
-                                            ? 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20'
-                                            : 'border-white/20 focus:border-blue-500 focus:ring-blue-500/20'
-                                            } ${isDragging ? 'opacity-50' : ''}`}
+                                        placeholder={`Cuéntanos tu idea, o arrastra imágenes aquí (ej: capturas de pantalla) para diseñar... (mín. ${MIN_CHARS_PRODUCTOS} caracteres)`}
+                                        className={`w-full bg-white/10 border rounded-xl px-4 py-3 pb-16 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition resize-none text-sm border-white/20 focus:border-blue-500 focus:ring-blue-500/20 ${isDragging ? 'opacity-50' : ''}`}
                                     />
 
                                     {/* Preview Imágenes Adjuntas */}
-                                    {imagenesAdjuntas.length > 0 && !audioBlob && (
+                                    {/* Preview Imágenes Adjuntas */}
+                                    {imagenesAdjuntas.length > 0 && (
                                         <div className="absolute bottom-12 left-3 right-3 flex gap-2 overflow-x-auto pb-1">
                                             {imagenesAdjuntas.map((img, idx) => (
                                                 <div key={idx} className="relative w-12 h-12 rounded-lg border border-white/20 overflow-hidden flex-shrink-0 group">
@@ -489,26 +434,10 @@ function DisenaPageContent() {
                                         </div>
                                     )}
 
-                                    {audioBlob && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-green-900/30 border border-green-500/40">
-                                            <div className="flex items-center gap-2 text-green-400 font-semibold text-sm">
-                                                <CheckCircle className="w-5 h-5" />
-                                                Audio grabado ({segundosGrabacion}s) ✅
-                                            </div>
-                                            <button type="button" onClick={limpiarAudio}
-                                                className="mt-2 text-xs text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1">
-                                                <RefreshCw className="w-3 h-3" /> Eliminar y escribir
-                                            </button>
-                                        </div>
-                                    )}
-
                                     <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between pointer-events-none">
-                                        {!audioBlob && (
-                                            <span className={`text-xs pointer-events-none ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-600'}`}>
-                                                {descripcion.length >= MIN_CHARS_PRODUCTOS ? '✅' : ''} {descripcion.length}/{MAX_CHARS_PRODUCTOS}
-                                            </span>
-                                        )}
-                                        {audioBlob && <span />}
+                                        <span className={`text-xs pointer-events-none ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'text-green-400 font-semibold' : 'text-slate-600'}`}>
+                                            {descripcion.length >= MIN_CHARS_PRODUCTOS ? '✅' : ''} {descripcion.length}/{MAX_CHARS_PRODUCTOS}
+                                        </span>
 
                                         <div className="flex gap-2">
                                             <input
@@ -518,57 +447,29 @@ function DisenaPageContent() {
                                                 className="hidden"
                                                 ref={fileInputRef}
                                                 onChange={handleImageSelect}
-                                                disabled={!!audioBlob || imagenesAdjuntas.length >= 3}
+                                                disabled={imagenesAdjuntas.length >= 3}
                                             />
                                             <button type="button"
                                                 onClick={() => fileInputRef.current?.click()}
-                                                disabled={!!audioBlob || imagenesAdjuntas.length >= 3}
+                                                disabled={imagenesAdjuntas.length >= 3}
                                                 title="Adjuntar capturas de pantalla o referencias (Máx. 3)"
-                                                className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${audioBlob || imagenesAdjuntas.length >= 3
+                                                className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${imagenesAdjuntas.length >= 3
                                                     ? 'bg-white/5 text-slate-500 cursor-not-allowed'
                                                     : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
                                                     }`}>
                                                 <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
-                                            </button>
-
-                                            <button type="button"
-                                                onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-                                                disabled={!!audioBlob || isDragging}
-                                                title={grabando ? 'Detener grabación' : `Grabar audio (hasta ${MAX_AUDIO_SEG}s)`}
-                                                className={`pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${grabando
-                                                    ? 'bg-red-500 text-white animate-pulse'
-                                                    : audioBlob
-                                                        ? 'bg-green-600/40 text-green-300 cursor-not-allowed'
-                                                        : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'
-                                                    }`}>
-                                                {grabando ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                                                {grabando ? `${segundosGrabacion}s` : '🎤 Audio'}
                                             </button>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Barra de progreso de caracteres */}
-                                {!audioBlob && (
-                                    <div className="mt-1.5 h-1 bg-slate-700 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
-                                            style={{ width: `${Math.min((descripcion.length / MAX_CHARS_PRODUCTOS) * 100, 100)}%` }}
-                                        />
-                                    </div>
-                                )}
-
-                                {grabando && (
-                                    <div className="mt-2">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                                            <span className="text-red-400 text-xs font-semibold">Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEG}s</span>
-                                        </div>
-                                        <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
-                                            <div className="h-full bg-red-500 rounded-full transition-all" style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEG) * 100}%` }} />
-                                        </div>
-                                    </div>
-                                )}
+                                <div className="mt-1.5 h-1 bg-slate-700 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full transition-all duration-300 ${descripcion.length >= MIN_CHARS_PRODUCTOS ? 'bg-green-500' : 'bg-blue-500'}`}
+                                        style={{ width: `${Math.min((descripcion.length / MAX_CHARS_PRODUCTOS) * 100, 100)}%` }}
+                                    />
+                                </div>
 
                                 {/* ── URL HINT NOTE ── */}
                                 <div className="mt-3 flex items-start gap-2 text-xs text-slate-500 border-t border-white/5 pt-3">
