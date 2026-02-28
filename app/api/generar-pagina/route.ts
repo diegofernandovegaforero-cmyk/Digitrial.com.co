@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     if (audio_base64 && apiKey) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const transcribeModel = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+        const transcribeModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         const audioResult = await transcribeModel.generateContent([
           { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
           { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       }
 
       const result = streamText({
-        model: customGoogle('gemini-1.5-flash'),
+        model: customGoogle('gemini-2.5-flash'),
         messages: [{ role: 'user', content: userContent }],
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente

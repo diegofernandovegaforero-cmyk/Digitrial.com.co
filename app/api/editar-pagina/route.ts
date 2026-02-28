@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         if (audio_base64 && apiKey) {
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+                const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
                 const audioResult = await model.generateContent([
                     { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
                     { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
@@ -129,7 +129,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
         });
 
         const result = streamText({
-            model: customGoogle('gemini-1.5-pro'),
+            model: customGoogle('gemini-2.5-flash'),
             prompt: promptEdicion,
             onFinish: async ({ text }) => {
                 const nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
