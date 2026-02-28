@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { getAdminDbSafe } from '@/lib/firebase-admin';
@@ -75,6 +74,11 @@ export async function POST(req: NextRequest) {
 Eres el Desarrollador Front-End Senior de Digitrial centro de soluciones.
 
 Se te entrega el código HTML actual de una landing page y una instrucción del cliente para modificarla.
+
+IMPORTANTE - REGLA DE IMÁGENES:
+Si vas a agregar o reemplazar imágenes, está ESTRICTAMENTE PROHIBIDO usar Unsplash, Pollinations u otros. Tu ÚNICO proveedor de imágenes es nuestro proxy interno de Pexels.
+Usa EXACTAMENTE esta estructura para el 'src' de la imagen:
+<img src="/api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]" alt="..." class="...">
 
 CÓDIGO HTML ACTUAL:
 ${codigoActual}

@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, CheckCircle, Loader2, Mic, MicOff, RefreshCw, Link2, ImagePlus, X } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Firebase Admin - solo importar si las variables están configuradas
 const getAdminDb = async () => {
@@ -31,17 +30,17 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
 Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. ¡ATENCIÓN! NO generes páginas exclusivamente en color oscuro (Dark Mode) por defecto. Los colores, la paleta y el estilo visual general deben estar ESTRICTAMENTE CONDICIONADOS por las indicaciones del texto, el audio descriptivo o el estilo de las imágenes adjuntas. Elije creativamente la paleta que mejor represente la actividad del negocio, incorporando siempre secciones de "Social proof" al estilo del diseño premium.
 
-3. IMÁGENES PROFESIONALES (UNSPLASH - PROVEEDOR ÚNICO):
+3. IMÁGENES PROFESIONALES (PEXELS - PROVEEDOR ÚNICO):
 ¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar color gradients genéricos, placeholders o imágenes generadas por IA. 
-Debes integrar EXCLUSIVAMENTE imágenes fotográficas reales de alta calidad de Unsplash O videos de stock ("Stick de vids") para fondos y hero sections.
+Debes integrar EXCLUSIVAMENTE imágenes fotográficas reales de alta calidad usando nuestro proxy interno de Pexels O videos de stock ("Stick de vids") para fondos y hero sections.
 
 **REGLA DE PROVEEDOR ÚNICO:**
-Tu **ÚNICO PROVEEDOR** de imágenes debe ser Unsplash. NO uses fallbacks a Pollinations, Nano Banana, LoremFlickr ni ningún otro.
+Tu **ÚNICO PROVEEDOR** de imágenes debe ser Pexels usando nuestro endpoint local. NO uses Unsplash, Pollinations, Nano Banana, ni LoremFlickr.
 Usa esta estructura EXACTA para el atributo 'src' de la imagen:
-https://images.unsplash.com/featured/1600x900/?[palabras-clave-en-ingles-separadas-por-coma]
+/api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]
 
 **Ejemplo Perfecto de etiqueta <img>:**
-<img src="https://images.unsplash.com/featured/1600x900/?modern,coffee,shop" alt="Interior Cafe" class="...">
+<img src="/api/pexels?q=modern+coffee+shop" alt="Interior Cafe" class="...">
 
 PARA VIDEOS DE FONDOS (Stock de videos / Stick de vids):
 Puedes usar libremente estos enlaces de videos MP4 de alta calidad libres de derechos como fondo de Hero sections o bloques divisorios (usa la etiqueta <video autoplay loop muted playsinline class="..."></video>):
