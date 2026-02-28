@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Firebase Admin - solo importar si las variables están configuradas
 const getAdminDb = async () => {
@@ -76,14 +77,33 @@ Todos los scripts y estilos deben ir dentro.
 
 export async function POST(req: NextRequest) {
   try {
-    const { descripcion, nombre_contacto, email, imagenes_base64 } = await req.json();
+    const { descripcion, nombre_contacto, email, imagenes_base64, audio_base64 } = await req.json();
 
-    if (!descripcion || descripcion.trim().length < 10) {
-      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    if ((!descripcion || descripcion.trim().length < 10) && !audio_base64) {
+      return NextResponse.json({ error: 'Faltan campos requeridos o descripción muy corta' }, { status: 400 });
     }
 
-    const inputUsuario = descripcion;
     const apiKey = process.env.GEMINI_API_KEY;
+
+    // ── Transcripción de audio (si aplica) ──
+    let transcripcion_audio = '';
+    if (audio_base64 && apiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const transcribeModel = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+        const audioResult = await transcribeModel.generateContent([
+          { text: 'Transcribe exactamente el siguiente audio en español. Solo devuelve el texto transcrito, sin explicaciones:' },
+          { inlineData: { mimeType: 'audio/webm', data: audio_base64 } },
+        ]);
+        transcripcion_audio = audioResult.response.text().trim();
+      } catch (err) {
+        console.warn('Error transcribiendo audio inicial:', err);
+      }
+    }
+
+    const inputUsuario = transcripcion_audio
+      ? `[AUDIO TRANSCRITO]: "${transcripcion_audio}". ${descripcion || ''}`
+      : descripcion;
 
     if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
       const fallbackHtml = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);

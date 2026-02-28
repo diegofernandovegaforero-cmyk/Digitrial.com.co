@@ -259,12 +259,23 @@ function DisenaPageContent() {
         const interval = setInterval(() => { idx = (idx + 1) % LOADING_MESSAGES.length; setLoadingMsg(idx); }, 2200);
         try {
             const base64Images = await Promise.all(imagenesAdjuntas.map(img => getBase64(img.file)));
+
+            let audio_base64 = '';
+            if (audioBlob) {
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+                let binary = '';
+                uint8Array.forEach(b => binary += String.fromCharCode(b));
+                audio_base64 = btoa(binary);
+            }
+
             const res = await fetch('/api/generar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     descripcion,
                     imagenes_base64: base64Images,
+                    audio_base64,
                     email: authUser?.email,
                     nombre_contacto: authUser?.displayName || ''
                 }),
