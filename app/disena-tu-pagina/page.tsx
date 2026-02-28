@@ -14,7 +14,7 @@ const LOADING_MESSAGES = [
     'Diseñando el Hero Section premium...',
     'Aplicando estilo visual y paleta de colores...',
     'Creando tarjetas de servicios con animaciones...',
-    'Seleccionando imágenes profesionales de Unsplash...',
+    'Seleccionando imágenes estéticas de Pexels...',
     'Configurando animaciones AOS al scroll...',
     'Integrando Google Fonts premium...',
     'Optimizando el embudo de ventas...',
