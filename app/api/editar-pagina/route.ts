@@ -127,7 +127,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                 const nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
                 const dbForUpdate = getAdminDbSafe();
                 if (dbForUpdate) {
-                    await dbForUpdate.collection('usuarios_leads').doc(docId).update({
+                    await dbForUpdate.collection('usuarios_leads').doc(docRef.id).update({
                         codigo_actual: nuevoHtml,
                         creditos_restantes: nuevosCreditos,
                         ultima_edicion: new Date().toISOString(),

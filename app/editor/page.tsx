@@ -213,9 +213,11 @@ function EditorContent() {
                     const { done, value } = await reader.read();
                     if (done) break;
                     htmlTemp += decoder.decode(value, { stream: true });
-                    const cleanHtml = htmlTemp.replace(/\`\`\`html\n?/gi, '').replace(/\`\`\`\n?/g, '');
-                    setUserData(prev => prev ? { ...prev, codigo_actual: cleanHtml } : null);
                 }
+
+                // Actualizar el DOM SOLO al final para evitar congelar el navegador (re-renders masivos del iframe)
+                const cleanHtml = htmlTemp.replace(/```html\n?/gi, '').replace(/```\n?/g, '');
+                setUserData(prev => prev ? { ...prev, codigo_actual: cleanHtml } : null);
 
                 setExito('¡Diseño actualizado! Los cambios ya están aplicados. 🎉');
                 setInstruccion('');
