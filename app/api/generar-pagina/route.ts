@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { streamText } from 'ai';
+import { google } from '@ai-sdk/google';
 
 // Firebase Admin - solo importar si las variables están configuradas
 const getAdminDb = async () => {
@@ -9,6 +10,8 @@ const getAdminDb = async () => {
   const { getAdminDbSafe } = await import('@/lib/firebase-admin');
   return getAdminDbSafe();
 };
+
+export const maxDuration = 60; // Permitir ejecución más larga en Vercel
 
 // ─── PROMPT MAESTRO DEFINITIVO ───────────────────────────────────────────────
 const buildPrompt = (input: string) => `
@@ -21,34 +24,37 @@ CONTEXTO DE ENTRADA DEL USUARIO:
 INSTRUCCIONES DE GENERACIÓN DE SITIO WEB DINÁMICO PREMIUM:
 
 1. ANÁLISIS E INFERENCIA:
-Procese la descripción del usuario. Infiere la actividad económica, los productos/servicios clave y el público objetivo. Si se proporciona una URL de referencia en la descripción, analícela profundamente (patrones de diseño, paleta, estructura).
-NO Clonar: Está estrictamente prohibido crear una copia idéntica del sitio de referencia.
-Recontextualización: Extraer inteligentemente los patrones y conceptos de diseño y adaptarlos de manera creativa para que sirvan y se alineen perfectamente con la actividad económica y los detalles específicos del usuario de DIGITRIAL. El diseño resultante debe ser inspirado por la referencia pero enfocado en el usuario de DIGITRIAL. NUNCA uses "Lorem Ipsum".
+Procese la descripción del usuario. Infiere la actividad económica, los productos/servicios clave y el público objetivo. Adapta creativamente el diseño para que sirva y se alinee perfectamente con la actividad económica y los detalles específicos del usuario de DIGITRIAL. NUNCA uses "Lorem Ipsum".
 
 2. DISEÑO DINÁMICO Y MOVIMIENTO (CRÍTICO):
-Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Esto significa implementar movimientos y animaciones modernas en todo el sitio para dar vida a la página (efectos de paralaje, scroll-triggered animations vía AOS.js o GSAP desde CDN, microinteracciones visuales fluidas). El objetivo es una experiencia fluida y viva.
-Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. Se prefiere encarecidamente "Premium Dark Mode" con brillos "glow", incorporando secciones de "Social proof" y direct copy. ¡No crear fondos de color sólido simples como recurso principal!
+Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
+Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. Aplica "Premium Dark Mode" con brillos morados y azules "glow", incorporando secciones de "Social proof" y direct copy, al estilo del diseño premium.
 
-3. IMÁGENES Y CONTENIDO (100% GRATIS POR IA):
-Integración de Imágenes: Es OBLIGATORIO usar imágenes generadas por IA en tiempo real sin costo usando la API de Pollinations. ¡NO uses source.unsplash.com porque está deprecado!
-Para cada imagen, construye una URL así: https://image.pollinations.ai/prompt/[descripcion_detallada_en_ingles]?width=[ancho]&height=[alto]&nologo=true
-Ejemplo para fondo de Hero: https://image.pollinations.ai/prompt/professional%20modern%20startup%20office%20with%20people%20working?width=1600&height=900&nologo=true
-Ejemplo para card de producto: https://image.pollinations.ai/prompt/delicious%20gourmet%20burger%20restaurant?width=600&height=400&nologo=true
-TODA sección principal, testimonios y sub-elemento (como cards de servicio) debe contener estas imágenes dinámicas. Describe la solicitud de imagen de forma muy detallada y en INGLÉS en la URL (separando las palabras con %20). Usa backdrop-filter: blur() (glassmorphism) para legibilidad de textos sobre ellas.
+3. IMÁGENES ÚNICAS Y FOTORREALISTAS (NANO BANANA 2 + POLLINATIONS):
+¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar imágenes estáticas de unsplash, color gradients genéricos o placeholders.
+Debes integrar fotorrealismo de alta calidad generado en tiempo real. 
+Usa esta estructura de URL para las imágenes, pero los prompts deben ser EXTREMADAMENTE detallados, enfocados en la actividad del usuario y fotorrealistas:
+https://image.pollinations.ai/prompt/[descripcion_detallada_en_ingles]?width=[ancho]&height=[alto]&nologo=true
+
+¡CRÍTICO! REEMPLAZA TODOS LOS ESPACIOS EN BLANCO EN LA DESCRIPCIÓN POR '%20' O GUIONES ('-'). NUNCA PERMITAS ESPACIOS EN BLANCO LITERALES EN EL ATRIBUTO SRC DE LA IMAGEN PORQUE SE ROMPERÁ.
+
+Ejemplo de prompt fotorrealista para Nano Banana 2: "Una fotografía macro, fotorrealista y de alta gama, de un grano de café perfectamente tostado en una finca boutique de Pitalito. El grano está centrado en una superficie oscura y texturizada, iluminado por un resplandor mágico y cálido, púrpura y azul, que emana desde el interior, proyectando una luz sutil. Esto crea una atmósfera premium y mística con un bokeh suave. El entorno es íntimo y exclusivo"
+Convierte ese tipo de descripción a inglés para la URL: https://image.pollinations.ai/prompt/macro%20photorealistic%20high-end%20photography%20of%20a%20perfectly%20roasted%20coffee%20bean%20in%20a%20boutique%20farm%20centered%20on%20a%20dark%20textured%20surface%20illuminated%20by%20a%20magical%20warm%20purple%20and%20blue%20glow%20emanating%20from%20within%20casting%20subtle%20light%20premium%20mystical%20atmosphere%20soft%20bokeh%20intimate%20exclusive%20setting?width=1600&height=900&nologo=true
 
 4. USO DE LENGUAJES DE PROGRAMACIÓN:
-Stack Moderno en un archivo: Dado el requerimiento técnico, debe simular un ecosistema completo (frontend interconectado) mediante HTML5, CSS avanzado, Tailwind via CDN y Vanilla JS / AOS.js via CDN <script>. El output debe estar optimizado y renderizado sin dependencias externas complejas.
+Simula un ecosistema completo mediante HTML5, Tailwind CSS via CDN, y Vanilla JS (y bibliotecas como GSAP/AOS via CDN). El output debe estar optimizado y renderizado en un solo archivo.
 
-5. IMPLEMENTACIÓN DE LA EXPERIENCIA DE CARGA INMERSIVA (CARGA DINÁMICA ABSOLUTAMENTE QUERIDA):
-Prioridad de Carga: Genere código que, al ejecutarse en el navegador, muestre PRIMERO una experiencia de carga inmersiva antes de renderizar el contenido principal.
-Icono Dinámico de DIGITRIAL: Incorporar el icono/nombre que debe ser animado con CSS puro (pulso, brillo).
-Contador de Porcentaje Dinámico: Implementar un contador porcentual numérico que avance del 0% al 100% progresivamente con JavaScript, simulando tiempos de renderizado y armado. Al alcanzar 100%, desaparecerá revelando la landing de manera fluida (fade out).
+5. IMPLEMENTACIÓN DE LA EXPERIENCIA DE CARGA INMERSIVA (OBLIGATORIO):
+Genere código que, al ejecutarse en el navegador, muestre PRIMERO una experiencia de carga inmersiva antes de renderizar el contenido principal.
+- Un icono dinámico y animado de Digitrial (con efecto de pulso o brillo, ej: un triángulo).
+- Un contador de porcentaje numérico que avance del 0% al 100% en tiempo real simulando el armado del sitio. Al llegar a 100%, desaparecerá revelando la landing de manera fluida (fade out).
+- Lógica de programación funcional en <script> para gestionar este contador dinámicamente.
 
 FORMATO DE SALIDA (ESTRICTO):
 Debes retornar UN ÚNICO ARCHIVO HTML COMPLETO.
 ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown. JAMÁS envuelvas tu respuesta en \`\`\`html ni \`\`\`. CERO explicaciones, preámbulos, ni saludos. Solo presenta el código.
 Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar EXACTAMENTE con </html>.
-Todo el CSS va en <style> y todo JS va en etiquetas <script> antes de cerrar el <body>.
+Todos los scripts y estilos deben ir dentro.
 `;
 
 export async function POST(req: NextRequest) {
@@ -59,60 +65,58 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
-    // Usar la descripción directamente como input
     const inputUsuario = descripcion;
-
     const apiKey = process.env.GEMINI_API_KEY;
-    let html: string;
 
     if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
-      html = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);
-    } else {
-      try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-        const result = await model.generateContent(buildPrompt(inputUsuario));
-        html = result.response.text()
-          .replace(/```html\n?/gi, '')
-          .replace(/```\n?/g, '')
-          .trim();
-      } catch (geminiError) {
-        console.warn('Gemini API falló, usando fallback:', geminiError);
-        html = buildFallbackHTML(descripcion.substring(0, 60), descripcion);
-      }
+      const fallbackHtml = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);
+      return NextResponse.json({ html: fallbackHtml });
     }
 
-    // Guardar lead en Firestore si Firebase y email están disponibles
-    if (email) {
-      try {
-        const adminDb = await getAdminDb();
-        if (adminDb) {
-          const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-          const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
-          const existing = await docRef.get();
-          if (!existing.exists) {
-            await docRef.set({
-              nombre_negocio: descripcion.substring(0, 60),
-              nombre_contacto: nombre_contacto || '',
-              email: email.toLowerCase().trim(),
-              descripcion,
-              codigo_actual: html,
-              creditos_restantes: 15,
-              fecha_creacion: new Date().toISOString(),
-            });
-          } else {
-            await docRef.update({
-              codigo_actual: html,
-              ultima_generacion: new Date().toISOString(),
-            });
+    try {
+      const result = streamText({
+        model: google('gemini-2.5-flash'),
+        prompt: buildPrompt(inputUsuario),
+        onFinish: async ({ text }) => {
+          // Limpiar markdown si el LLM no obedeció completamente
+          const html = text.replace(/\\`\\`\\`html\\n?/gi, '').replace(/\\`\\`\\`/g, '').trim();
+
+          if (email) {
+            try {
+              const adminDb = await getAdminDb();
+              if (adminDb) {
+                const emailKey = email.toLowerCase().trim().replace(/[.#$[\\]]/g, '_');
+                const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+                const existing = await docRef.get();
+                if (!existing.exists) {
+                  await docRef.set({
+                    nombre_negocio: descripcion.substring(0, 60),
+                    nombre_contacto: nombre_contacto || '',
+                    email: email.toLowerCase().trim(),
+                    descripcion,
+                    codigo_actual: html,
+                    creditos_restantes: 15,
+                    fecha_creacion: new Date().toISOString(),
+                  });
+                } else {
+                  await docRef.update({
+                    codigo_actual: html,
+                    ultima_generacion: new Date().toISOString(),
+                  });
+                }
+              }
+            } catch (fbErr) {
+              console.warn('Firebase no disponible:', fbErr);
+            }
           }
-        }
-      } catch (fbErr) {
-        console.warn('Firebase no disponible:', fbErr);
-      }
-    }
+        },
+      });
 
-    return NextResponse.json({ html });
+      return result.toTextStreamResponse();
+    } catch (geminiError) {
+      console.warn('Gemini API falló, usando fallback:', geminiError);
+      return NextResponse.json({ html: buildFallbackHTML(descripcion.substring(0, 60), descripcion) });
+    }
   } catch (error) {
     console.error('Error generando página:', error);
     return NextResponse.json({ error: 'Error generando la página' }, { status: 500 });

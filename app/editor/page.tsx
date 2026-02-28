@@ -161,15 +161,41 @@ function EditorContent() {
                 }),
             });
 
-            const data = await res.json();
-
             if (res.status === 402) {
                 setError('¡Créditos insuficientes! Habla con nosotros para recargar.');
-            } else if (data.error) {
-                setError(data.error);
-            } else {
+                setEditando(false);
+                return;
+            }
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                setError(errData.error || 'Error al guardar los cambios.');
+                setEditando(false);
+                return;
+            }
+
+            const transcripcionHeader = res.headers.get('x-transcripcion-audio');
+            if (transcripcionHeader) {
+                setTranscripcion(atob(transcripcionHeader));
+            }
+            const creditosHeader = res.headers.get('x-creditos-restantes');
+            if (creditosHeader && userData) {
+                setUserData(prev => prev ? { ...prev, creditos_restantes: parseInt(creditosHeader, 10) } : null);
+            }
+
+            if (res.body) {
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let htmlTemp = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    htmlTemp += decoder.decode(value, { stream: true });
+                    const cleanHtml = htmlTemp.replace(/\`\`\`html\n?/gi, '').replace(/\`\`\`\n?/g, '');
+                    setUserData(prev => prev ? { ...prev, codigo_actual: cleanHtml } : null);
+                }
+
                 setExito('¡Diseño actualizado! Los cambios ya están aplicados. 🎉');
-                if (data.transcripcion_audio) setTranscripcion(data.transcripcion_audio);
                 setInstruccion('');
                 limpiarAudio();
             }

@@ -220,13 +220,25 @@ function DisenaPageContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ descripcion }),
             });
-            const data = await res.json();
+
             clearInterval(interval);
-            if (data.html) {
-                setGeneratedHtml(data.html);
+
+            if (res.ok && res.body) {
                 setStep('preview');
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let htmlTemp = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    htmlTemp += decoder.decode(value, { stream: true });
+                    const cleanHtml = htmlTemp.replace(/\`\`\`html\n?/gi, '').replace(/\`\`\`\n?/g, '');
+                    setGeneratedHtml(cleanHtml);
+                }
             } else {
-                setError('Hubo un error generando tu página. Intenta de nuevo.');
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || 'Hubo un error generando tu página. Intenta de nuevo.');
                 setStep('form');
             }
         } catch {

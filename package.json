@@ -16,7 +16,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.33",
     "@google/generative-ai": "^0.24.1",
+    "ai": "^6.0.104",
     "clsx": "^2.1.1",
     "firebase": "^12.9.0",
     "firebase-admin": "^13.6.1",
