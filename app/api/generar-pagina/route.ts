@@ -30,16 +30,25 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
 Layout Profesional y Estético: Priorice layouts modernos, limpios y espaciados generosamente. ¡ATENCIÓN! NO generes páginas exclusivamente en color oscuro (Dark Mode) por defecto. Los colores, la paleta y el estilo visual general deben estar ESTRICTAMENTE CONDICIONADOS por las indicaciones del texto, el audio descriptivo o el estilo de las imágenes adjuntas. Elije creativamente la paleta que mejor represente la actividad del negocio, incorporando siempre secciones de "Social proof" al estilo del diseño premium.
 
-3. IMÁGENES ÚNICAS Y FOTORREALISTAS (NANO BANANA 2 + POLLINATIONS):
-¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar imágenes estáticas de unsplash, color gradients genéricos o placeholders.
-Debes integrar fotorrealismo de alta calidad generado en tiempo real. 
-Usa esta estructura de URL para las imágenes, pero los prompts deben ser EXTREMADAMENTE detallados, enfocados en la actividad del usuario y fotorrealistas:
-https://image.pollinations.ai/prompt/[descripcion_detallada_en_ingles]?width=[ancho]&height=[alto]&nologo=true
+3. IMÁGENES ÚNICAS Y STOCK DE VIDEOS (NANO BANANA 2 + POLLINATIONS + STICK DE VIDS):
+¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar color gradients genéricos o placeholders. 
+Debes integrar imágenes fotorrealistas de alta calidad generadas en tiempo real O videos de stock ("Stick de vids") para fondos y hero sections.
 
-¡CRÍTICO! REEMPLAZA TODOS LOS ESPACIOS EN BLANCO EN LA DESCRIPCIÓN POR '%20' O GUIONES ('-'). NUNCA PERMITAS ESPACIOS EN BLANCO LITERALES EN EL ATRIBUTO SRC DE LA IMAGEN PORQUE SE ROMPERÁ.
+PARA IMÁGENES (Pollinations / Nano Banana 2):
+Usa esta estructura de URL para las imágenes, con prompts EXTREMADAMENTE detallados, en INGLÉS, enfocados en la actividad del usuario:
+https://image.pollinations.ai/prompt/[descripcion-detallada-en-ingles]?width=[ancho]&height=[alto]&nologo=true
 
-Ejemplo de prompt fotorrealista para Nano Banana 2: "Una fotografía macro, fotorrealista y de alta gama, de un grano de café perfectamente tostado en una finca boutique de Pitalito. El grano está centrado en una superficie oscura y texturizada, iluminado por un resplandor mágico y cálido, púrpura y azul, que emana desde el interior, proyectando una luz sutil. Esto crea una atmósfera premium y mística con un bokeh suave. El entorno es íntimo y exclusivo"
-Convierte ese tipo de descripción a inglés para la URL: https://image.pollinations.ai/prompt/macro%20photorealistic%20high-end%20photography%20of%20a%20perfectly%20roasted%20coffee%20bean%20in%20a%20boutique%20farm%20centered%20on%20a%20dark%20textured%20surface%20illuminated%20by%20a%20magical%20warm%20purple%20and%20blue%20glow%20emanating%20from%20within%20casting%20subtle%20light%20premium%20mystical%20atmosphere%20soft%20bokeh%20intimate%20exclusive%20setting?width=1600&height=900&nologo=true
+¡CRÍTICO Y VITAL! REEMPLAZA TODOS LOS ESPACIOS EN BLANCO EN LA DESCRIPCIÓN EXCLUSIVAMENTE POR GUIONES MEDIOS ('-'). NINGÚN ESPACIO LITERAL.
+Ejemplo correcto: https://image.pollinations.ai/prompt/macro-photorealistic-high-end-photography-of-roasted-coffee-bean-in-boutique-farm?width=1600&height=900&nologo=true
+
+PARA VIDEOS DE FONDOS (Stock de videos / Stick de vids):
+Puedes usar libremente estos enlaces de videos MP4 de alta calidad libres de derechos como fondo de Hero sections o bloques divisorios (usa la etiqueta <video autoplay loop muted playsinline class="..."></video>):
+- Oficina/Tecnología: https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-4174-large.mp4
+- Negocios/Reunión: https://assets.mixkit.co/videos/preview/mixkit-people-in-a-business-meeting-working-on-a-project-4180-large.mp4
+- Emprendedor/Café: https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-laptop-in-a-coffee-shop-4171-large.mp4
+- Abstracto/Cyber: https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-connection-background-27202-large.mp4
+
+Alternativa para imágenes genéricas/placeholders: https://picsum.photos/seed/[palabra_clave_aleatoria]/1920/1080
 
 4. USO DE LENGUAJES DE PROGRAMACIÓN:
 Simula un ecosistema completo mediante HTML5, Tailwind CSS via CDN, y Vanilla JS (y bibliotecas como GSAP/AOS via CDN). El output debe estar optimizado y renderizado en un solo archivo.
