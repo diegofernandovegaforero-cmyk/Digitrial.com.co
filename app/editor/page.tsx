@@ -50,7 +50,7 @@ function EditorContent() {
         const docRef = doc(db, 'usuarios_leads', docId);
         setCargando(true);
 
-        const unsubscribe = onSnapshot(docRef, (snapshot) => {
+        const unsubscribe = onSnapshot(docRef, async (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.data();
                 setUserData({
@@ -60,10 +60,32 @@ function EditorContent() {
                     codigo_actual: data.codigo_actual || '',
                 });
                 setError('');
+                setCargando(false);
             } else {
-                setError('No encontramos tu cuenta. Primero genera tu página web.');
+                // Compatibilidad hacia atrás: buscar por campo 'email' si el ID no coincide
+                import('firebase/firestore').then(({ collection, query, where, getDocs }) => {
+                    const q = query(collection(db, 'usuarios_leads'), where('email', '==', email.toLowerCase().trim()));
+                    getDocs(q).then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            const data = querySnapshot.docs[0].data();
+                            setUserData({
+                                nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
+                                nombre_contacto: data.nombre_contacto || '',
+                                creditos_restantes: data.creditos_restantes ?? 0,
+                                codigo_actual: data.codigo_actual || '',
+                            });
+                            setError('');
+                        } else {
+                            setError('No encontramos tu cuenta. Primero genera tu página web.');
+                        }
+                        setCargando(false);
+                    }).catch(err => {
+                        console.error('Error buscando doc antiguo:', err);
+                        setError('No encontramos tu cuenta. Primero genera tu página web.');
+                        setCargando(false);
+                    });
+                });
             }
-            setCargando(false);
         }, (err) => {
             console.error(err);
             setError('Error conectando con Firebase.');

@@ -27,11 +27,20 @@ export async function POST(req: NextRequest) {
         }
 
         const docId = emailToDocId(email);
-        const docRef = db.collection('usuarios_leads').doc(docId);
-        const docSnap = await docRef.get();
+        let docRef = db.collection('usuarios_leads').doc(docId);
+        let docSnap = await docRef.get();
 
+        // ── Compatibilidad hacia atrás: Si no existe por email, buscar por UID de Firebase ──
         if (!docSnap.exists) {
-            return NextResponse.json({ error: 'Usuario no encontrado. Genera primero tu página web.' }, { status: 404 });
+            // Asumimos que si no lo encuentra, tal vez la página se haya generado ANTES de nuestra 
+            // actualización que unifica los IDs por email. Busquemos un documento cuyo campo 'email' coincida.
+            const querySnapshot = await db.collection('usuarios_leads').where('email', '==', email.toLowerCase().trim()).limit(1).get();
+            if (!querySnapshot.empty) {
+                docRef = querySnapshot.docs[0].ref;
+                docSnap = await docRef.get();
+            } else {
+                return NextResponse.json({ error: 'Usuario no encontrado. Genera primero tu página web.' }, { status: 404 });
+            }
         }
 
         const userData = docSnap.data()!;
