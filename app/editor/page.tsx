@@ -115,18 +115,26 @@ function EditorContent() {
             setShowWelcomeModal(true);
             setLogoLoading(true);
 
-            // Generar logo nativamente con Google Imagen
-            fetch('/api/generar-logo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ businessName: userData.nombre_negocio })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.image) setLogoUrl(data.image);
-                })
-                .catch(err => console.error('Error generando logo:', err))
-                .finally(() => setLogoLoading(false));
+            // Extraer logo nativo directamente del HTML generado
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(userData.codigo_actual, 'text/html');
+                // Buscar imágenes en el header/nav, o que digan 'logo'
+                let logoImg = doc.querySelector('header img, nav img, img[alt*="logo" i], img[class*="logo" i], img[id*="logo" i]');
+                if (!logoImg) {
+                    // Fallback a cualquier imagen si no se encuentra un logo explícito
+                    logoImg = doc.querySelector('img');
+                }
+                const extractedUrl = logoImg ? logoImg.getAttribute('src') : null;
+
+                if (extractedUrl) {
+                    setLogoUrl(extractedUrl);
+                }
+            } catch (err) {
+                console.error('Error extrayendo logo del DOM:', err);
+            } finally {
+                setLogoLoading(false);
+            }
         }
     }, [userData?.codigo_actual]);
 
@@ -493,7 +501,7 @@ function EditorContent() {
 
                                 {creditosBajos && (
                                     <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
-                                        ⚠️ Te quedan <strong>{userData?.creditos_restantes}</strong> créditos.{' '}
+                                        ⚠️ Te quedan <strong>{userData?.creditos_restantes ?? 0}</strong> créditos.{' '}
                                         <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
                                             Contáctanos
                                         </a>{' '}para recargar.
