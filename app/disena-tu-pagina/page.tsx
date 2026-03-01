@@ -3,9 +3,12 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Download, Eye, Type } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+
+const emailToDocId = (email: string) => email.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
 type Step = 'form' | 'loading' | 'preview';
 
@@ -271,6 +274,59 @@ function DisenaPageContent() {
     const [editPanelOpen, setEditPanelOpen] = useState(false);
     const [editInstruction, setEditInstruction] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [logoLoading, setLogoLoading] = useState(false);
+    const [exitoGuardado, setExitoGuardado] = useState('');
+    const hasParsedLogoRef = useRef(false);
+
+    // ─── LÓGICA DEL MODAL ONBOARDING Y EXTRACCIÓN DE LOGO ───
+    useEffect(() => {
+        if (step === 'preview' && generatedHtml && !hasParsedLogoRef.current) {
+            hasParsedLogoRef.current = true;
+            setShowWelcomeModal(true);
+            setLogoLoading(true);
+
+            setTimeout(() => {
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(generatedHtml, 'text/html');
+                    let logoImg = doc.querySelector('header img, nav img, img[alt*="logo" i], img[class*="logo" i], img[id*="logo" i]');
+                    if (!logoImg) {
+                        logoImg = doc.querySelector('img');
+                    }
+                    const extractedUrl = logoImg ? logoImg.getAttribute('src') : null;
+                    if (extractedUrl) {
+                        setLogoUrl(extractedUrl);
+                    }
+                } catch (err) {
+                    console.error('Error extrayendo logo del DOM:', err);
+                } finally {
+                    setLogoLoading(false);
+                }
+            }, 1000); // Dar un segundo para que el HTML esté estable
+        }
+    }, [step, generatedHtml]);
+
+    // Listener para recibir los cambios editados nativamente desde el Iframe
+    useEffect(() => {
+        const handleMessage = async (event: MessageEvent) => {
+            if (event.data?.type === 'SAVE_HTML' && event.data?.html && userEmail) {
+                try {
+                    const docId = emailToDocId(userEmail);
+                    const docRef = doc(db, 'usuarios_leads', docId);
+                    await updateDoc(docRef, { codigo_actual: event.data.html });
+                    setExitoGuardado('¡Texto modificado nativamente y guardado con éxito!');
+                    setTimeout(() => setExitoGuardado(''), 4000);
+                } catch (err) {
+                    console.error('Error guardando HTML editado nativamente:', err);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [userEmail]);
 
     const handleEditRequest = async () => {
         if (!editInstruction.trim() || !userEmail) return;
@@ -502,12 +558,131 @@ function DisenaPageContent() {
             {/* ─── PASO 3: PREVIEW ─── */}
             {step === 'preview' && (
                 <main className="h-screen w-screen relative bg-white">
+                    {/* Alerta flotante de éxito al guardar texto nativo */}
+                    <AnimatePresence>
+                        {exitoGuardado && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600/95 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-[0_10px_40px_rgba(22,163,74,0.4)] border border-green-400/30 flex items-center gap-2 font-medium"
+                            >
+                                <Sparkles className="w-5 h-5 text-green-200" />
+                                {exitoGuardado}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Iframe ocupando el 100% de la pantalla */}
                     <iframe
-                        srcDoc={generatedHtml}
+                        srcDoc={injectEditorScript(generatedHtml)}
                         className="w-full h-full border-none"
                         title="Tu página web generada"
                     />
+
+                    {/* MODAL DE BIENVENIDA Y ONBOARDING */}
+                    <AnimatePresence>
+                        {showWelcomeModal && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-sm"
+                                    onClick={() => setShowWelcomeModal(false)}
+                                />
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-full max-w-lg bg-slate-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                                >
+                                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center shrink-0">
+                                        <div className="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-4 backdrop-blur-sm">
+                                            <Sparkles className="w-8 h-8 text-white" />
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-white mb-2">¡Tu Maqueta está Lista!</h2>
+                                        <p className="text-blue-100/80 text-sm">
+                                            La IA ha diseñado tu página usando las mejores prácticas de conversión.
+                                        </p>
+                                    </div>
+
+                                    <div className="p-6 overflow-y-auto">
+                                        {/* LOGO SECTION */}
+                                        <div className="mb-6 bg-slate-800/50 rounded-xl p-4 border border-white/5 text-center">
+                                            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center justify-center gap-2">
+                                                <Eye className="w-4 h-4" /> Logo Extraído del Diseño
+                                            </h3>
+
+                                            <div className="w-full h-32 bg-white rounded-lg flex items-center justify-center overflow-hidden mb-3 border border-slate-700 relative">
+                                                {logoLoading ? (
+                                                    <div className="flex flex-col items-center text-slate-500">
+                                                        <Loader2 className="w-6 h-6 animate-spin mb-2" />
+                                                        <span className="text-xs">Buscando logotipo...</span>
+                                                    </div>
+                                                ) : logoUrl ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img src={logoUrl} alt="Logo UI" className="w-full h-full object-contain p-2" />
+                                                ) : (
+                                                    <span className="text-slate-500 text-sm">No se encontró logo visual.</span>
+                                                )}
+                                            </div>
+
+                                            {logoUrl && (
+                                                <a
+                                                    href={logoUrl}
+                                                    download="Mi-Logo-Generado.jpg"
+                                                    target="_blank"
+                                                    className="w-full justify-center flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg text-sm transition-colors border border-slate-600"
+                                                >
+                                                    <Download className="w-4 h-4" /> Descargar Logo (Alta Calidad)
+                                                </a>
+                                            )}
+                                        </div>
+
+                                        {/* INSTRUCTIONS SECTION */}
+                                        <h3 className="text-sm font-semibold text-slate-300 mb-3 block">
+                                            ¿Cómo modificar tu diseño?
+                                        </h3>
+                                        <div className="space-y-3">
+                                            <div className="flex gap-3 bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl">
+                                                <div className="bg-blue-500/20 p-2 rounded-lg h-fit">
+                                                    <Type className="w-4 h-4 text-blue-400" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-blue-100 mb-1">Para cambiar Textos</h4>
+                                                    <p className="text-xs text-blue-200/70 leading-relaxed">
+                                                        Haz <b>doble clic directamente</b> en cualquier título o texto de la página generada para escribir sobre él. Se guardará automáticamente.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-3 bg-purple-500/10 border border-purple-500/20 p-4 rounded-xl">
+                                                <div className="bg-purple-500/20 p-2 rounded-lg h-fit">
+                                                    <Sparkles className="w-4 h-4 text-purple-400" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-purple-100 mb-1">Para cambiar Imágenes o Diseño</h4>
+                                                    <p className="text-xs text-purple-200/70 leading-relaxed">
+                                                        Usa el botón lateral azul <b>&quot;✨ Editar Web&quot;</b> para pedirle a la IA que recambie las fotos o mueva secciones.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-5 border-t border-white/10 bg-slate-800/30 shrink-0">
+                                        <button
+                                            onClick={() => setShowWelcomeModal(false)}
+                                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-600/20"
+                                        >
+                                            Entendido, ir al editor
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
 
                     {/* Botón Flotante para abrir panel lateral */}
                     <motion.button
@@ -640,4 +815,51 @@ export default function DisenaPage() {
             <DisenaPageContent />
         </Suspense>
     );
+}
+
+// Inyección del Script de Edición en el Iframe Web
+function injectEditorScript(html: string): string {
+    const scriptToInject = `
+        <script>
+            (function() {
+                // Hacer todos los textos editables por defecto
+                const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a');
+                textElements.forEach(el => {
+                    if(el.children.length === 0 || el.textContent.trim().length > 0) {
+                        el.setAttribute('contenteditable', 'true');
+                        el.style.outline = 'none';
+                        el.style.transition = 'outline 0.2s, background-color 0.2s';
+                        
+                        el.addEventListener('focus', function() {
+                            this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
+                            this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                        });
+                        
+                        el.addEventListener('blur', function() {
+                            this.style.outline = 'none';
+                            this.style.backgroundColor = 'transparent';
+                            
+                            const clone = document.documentElement.cloneNode(true);
+                            const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
+                            clonedNodes.forEach(n => {
+                                n.style.outline = '';
+                                n.style.backgroundColor = '';
+                                if(n.getAttribute('style') === '') n.removeAttribute('style');
+                            });
+                            
+                            window.parent.postMessage({
+                                type: 'SAVE_HTML',
+                                html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
+                            }, '*');
+                        });
+                    }
+                });
+            })();
+        </script>
+    `;
+
+    if (html.includes('</body>')) {
+        return html.replace('</body>', scriptToInject + '</body>');
+    }
+    return html + scriptToInject;
 }
