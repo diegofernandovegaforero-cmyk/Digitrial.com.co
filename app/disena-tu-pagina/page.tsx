@@ -312,9 +312,20 @@ function DisenaPageContent() {
                         if (validImg) finalSrc = validImg.getAttribute('src');
                     }
 
-                    // 3. Fallback: Tipografía convertida a SVG Vectorial (Generalmente arriba a la izq)
+                    // 3. Fallback: Tipografía convertida a SVG Vectorial (Parte Superior Izquierda)
                     if (!finalSrc) {
-                        const txtElem = doc.querySelector('.logo, #logo, header h1, nav h1, header a, nav a');
+                        // Evitar 'nav a' genéricos que capturan menús como "Quiénes Somos"
+                        let txtElem = doc.querySelector('.logo, #logo, .brand, #brand, header h1, nav h1');
+
+                        if (!txtElem) {
+                            // Buscar el primer enlace del header que destaque (negrita o tamaño) o el primero en orden DOM
+                            const headerLinks = Array.from(doc.querySelectorAll('header a, nav a'));
+                            txtElem = headerLinks.find(a => {
+                                const c = a.className || '';
+                                return c.includes('font-bold') || c.includes('font-extrabold') || c.includes('text-xl') || c.includes('text-2xl');
+                            }) || headerLinks[0];
+                        }
+
                         if (txtElem && txtElem.textContent && txtElem.textContent.trim().length > 0) {
                             const t = txtElem.textContent.trim().substring(0, 15);
                             const dynamicSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="100%" height="100%"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="28" fill="url(#g)" letter-spacing="-1">${t}</text></svg>`;
