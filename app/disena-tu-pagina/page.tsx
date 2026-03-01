@@ -7,6 +7,7 @@ import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Download,
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import PlanesDigitrial from '@/components/PlanesDigitrial';
 
 const emailToDocId = (email: string) => email.toLowerCase().replace(/[^a-z0-9]/g, '_');
 
@@ -804,6 +805,10 @@ function DisenaPageContent() {
                             </>
                         )}
                     </AnimatePresence>
+
+                    {/* ── Módulo de Precios y Lanzamiento ── */}
+                    <PlanesDigitrial />
+
                 </main>
             )}
 

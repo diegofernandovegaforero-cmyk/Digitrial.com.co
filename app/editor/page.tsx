@@ -6,6 +6,7 @@ import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader
 import { AnimatePresence, motion } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import PlanesDigitrial from '@/components/PlanesDigitrial';
 
 const CREDITOS_POR_EDICION = 3;
 const MAX_AUDIO_SEGUNDOS = 45;
@@ -732,6 +733,10 @@ function EditorContent() {
                     )}
                 </div>
             </div>
+
+            {/* ── Módulo de Precios y Lanzamiento ── */}
+            <PlanesDigitrial />
+
         </div>
     );
 }
