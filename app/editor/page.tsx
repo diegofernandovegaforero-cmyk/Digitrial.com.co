@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 const CREDITOS_POR_EDICION = 3;
 const MAX_AUDIO_SEGUNDOS = 45;
@@ -47,6 +47,12 @@ function EditorContent() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+
+    // Modal de Bienvenida e Instrucciones
+    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [logoLoading, setLogoLoading] = useState(false);
+    const hasShownModalRef = useRef(false);
 
     // Listener de Firestore en tiempo real
     useEffect(() => {
@@ -101,6 +107,49 @@ function EditorContent() {
 
         return () => unsubscribe();
     }, [identificado, email]);
+
+    // Mostrar modal la primera vez que carga un diseño
+    useEffect(() => {
+        if (userData?.codigo_actual && !hasShownModalRef.current) {
+            hasShownModalRef.current = true;
+            setShowWelcomeModal(true);
+            setLogoLoading(true);
+
+            // Generar logo nativamente con Google Imagen
+            fetch('/api/generar-logo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ businessName: userData.nombre_negocio })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.image) setLogoUrl(data.image);
+                })
+                .catch(err => console.error('Error generando logo:', err))
+                .finally(() => setLogoLoading(false));
+        }
+    }, [userData?.codigo_actual]);
+
+    // Listener para recibir los cambios editados nativamente desde el Iframe
+    useEffect(() => {
+        const handleMessage = async (event: MessageEvent) => {
+            if (event.data?.type === 'SAVE_HTML' && event.data?.html && email) {
+                try {
+                    const docId = emailToDocId(email);
+                    const docRef = doc(db, 'usuarios_leads', docId);
+                    // Actualizar silenciosamente el código en Firebase sin gastar créditos
+                    await updateDoc(docRef, { codigo_actual: event.data.html });
+                    setExito('Texto modificado nativamente guardado con éxito.');
+                    setTimeout(() => setExito(''), 3000);
+                } catch (err) {
+                    console.error('Error guardando HTML editado nativamente:', err);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [email]);
 
     const handleIdentificar = (e: React.FormEvent) => {
         e.preventDefault();
@@ -329,6 +378,71 @@ function EditorContent() {
     // ── UI: Editor principal ──
     return (
         <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+
+            {/* ── Modal Instructivo de Bienvenida ── */}
+            {showWelcomeModal && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/80 backdrop-blur-md">
+                    <div className="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+                        {/* Izquierda: Logo Area */}
+                        <div className="bg-slate-900 md:w-2/5 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-700">
+                            <h3 className="text-white font-bold mb-4 text-center">Logo de tu Marca</h3>
+                            <div className="w-40 h-40 bg-white rounded-xl shadow-inner flex items-center justify-center mb-6 overflow-hidden relative">
+                                {logoLoading ? (
+                                    <div className="flex flex-col items-center text-slate-400">
+                                        <Loader2 className="w-8 h-8 animate-spin mb-2 text-blue-500" />
+                                        <span className="text-xs text-center font-medium">Diseñando<br />vector...</span>
+                                    </div>
+                                ) : logoUrl ? (
+                                    <img src={logoUrl} alt="Logo Generado" className="w-full h-full object-contain p-2" />
+                                ) : (
+                                    <Triangle className="w-12 h-12 text-slate-200" />
+                                )}
+                            </div>
+
+                            <a
+                                href={logoUrl || '#'}
+                                download={`Logo_${userData.nombre_negocio.replace(/\s+/g, '_')}.png`}
+                                className={`w-full py-2.5 rounded-lg font-bold text-sm text-center transition-colors shadow-lg ${logoUrl ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-slate-700 text-slate-400 cursor-not-allowed hidden'}`}
+                            >
+                                Descargar Logo HD
+                            </a>
+                        </div>
+
+                        {/* Derecha: Instrucciones */}
+                        <div className="p-8 md:w-3/5 flex flex-col justify-center">
+                            <h2 className="text-2xl font-extrabold text-white mb-2">¡Tu maqueta está lista!</h2>
+                            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                                Hemos construido la estructura de tu página. Ahora es tu turno de darle el toque final.
+                            </p>
+
+                            <div className="space-y-4 mb-8">
+                                <div className="flex gap-4 items-start bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
+                                    <div className="bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold mt-0.5">1</div>
+                                    <div>
+                                        <h4 className="text-blue-100 font-bold text-sm mb-1">Textos (Edición Directa)</h4>
+                                        <p className="text-slate-400 text-xs leading-relaxed">Haz clic directamente sobre cualquier título o párrafo en la página de la derecha para escribir tu propio texto con el teclado. ¡Se guarda solo!</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 items-start bg-purple-500/10 p-3 rounded-xl border border-purple-500/20">
+                                    <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold mt-0.5">2</div>
+                                    <div>
+                                        <h4 className="text-purple-100 font-bold text-sm mb-1">Imágenes y Diseño</h4>
+                                        <p className="text-slate-400 text-xs leading-relaxed">Para cambiar fotografías, colores o agregar nuevas secciones, usa la caja de chat de Inteligencia Artificial.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setShowWelcomeModal(false)}
+                                className="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors shadow-xl"
+                            >
+                                Entendido, ir al editor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Navbar */}
             <nav className="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
                 <Link href="/" className="flex items-center gap-2">
@@ -546,7 +660,11 @@ function EditorContent() {
                         </div>
                     )}
                     {userData?.codigo_actual ? (
-                        <iframe srcDoc={userData.codigo_actual} className="w-full h-full border-none" title="Vista previa en tiempo real" />
+                        <iframe
+                            srcDoc={injectEditorScript(userData.codigo_actual)}
+                            className="w-full h-full border-none"
+                            title="Vista previa en tiempo real"
+                        />
                     ) : (
                         <div className="flex items-center justify-center h-full text-slate-600">
                             <p>No hay diseño cargado aún.</p>
@@ -556,6 +674,60 @@ function EditorContent() {
             </div>
         </div>
     );
+}
+
+// Inyección del Script de Edición en el Iframe Web
+function injectEditorScript(html: string): string {
+    const scriptToInject = `
+        <script>
+            (function() {
+                // Hacer todos los textos editables por defecto
+                const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a');
+                textElements.forEach(el => {
+                    // Ignoramos elementos que sean puramente iconos
+                    if(el.children.length === 0 || el.textContent.trim().length > 0) {
+                        el.setAttribute('contenteditable', 'true');
+                        el.style.outline = 'none';
+                        el.style.transition = 'outline 0.2s, background-color 0.2s';
+                        
+                        el.addEventListener('focus', function() {
+                            this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
+                            this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                        });
+                        
+                        el.addEventListener('blur', function() {
+                            this.style.outline = 'none';
+                            this.style.backgroundColor = 'transparent';
+                            
+                            // Remover las selecciones y clases temporales de enfoque para limpiar el HTML
+                            const clone = document.documentElement.cloneNode(true);
+                            
+                            // Limpiar atributos inyectados en el clon para guardar un DOM limpio
+                            const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
+                            clonedNodes.forEach(n => {
+                                // Dejamos el contenteditable pero quitamos el CSS en-linea inyectado
+                                n.style.outline = '';
+                                n.style.backgroundColor = '';
+                                if(n.getAttribute('style') === '') n.removeAttribute('style');
+                            });
+                            
+                            // Enviar el HTML limpio de vuelta a Next.js
+                            window.parent.postMessage({
+                                type: 'SAVE_HTML',
+                                html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
+                            }, '*');
+                        });
+                    }
+                });
+            })();
+        </script>
+    `;
+
+    // Lo insertamos justo antes de cerrar el body, o al final si no hay body
+    if (html.includes('</body>')) {
+        return html.replace('</body>', scriptToInject + '</body>');
+    }
+    return html + scriptToInject;
 }
 
 export default function EditorPage() {
