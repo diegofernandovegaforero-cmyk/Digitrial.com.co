@@ -291,14 +291,38 @@ function DisenaPageContent() {
                 try {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(generatedHtml, 'text/html');
-                    let logoImg = doc.querySelector('header img, nav img, img[alt*="logo" i], img[class*="logo" i], img[id*="logo" i]');
-                    if (!logoImg) {
-                        logoImg = doc.querySelector('img');
+                    let finalSrc = null;
+
+                    // 1. Prioridad 1: Buscar SVG vectorial en cabecera/brand
+                    const svgLogo = doc.querySelector('header svg, nav svg, .logo svg, #logo svg, a.font-bold svg');
+                    if (svgLogo) {
+                        svgLogo.setAttribute('width', '100%');
+                        svgLogo.setAttribute('height', '100%');
+                        const s = new XMLSerializer().serializeToString(svgLogo);
+                        finalSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
                     }
-                    const extractedUrl = logoImg ? logoImg.getAttribute('src') : null;
-                    if (extractedUrl) {
-                        setLogoUrl(extractedUrl);
+
+                    // 2. Prioridad 2: Buscar imagenes que NO sean de Pexels/Mixkit (ej: placehold.co, ui-faces)
+                    if (!finalSrc) {
+                        const imgs = Array.from(doc.querySelectorAll('header img, nav img, .logo img, #logo img, img[alt*="logo" i]'));
+                        const validImg = imgs.find(i => {
+                            const src = i.getAttribute('src') || '';
+                            return !src.includes('pexels.com') && !src.includes('mixkit.co');
+                        });
+                        if (validImg) finalSrc = validImg.getAttribute('src');
                     }
+
+                    // 3. Fallback: Tipografía convertida a SVG Vectorial (Generalmente arriba a la izq)
+                    if (!finalSrc) {
+                        const txtElem = doc.querySelector('.logo, #logo, header h1, nav h1, header a, nav a');
+                        if (txtElem && txtElem.textContent && txtElem.textContent.trim().length > 0) {
+                            const t = txtElem.textContent.trim().substring(0, 15);
+                            const dynamicSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="100%" height="100%"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="28" fill="url(#g)" letter-spacing="-1">${t}</text></svg>`;
+                            finalSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dynamicSvg);
+                        }
+                    }
+
+                    if (finalSrc) setLogoUrl(finalSrc);
                 } catch (err) {
                     console.error('Error extrayendo logo del DOM:', err);
                 } finally {
@@ -583,104 +607,81 @@ function DisenaPageContent() {
                     {/* MODAL DE BIENVENIDA Y ONBOARDING */}
                     <AnimatePresence>
                         {showWelcomeModal && (
-                            <>
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-sm"
-                                    onClick={() => setShowWelcomeModal(false)}
-                                />
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-full max-w-lg bg-slate-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-                                >
-                                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-center shrink-0">
-                                        <div className="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-4 backdrop-blur-sm">
-                                            <Sparkles className="w-8 h-8 text-white" />
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-white mb-2">¡Tu Maqueta está Lista!</h2>
-                                        <p className="text-blue-100/80 text-sm">
-                                            La IA ha diseñado tu página usando las mejores prácticas de conversión.
-                                        </p>
+                            <motion.div
+                                initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                                className="fixed bottom-6 left-6 z-[70] w-[340px] bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/10 shadow-[-10px_10px_40px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
+                            >
+                                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 flex items-center justify-between shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-white" />
+                                        <h2 className="text-sm font-bold text-white">Tu Maqueta está Lista</h2>
                                     </div>
+                                    <button onClick={() => setShowWelcomeModal(false)} className="text-white/80 hover:text-white bg-white/10 p-1.5 rounded-lg transition-colors">
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
 
-                                    <div className="p-6 overflow-y-auto">
-                                        {/* LOGO SECTION */}
-                                        <div className="mb-6 bg-slate-800/50 rounded-xl p-4 border border-white/5 text-center">
-                                            <h3 className="text-sm font-semibold text-slate-300 mb-3 flex items-center justify-center gap-2">
-                                                <Eye className="w-4 h-4" /> Logo Extraído del Diseño
-                                            </h3>
+                                <div className="p-4 overflow-y-auto max-h-[70vh]">
+                                    {/* LOGO SECTION */}
+                                    <div className="mb-4">
+                                        <h3 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                                            <Eye className="w-3.5 h-3.5" /> Logo Identificado
+                                        </h3>
 
-                                            <div className="w-full h-32 bg-white rounded-lg flex items-center justify-center overflow-hidden mb-3 border border-slate-700 relative">
-                                                {logoLoading ? (
-                                                    <div className="flex flex-col items-center text-slate-500">
-                                                        <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                                                        <span className="text-xs">Buscando logotipo...</span>
-                                                    </div>
-                                                ) : logoUrl ? (
-                                                    // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={logoUrl} alt="Logo UI" className="w-full h-full object-contain p-2" />
-                                                ) : (
-                                                    <span className="text-slate-500 text-sm">No se encontró logo visual.</span>
-                                                )}
-                                            </div>
-
-                                            {logoUrl && (
-                                                <a
-                                                    href={logoUrl}
-                                                    download="Mi-Logo-Generado.jpg"
-                                                    target="_blank"
-                                                    className="w-full justify-center flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg text-sm transition-colors border border-slate-600"
-                                                >
-                                                    <Download className="w-4 h-4" /> Descargar Logo (Alta Calidad)
-                                                </a>
+                                        <div className="w-full h-20 bg-white/5 rounded-lg flex items-center justify-center overflow-hidden mb-2 border border-white/10 p-2">
+                                            {logoLoading ? (
+                                                <div className="flex flex-col items-center text-slate-500">
+                                                    <Loader2 className="w-5 h-5 animate-spin mb-1" />
+                                                </div>
+                                            ) : logoUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={logoUrl} alt="Logo Vectorial" className="max-w-full max-h-full object-contain" />
+                                            ) : (
+                                                <span className="text-slate-500 text-xs">Sin logo detectado</span>
                                             )}
                                         </div>
 
-                                        {/* INSTRUCTIONS SECTION */}
-                                        <h3 className="text-sm font-semibold text-slate-300 mb-3 block">
-                                            ¿Cómo modificar tu diseño?
-                                        </h3>
-                                        <div className="space-y-3">
-                                            <div className="flex gap-3 bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl">
-                                                <div className="bg-blue-500/20 p-2 rounded-lg h-fit">
-                                                    <Type className="w-4 h-4 text-blue-400" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-blue-100 mb-1">Para cambiar Textos</h4>
-                                                    <p className="text-xs text-blue-200/70 leading-relaxed">
-                                                        Haz <b>doble clic directamente</b> en cualquier título o texto de la página generada para escribir sobre él. Se guardará automáticamente.
-                                                    </p>
-                                                </div>
-                                            </div>
+                                        {logoUrl && (
+                                            <a
+                                                href={logoUrl}
+                                                download="Identidad-Visual.svg"
+                                                target="_blank"
+                                                className="w-full justify-center flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white font-medium py-2 rounded-lg text-xs transition-colors border border-white/10"
+                                            >
+                                                <Download className="w-3.5 h-3.5" /> Descargar Vector
+                                            </a>
+                                        )}
+                                    </div>
 
-                                            <div className="flex gap-3 bg-purple-500/10 border border-purple-500/20 p-4 rounded-xl">
-                                                <div className="bg-purple-500/20 p-2 rounded-lg h-fit">
-                                                    <Sparkles className="w-4 h-4 text-purple-400" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-purple-100 mb-1">Para cambiar Imágenes o Diseño</h4>
-                                                    <p className="text-xs text-purple-200/70 leading-relaxed">
-                                                        Usa el botón lateral azul <b>&quot;✨ Editar Web&quot;</b> para pedirle a la IA que recambie las fotos o mueva secciones.
-                                                    </p>
-                                                </div>
+                                    {/* INSTRUCTIONS SECTION */}
+                                    <h3 className="text-xs font-semibold text-slate-300 mb-2 block">
+                                        Opciones de Edición
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2.5 bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg">
+                                            <Type className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="text-xs font-bold text-blue-100 mb-0.5">Editar Textos Nativos</h4>
+                                                <p className="text-[10px] text-blue-200/70 leading-snug">
+                                                    Haz doble clic en cualquier texto del lado derecho para escribir sobre él.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2.5 bg-purple-500/10 border border-purple-500/20 p-3 rounded-lg">
+                                            <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <h4 className="text-xs font-bold text-purple-100 mb-0.5">Renovar Imágenes/Diseño</h4>
+                                                <p className="text-[10px] text-purple-200/70 leading-snug">
+                                                    Si no te gusta el acomodo o fotos, usa el botón <b>&quot;✨ Editar Web&quot;</b>.
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="p-5 border-t border-white/10 bg-slate-800/30 shrink-0">
-                                        <button
-                                            onClick={() => setShowWelcomeModal(false)}
-                                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-600/20"
-                                        >
-                                            Entendido, ir al editor
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            </>
+                                </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
 

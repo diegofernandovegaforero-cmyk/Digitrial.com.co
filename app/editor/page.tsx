@@ -2,7 +2,8 @@
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code } from 'lucide-react';
+import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 
@@ -119,17 +120,38 @@ function EditorContent() {
             try {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(userData.codigo_actual, 'text/html');
-                // Buscar imágenes en el header/nav, o que digan 'logo'
-                let logoImg = doc.querySelector('header img, nav img, img[alt*="logo" i], img[class*="logo" i], img[id*="logo" i]');
-                if (!logoImg) {
-                    // Fallback a cualquier imagen si no se encuentra un logo explícito
-                    logoImg = doc.querySelector('img');
-                }
-                const extractedUrl = logoImg ? logoImg.getAttribute('src') : null;
+                let finalSrc = null;
 
-                if (extractedUrl) {
-                    setLogoUrl(extractedUrl);
+                // 1. Prioridad 1: Buscar SVG vectorial en cabecera/brand
+                const svgLogo = doc.querySelector('header svg, nav svg, .logo svg, #logo svg, a.font-bold svg');
+                if (svgLogo) {
+                    svgLogo.setAttribute('width', '100%');
+                    svgLogo.setAttribute('height', '100%');
+                    const s = new XMLSerializer().serializeToString(svgLogo);
+                    finalSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
                 }
+
+                // 2. Prioridad 2: Buscar imagenes que NO sean de Pexels/Mixkit
+                if (!finalSrc) {
+                    const imgs = Array.from(doc.querySelectorAll('header img, nav img, .logo img, #logo img, img[alt*="logo" i]'));
+                    const validImg = imgs.find(i => {
+                        const src = i.getAttribute('src') || '';
+                        return !src.includes('pexels.com') && !src.includes('mixkit.co');
+                    });
+                    if (validImg) finalSrc = validImg.getAttribute('src');
+                }
+
+                // 3. Fallback: Tipografía convertida a SVG Vectorial
+                if (!finalSrc) {
+                    const txtElem = doc.querySelector('.logo, #logo, header h1, nav h1, header a, nav a');
+                    if (txtElem && txtElem.textContent && txtElem.textContent.trim().length > 0) {
+                        const t = txtElem.textContent.trim().substring(0, 15);
+                        const dynamicSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="100%" height="100%"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="28" fill="url(#g)" letter-spacing="-1">${t}</text></svg>`;
+                        finalSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dynamicSvg);
+                    }
+                }
+
+                if (finalSrc) setLogoUrl(finalSrc);
             } catch (err) {
                 console.error('Error extrayendo logo del DOM:', err);
             } finally {
@@ -387,69 +409,86 @@ function EditorContent() {
     return (
         <div className="min-h-screen bg-slate-950 text-white flex flex-col">
 
-            {/* ── Modal Instructivo de Bienvenida ── */}
-            {showWelcomeModal && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/80 backdrop-blur-md">
-                    <div className="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-                        {/* Izquierda: Logo Area */}
-                        <div className="bg-slate-900 md:w-2/5 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-700">
-                            <h3 className="text-white font-bold mb-4 text-center">Logo de tu Marca</h3>
-                            <div className="w-40 h-40 bg-white rounded-xl shadow-inner flex items-center justify-center mb-6 overflow-hidden relative">
-                                {logoLoading ? (
-                                    <div className="flex flex-col items-center text-slate-400">
-                                        <Loader2 className="w-8 h-8 animate-spin mb-2 text-blue-500" />
-                                        <span className="text-xs text-center font-medium">Diseñando<br />vector...</span>
-                                    </div>
-                                ) : logoUrl ? (
-                                    <img src={logoUrl} alt="Logo Generado" className="w-full h-full object-contain p-2" />
-                                ) : (
-                                    <Triangle className="w-12 h-12 text-slate-200" />
+            {/* Modal Instructivo de Bienvenida (Flotante) */}
+            <AnimatePresence>
+                {showWelcomeModal && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                        className="fixed bottom-6 left-6 z-[70] w-[340px] bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/10 shadow-[-10px_10px_40px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col"
+                    >
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-white" />
+                                <h2 className="text-sm font-bold text-white">Tu Maqueta está Lista</h2>
+                            </div>
+                            <button onClick={() => setShowWelcomeModal(false)} className="text-white/80 hover:text-white bg-white/10 p-1.5 rounded-lg transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="p-4 overflow-y-auto max-h-[70vh]">
+                            {/* LOGO SECTION */}
+                            <div className="mb-4">
+                                <h3 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                                    <Eye className="w-3.5 h-3.5" /> Logo Identificado
+                                </h3>
+
+                                <div className="w-full h-20 bg-white/5 rounded-lg flex items-center justify-center overflow-hidden mb-2 border border-white/10 p-2 relative">
+                                    {logoLoading ? (
+                                        <div className="flex flex-col items-center text-slate-500">
+                                            <Loader2 className="w-5 h-5 animate-spin mb-1" />
+                                        </div>
+                                    ) : logoUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={logoUrl} alt="Logo Vectorial" className="max-w-full max-h-full object-contain" />
+                                    ) : (
+                                        <span className="text-slate-500 text-xs text-center">Sin logo<br />detectado</span>
+                                    )}
+                                </div>
+
+                                {logoUrl && (
+                                    <a
+                                        href={logoUrl}
+                                        download={`Identidad_${userData?.nombre_negocio ? userData.nombre_negocio.replace(/\s+/g, '_') : 'Visual'}.svg`}
+                                        target="_blank"
+                                        className="w-full justify-center flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white font-medium py-2 rounded-lg text-xs transition-colors border border-white/10"
+                                    >
+                                        <Download className="w-3.5 h-3.5" /> Descargar Vector
+                                    </a>
                                 )}
                             </div>
 
-                            <a
-                                href={logoUrl || '#'}
-                                download={`Logo_${userData.nombre_negocio.replace(/\s+/g, '_')}.png`}
-                                className={`w-full py-2.5 rounded-lg font-bold text-sm text-center transition-colors shadow-lg ${logoUrl ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-slate-700 text-slate-400 cursor-not-allowed hidden'}`}
-                            >
-                                Descargar Logo HD
-                            </a>
-                        </div>
-
-                        {/* Derecha: Instrucciones */}
-                        <div className="p-8 md:w-3/5 flex flex-col justify-center">
-                            <h2 className="text-2xl font-extrabold text-white mb-2">¡Tu maqueta está lista!</h2>
-                            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                                Hemos construido la estructura de tu página. Ahora es tu turno de darle el toque final.
-                            </p>
-
-                            <div className="space-y-4 mb-8">
-                                <div className="flex gap-4 items-start bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
-                                    <div className="bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold mt-0.5">1</div>
+                            {/* INSTRUCTIONS SECTION */}
+                            <h3 className="text-xs font-semibold text-slate-300 mb-2 block">
+                                Opciones de Edición
+                            </h3>
+                            <div className="space-y-2">
+                                <div className="flex gap-2.5 bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg">
+                                    <Type className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <h4 className="text-blue-100 font-bold text-sm mb-1">Textos (Edición Directa)</h4>
-                                        <p className="text-slate-400 text-xs leading-relaxed">Haz clic directamente sobre cualquier título o párrafo en la página de la derecha para escribir tu propio texto con el teclado. ¡Se guarda solo!</p>
+                                        <h4 className="text-xs font-bold text-blue-100 mb-0.5">Editar Textos Nativos</h4>
+                                        <p className="text-[10px] text-blue-200/70 leading-snug">
+                                            Haz doble clic en cualquier texto de la vista previa para escribir sobre él.
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="flex gap-4 items-start bg-purple-500/10 p-3 rounded-xl border border-purple-500/20">
-                                    <div className="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold mt-0.5">2</div>
+
+                                <div className="flex gap-2.5 bg-purple-500/10 border border-purple-500/20 p-3 rounded-lg">
+                                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <h4 className="text-purple-100 font-bold text-sm mb-1">Imágenes y Diseño</h4>
-                                        <p className="text-slate-400 text-xs leading-relaxed">Para cambiar fotografías, colores o agregar nuevas secciones, usa la caja de chat de Inteligencia Artificial.</p>
+                                        <h4 className="text-xs font-bold text-purple-100 mb-0.5">Renovar Imágenes/Diseño</h4>
+                                        <p className="text-[10px] text-purple-200/70 leading-snug">
+                                            Utiliza el chat de IA en la izquierda para cambiar el layout o las fotos.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-
-                            <button
-                                onClick={() => setShowWelcomeModal(false)}
-                                className="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors shadow-xl"
-                            >
-                                Entendido, ir al editor
-                            </button>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Navbar */}
             <nav className="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
