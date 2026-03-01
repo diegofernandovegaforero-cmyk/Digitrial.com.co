@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Download, Eye, Type } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Download, Eye, Type, Zap } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -769,6 +769,18 @@ function DisenaPageContent() {
                                                 {isEditing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
                                                 {isEditing ? 'Procesando cambios...' : (!userEmail ? 'Inicia sesión para editar' : 'Aplicar Modificaciones')}
                                             </button>
+
+                                            <div className="bg-blue-900/20 border border-blue-500/20 rounded-xl p-3 flex flex-col items-center justify-center text-center mt-4">
+                                                <div className="flex items-center gap-1.5 text-blue-300 font-bold text-sm mb-1">
+                                                    <Zap className="w-4 h-4 text-blue-400" />
+                                                    Créditos de Edición
+                                                </div>
+                                                <p className="text-xs text-blue-200/70 leading-relaxed">
+                                                    Cuentas con <strong>15 créditos gratuitos</strong> iniciales. <br />
+                                                    Cada modificación por IA consume <strong>3 créditos</strong>.<br />
+                                                    Tienes hasta <strong>5 intentos de diseño</strong> sin costo.
+                                                </p>
+                                            </div>
 
                                             {!userEmail && (
                                                 <p className="text-xs text-amber-400 text-center flex items-center justify-center gap-1 mt-2">
