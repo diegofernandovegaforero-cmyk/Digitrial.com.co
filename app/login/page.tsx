@@ -54,7 +54,7 @@ async function saveUserToFirestore(user: { uid: string; email: string | null; di
 function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirectTo = searchParams.get('redirect') || '/disena-tu-pagina?form=true';
+    const redirectTo = searchParams.get('redirect') || 'https://ia.digitrial.com.co/?form=true';
 
     const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');

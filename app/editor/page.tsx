@@ -254,7 +254,7 @@ function EditorContent() {
                             DIGI<span className="text-blue-400">TRIAL</span>
                         </span>
                     </Link>
-                    <Link href="/disena-tu-pagina" className="text-sm text-slate-400 hover:text-white transition-colors">
+                    <Link href="https://ia.digitrial.com.co" className="text-sm text-slate-400 hover:text-white transition-colors">
                         ← Generar nueva página
                     </Link>
                 </nav>
@@ -287,7 +287,7 @@ function EditorContent() {
                         </form>
                         <p className="text-xs text-slate-600 mt-4">
                             ¿No tienes cuenta?{' '}
-                            <Link href="/disena-tu-pagina" className="text-blue-400 hover:text-blue-300 underline">
+                            <Link href="https://ia.digitrial.com.co" className="text-blue-400 hover:text-blue-300 underline">
                                 Genera tu página gratis aquí
                             </Link>
                         </p>
@@ -317,7 +317,7 @@ function EditorContent() {
                     <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                     <h2 className="text-xl font-bold mb-2">Cuenta no encontrada</h2>
                     <p className="text-slate-400 mb-6">{error}</p>
-                    <Link href="/disena-tu-pagina"
+                    <Link href="https://ia.digitrial.com.co"
                         className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-block">
                         Generar mi página gratis
                     </Link>
