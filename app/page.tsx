@@ -14,9 +14,11 @@ export default function Home() {
         <main className="relative">
             <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
-            <HeroHeader />
-            <HeroSearch />
-            <div ref={videoRangeRef} className="h-[80vh] bg-transparent" />
+            <div ref={videoRangeRef} className="relative">
+                <HeroHeader />
+                <HeroSearch />
+                <div className="h-[40vh] bg-transparent" />
+            </div>
             <Templates />
             <Footer />
 

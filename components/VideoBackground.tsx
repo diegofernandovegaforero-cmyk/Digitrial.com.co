@@ -41,7 +41,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     });
 
     // Opacidad suavizada: El enmascaramiento físico (HeroHeader opaco) se encarga de la precisión.
-    const opacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+    const opacity = useTransform(scrollYProgress, [0, 0.01, 0.99, 1], [0, 1, 1, 0]);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
@@ -54,7 +54,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     return (
         <motion.div
             style={{ opacity }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-6xl aspect-video overflow-hidden rounded-[2.5rem] shadow-2xl border-4 border-white/20 z-0 pointer-events-none"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-6xl aspect-video overflow-hidden rounded-[80px] md:rounded-[180px] shadow-2xl border-4 border-white/20 z-0 pointer-events-none"
         >
             <AnimatePresence mode="wait">
                 <motion.div
