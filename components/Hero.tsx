@@ -18,10 +18,9 @@ const itemVariants: Variants = {
     visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: 'easeOut' } },
 };
 
-// ─── Componente de Cabecera (Headline, CTA) ──────────────────────────────────
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-transparent">
+        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white dark:bg-slate-950 z-30">
             {/* Blobs decorativos de fondo */}
             <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
