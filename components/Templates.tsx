@@ -94,14 +94,14 @@ export default function Templates() {
             <div className="container mx-auto px-6 relative z-10">
                 <motion.div
                     ref={headerRef}
-                    className="text-center mb-16 max-w-3xl mx-auto p-8 rounded-3xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 shadow-xl"
+                    className="text-center mb-20 px-6"
                     initial={{ opacity: 0, y: 30 }}
                     animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     transition={{ duration: 0.7, ease: 'easeOut' }}
                 >
-                    <span className="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Casos de Éxito / Plantillas</span>
-                    <h2 className="text-4xl md:text-5xl font-extrabold mt-6 mb-6 text-slate-900 dark:text-white">Plantillas Generadas por IA</h2>
-                    <p className="text-gray-500 dark:text-slate-400 text-lg">Explora la calidad internacional de los diseños que nuestro agente IA construye en segundos para cada tipo de negocio.</p>
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] uppercase tracking-tighter">
+                        Plantillas Generadas con IA
+                    </h2>
                 </motion.div>
 
                 <div className="relative max-w-5xl mx-auto h-[500px] flex items-center justify-center">
