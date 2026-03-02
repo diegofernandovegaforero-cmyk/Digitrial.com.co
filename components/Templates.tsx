@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
-import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingCart, Users, Layout, Smartphone, Code } from 'lucide-react';
 import WavesBackground from './WavesBackground';
 
@@ -46,8 +46,7 @@ const templates = [
 export default function Templates() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0);
-    const headerRef = useRef<HTMLDivElement>(null);
-    const headerInView = useInView(headerRef, { once: true, margin: '-60px' });
+
 
     const slideVariants = {
         enter: (direction: number) => ({
@@ -92,17 +91,7 @@ export default function Templates() {
         <section id="templates" className="py-24 bg-transparent relative overflow-hidden">
             <WavesBackground />
             <div className="container mx-auto px-6 relative z-10">
-                <motion.div
-                    ref={headerRef}
-                    className="text-center mb-20 px-6"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                    transition={{ duration: 0.7, ease: 'easeOut' }}
-                >
-                    <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tracking-tight font-[family-name:var(--font-outfit)]">
-                        Plantillas generadas con IA
-                    </h2>
-                </motion.div>
+
 
                 <div className="relative max-w-5xl mx-auto h-[500px] flex items-center justify-center">
                     <AnimatePresence initial={false} custom={direction}>
