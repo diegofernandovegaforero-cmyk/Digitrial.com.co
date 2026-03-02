@@ -38,7 +38,7 @@ export default function Navbar() {
                         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
                             <Link href="#" className="text-blue-600 font-semibold">Inicio</Link>
                             <Link href="#templates" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Diseños</Link>
-                            <Link href="#services" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Tienda</Link>
+                            <Link href="https://ia.digitrial.com.co" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Tienda</Link>
                             <Link href="#contact" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Contacto</Link>
 
                             <div className="h-4 w-px bg-gray-200 dark:bg-slate-700 mx-2"></div>
@@ -79,7 +79,7 @@ export default function Navbar() {
                         <div className="flex flex-col p-6 space-y-4 font-medium text-slate-900 dark:text-white">
                             <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Inicio</Link>
                             <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Diseños</Link>
-                            <Link href="#services" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
+                            <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
                             <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
                             <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)}
                                 className="group relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-extrabold shadow-lg overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600"
