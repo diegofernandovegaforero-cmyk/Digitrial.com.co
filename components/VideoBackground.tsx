@@ -56,13 +56,13 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
             style={{ opacity }}
             className="fixed inset-0 w-full h-full overflow-hidden shadow-2xl z-0 pointer-events-none"
         >
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
                 <motion.div
                     key={index}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 1.5 }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
                     className="absolute inset-0"
                 >
                     <video
