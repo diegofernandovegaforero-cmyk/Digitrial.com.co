@@ -5,53 +5,46 @@ import { motion, useMotionValue, useTransform, useSpring, useInView } from 'fram
 import { Code, Layout, ShoppingCart, Smartphone, Users, Video } from 'lucide-react';
 import WavesBackground from './WavesBackground';
 
-const services = [
+const templates = [
     {
-        title: "Desarrollo Web Premium",
-        description: "Sitios web ultrarrápidos y estéticamente impactantes que convierten visitantes en clientes.",
-        icon: <Code className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80",
-        color: "bg-blue-50 text-blue-600"
-    },
-    {
-        title: "Landing Pages de Alta Conversión",
-        description: "Páginas diseñadas psicológicamente para maximizar tus ventas y captación de leads.",
-        icon: <Layout className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80",
-        color: "bg-purple-50 text-purple-600"
-    },
-    {
-        title: "E-commerce & Tiendas Online",
-        description: "Plataformas robustas y seguras para vender tus productos a todo el mundo sin comisiones.",
+        title: "Gastronomía: LaBurguer",
+        description: "Diseño audaz y apetecible para restaurantes de comida rápida gourmet que buscan impacto visual.",
         icon: <ShoppingCart className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=600&q=80",
-        color: "bg-indigo-50 text-indigo-600"
+        image: "/images/templates/laburguer.png",
+        color: "bg-red-50 text-red-600"
     },
     {
-        title: "Estrategia Social Media",
-        description: "No solo publicamos, construimos comunidades leales y amplificamos tu voz de marca.",
+        title: "Cortes Premium: Yanapore",
+        description: "Elegancia y sofisticación para parrillas y restaurantes de alta cocina con enfoque en la tradición.",
         icon: <Users className="w-6 h-6" />,
-        image: "/images/social-media-logos.jpg",
-        color: "bg-cyan-50 text-cyan-600"
+        image: "/images/templates/yanapore.png",
+        color: "bg-amber-50 text-amber-600"
     },
     {
-        title: "Talento Humano & SST",
-        description: "Gestión integral del capital humano y seguridad laboral adaptada a la era moderna.",
-        icon: <Smartphone className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&q=80",
-        color: "bg-green-50 text-green-600"
-    },
-    {
-        title: "Producción Audiovisual",
-        description: "Contenido visual de calidad cinematográfica para posicionar tu marca en el top.",
-        icon: <Video className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1533750516457-a7f992034fec?auto=format&fit=crop&w=600&q=80",
+        title: "Tradición: MasaViva",
+        description: "Un tributo a lo artesanal con un toque moderno para panaderías y negocios de comida típica.",
+        icon: <Layout className="w-6 h-6" />,
+        image: "/images/templates/masaviva.png",
         color: "bg-orange-50 text-orange-600"
+    },
+    {
+        title: "Fitness: Big Fit",
+        description: "Energía pura y potencia para gimnasios, suplementos y equipamiento deportivo profesional.",
+        icon: <Smartphone className="w-6 h-6" />,
+        image: "/images/templates/bigfit.png",
+        color: "bg-orange-50 text-orange-600"
+    },
+    {
+        title: "Automotriz: SuccessCar",
+        description: "Confianza y robustez para repuestos, talleres y servicios de mantenimiento vehicular.",
+        icon: <Code className="w-6 h-6" />,
+        image: "/images/templates/successcar.png",
+        color: "bg-blue-50 text-blue-600"
     }
 ];
 
 // 3D Tilt Card component
-function TiltCard({ service, index }: { service: typeof services[0]; index: number }) {
+function TiltCard({ template, index }: { template: typeof templates[0]; index: number }) {
     const ref = useRef<HTMLDivElement>(null);
     const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -106,21 +99,21 @@ function TiltCard({ service, index }: { service: typeof services[0]; index: numb
             >
                 <div className="h-48 overflow-hidden relative">
                     <Image
-                        src={service.image}
-                        alt={service.title}
+                        src={template.image}
+                        alt={template.title}
                         width={600}
                         height={400}
                         className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
-                    <div className={`absolute top-4 right-4 w-12 h-12 ${service.color} bg-white/90 backdrop-blur rounded-2xl flex items-center justify-center shadow-lg`}>
-                        {service.icon}
+                    <div className={`absolute top-4 right-4 w-12 h-12 ${template.color} bg-white/90 backdrop-blur rounded-2xl flex items-center justify-center shadow-lg`}>
+                        {template.icon}
                     </div>
                 </div>
 
                 <div className="p-8 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-blue-600 transition-colors">{service.title}</h3>
-                    <p className="text-gray-500 text-sm mb-6 leading-relaxed flex-1">{service.description}</p>
+                    <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{template.title}</h3>
+                    <p className="text-gray-500 text-sm mb-6 leading-relaxed flex-1">{template.description}</p>
                     <a href="#" className="inline-flex items-center text-blue-600 font-bold text-sm hover:translate-x-1 transition-transform">
                         Conocer más <span className="ml-2">→</span>
                     </a>
@@ -131,12 +124,12 @@ function TiltCard({ service, index }: { service: typeof services[0]; index: numb
 }
 
 
-export default function Services() {
+export default function Templates() {
     const headerRef = useRef<HTMLDivElement>(null);
     const headerInView = useInView(headerRef, { once: true, margin: '-60px' });
 
     return (
-        <section id="services" className="py-24 bg-white/55 relative overflow-hidden">
+        <section id="templates" className="py-24 bg-white/55 relative overflow-hidden">
             <WavesBackground />
             <div className="container mx-auto px-6 relative z-10">
                 <motion.div
@@ -146,14 +139,14 @@ export default function Services() {
                     animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     transition={{ duration: 0.7, ease: 'easeOut' }}
                 >
-                    <span className="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Nuestras Soluciones</span>
-                    <h2 className="text-4xl md:text-5xl font-extrabold mt-6 mb-6 text-slate-900">Todo lo que necesitas para escalar</h2>
-                    <p className="text-gray-500 text-lg">Ecosistema integral de servicios diseñados para potenciar cada aspecto de tu presencia digital con resultados medibles.</p>
+                    <span className="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Casos de Éxito / Plantillas</span>
+                    <h2 className="text-4xl md:text-5xl font-extrabold mt-6 mb-6 text-slate-900">Plantillas Generadas por IA</h2>
+                    <p className="text-gray-500 text-lg">Explora la calidad internacional de los diseños que nuestro agente IA construye en segundos para cada tipo de negocio.</p>
                 </motion.div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {services.map((service, index) => (
-                        <TiltCard key={index} service={service} index={index} />
+                    {templates.map((template, index) => (
+                        <TiltCard key={index} template={template} index={index} />
                     ))}
                 </div>
             </div>

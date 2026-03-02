@@ -89,12 +89,12 @@ export default function Footer() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold mb-6 uppercase text-xs text-slate-400 tracking-wider">Servicios</h4>
+                        <h4 className="font-bold mb-6 uppercase text-xs text-slate-400 tracking-wider">Plantillas</h4>
                         <ul className="space-y-4 text-slate-500">
-                            <li><Link href="#services" className="hover:text-blue-400 transition">Desarrollo Web</Link></li>
-                            <li><Link href="#services" className="hover:text-blue-400 transition">Landing Pages</Link></li>
+                            <li><Link href="#templates" className="hover:text-blue-400 transition">Desarrollo Web</Link></li>
+                            <li><Link href="#templates" className="hover:text-blue-400 transition">Landing Pages</Link></li>
 
-                            <li><Link href="#services" className="hover:text-blue-400 transition">Manejo de Redes</Link></li>
+                            <li><Link href="#templates" className="hover:text-blue-400 transition">Manejo de Redes</Link></li>
                         </ul>
                     </div>
 
