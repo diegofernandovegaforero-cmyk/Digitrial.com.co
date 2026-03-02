@@ -20,7 +20,7 @@ const itemVariants: Variants = {
 
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-transparent z-10">
+        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white dark:bg-slate-950 z-30">
             {/* Blobs decorativos de fondo */}
             <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
@@ -132,7 +132,7 @@ export function HeroSearch() {
     };
 
     return (
-        <section className="pb-24 px-6 relative z-10 flex flex-col items-center bg-transparent">
+        <section className="pb-24 px-6 relative z-10 flex flex-col items-center bg-white dark:bg-slate-950">
             <div className="container mx-auto max-w-5xl">
                 <motion.div
                     variants={containerVariants}
