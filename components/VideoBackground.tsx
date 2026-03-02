@@ -54,7 +54,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     return (
         <motion.div
             style={{ opacity }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-6xl aspect-video overflow-hidden rounded-[80px] md:rounded-[180px] shadow-2xl border-4 border-white/20 z-0 pointer-events-none"
+            className="fixed inset-0 w-full h-full overflow-hidden shadow-2xl z-0 pointer-events-none"
         >
             <AnimatePresence mode="wait">
                 <motion.div

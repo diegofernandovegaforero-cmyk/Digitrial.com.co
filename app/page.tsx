@@ -16,7 +16,7 @@ export default function Home() {
             <Navbar />
             <HeroHeader />
             <HeroSearch />
-            <div ref={videoRangeRef} className="h-[80vh] bg-transparent" />
+            <div ref={videoRangeRef} className="h-[150vh] bg-transparent" />
             <Templates />
             <Footer />
 
