@@ -4,7 +4,7 @@ import { Mail, MapPin, Phone, Linkedin, Instagram, Facebook, Triangle } from 'lu
 
 export default function Footer() {
     return (
-        <footer id="contact" className="bg-slate-900 text-white pt-24 pb-12 px-6">
+        <footer id="contact" className="bg-slate-900 text-white pt-24 pb-12 px-6 relative z-10">
             <div className="container mx-auto">
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-8 md:p-12 rounded-[2.5rem] mb-20 relative overflow-hidden">
                     {/* Background Glow */}
@@ -31,7 +31,7 @@ export default function Footer() {
                                 </a>
                             </div>
                         </div>
-                        <div className="bg-slate-950/50 backdrop-blur-sm p-8 rounded-3xl border border-slate-800 text-sm space-y-4">
+                        <div className="bg-slate-950 p-8 rounded-3xl border border-slate-800 text-sm space-y-4">
                             <div className="flex items-center gap-4 text-white">
                                 <MapPin className="text-blue-500 w-5 h-5" />
                                 <span>Pitalito Huila, Colombia</span>

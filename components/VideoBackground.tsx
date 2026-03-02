@@ -41,7 +41,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     });
 
     // Opacidad suavizada: El enmascaramiento físico (HeroHeader opaco) se encarga de la precisión.
-    const opacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
+    const opacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
