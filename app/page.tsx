@@ -1,6 +1,7 @@
 'use client';
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import ShowcaseVideo from "@/components/ShowcaseVideo";
 import Templates from "@/components/Templates";
 import About from "@/components/About";
 import Footer from "@/components/Footer";
@@ -11,6 +12,7 @@ export default function Home() {
         <main className="relative z-10">
             <Navbar />
             <Hero />
+            <ShowcaseVideo />
             <Templates />
             <About />
             <Footer />
