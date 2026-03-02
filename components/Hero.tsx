@@ -132,7 +132,7 @@ export function HeroSearch() {
     };
 
     return (
-        <section className="pb-24 px-6 relative z-10 flex flex-col items-center">
+        <section className="pb-24 px-6 relative z-10 flex flex-col items-center bg-white dark:bg-slate-950">
             <div className="container mx-auto max-w-5xl">
                 <motion.div
                     variants={containerVariants}

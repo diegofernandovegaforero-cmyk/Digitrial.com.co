@@ -15,8 +15,8 @@ export default function Home() {
             <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
             <HeroHeader />
+            <HeroSearch />
             <div ref={videoRangeRef} className="relative">
-                <HeroSearch />
                 <Templates />
             </div>
             <Footer />
