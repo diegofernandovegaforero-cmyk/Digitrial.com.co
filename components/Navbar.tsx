@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Menu, X, Triangle, ShoppingCart } from 'lucide-react';
 import AnnouncementBar from './AnnouncementBar';
 
@@ -53,14 +54,18 @@ export default function Navbar() {
                             <ShoppingCart className="w-5 h-5" />
                         </Link>
 
-                        {/* Desktop CTA (Hidden on mobile < sm) */}
-                        <Link
-                            href="https://ia.digitrial.com.co"
-                            className="group relative hidden sm:flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-extrabold text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-lg hover:shadow-blue-500/40 hover:-translate-y-0.5 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500"
+                        <motion.div
+                            animate={{ scale: [1, 1.02, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
-                            <span className="relative z-10 text-xs md:text-sm">Diseña tu Página Web Gratis con IA</span>
-                        </Link>
+                            <Link
+                                href="https://ia.digitrial.com.co"
+                                className="group relative hidden sm:flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-black text-slate-900 text-xs uppercase tracking-wider transition-all duration-300 shadow-[0_0_20px_rgba(163,255,18,0.3)] hover:shadow-[0_0_30px_rgba(163,255,18,0.5)] hover:-translate-y-0.5 overflow-hidden bg-[#A3FF12]"
+                            >
+                                <div className="absolute inset-0 w-full h-full bg-white/30 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                                <span className="relative z-10 text-xs md:text-sm">Diseña tu Página Web Gratis con IA</span>
+                            </Link>
+                        </motion.div>
 
                         {/* Mobile Menu Button */}
                         <button
@@ -80,12 +85,17 @@ export default function Navbar() {
                             <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Diseños</Link>
                             <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
                             <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
-                            <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)}
-                                className="group relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-extrabold shadow-lg overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600"
+                            <motion.div
+                                animate={{ scale: [1, 1.02, 1] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                             >
-                                <div className="absolute inset-0 w-full h-full bg-white/10 -skew-x-12 -translate-x-full animate-[shimmer_3s_infinite]" />
-                                <span className="relative z-10 text-xs uppercase tracking-wider font-bold">Diseña tu Página Web Gratis con IA</span>
-                            </Link>
+                                <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)}
+                                    className="group relative flex items-center justify-center text-slate-900 px-6 py-4 rounded-2xl text-center font-black shadow-[0_0_20px_rgba(163,255,18,0.3)] overflow-hidden bg-[#A3FF12]"
+                                >
+                                    <div className="absolute inset-0 w-full h-full bg-white/20 -skew-x-12 -translate-x-full animate-[shimmer_3s_infinite]" />
+                                    <span className="relative z-10 text-xs uppercase tracking-wider font-bold">Diseña tu Página Web Gratis con IA</span>
+                                </Link>
+                            </motion.div>
                         </div>
                     </div>
                 )}
