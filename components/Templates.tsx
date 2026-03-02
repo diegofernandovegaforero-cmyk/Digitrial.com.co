@@ -108,6 +108,15 @@ export default function Templates() {
                             }}
                             className="absolute w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row h-full"
                         >
+                            {/* Etiqueta Elegante de IA */}
+                            <div className="absolute top-6 right-8 z-20 hidden md:block">
+                                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                    <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+                                        Diseños Realizados con I.A
+                                    </span>
+                                </div>
+                            </div>
                             {/* Imagen del Template */}
                             <div className="relative w-full md:w-3/5 h-64 md:h-auto overflow-hidden">
                                 <Image
