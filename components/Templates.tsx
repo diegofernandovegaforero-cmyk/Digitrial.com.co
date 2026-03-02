@@ -129,7 +129,7 @@ export default function Templates() {
     const headerInView = useInView(headerRef, { once: true, margin: '-60px' });
 
     return (
-        <section id="templates" className="py-24 bg-white/55 relative overflow-hidden">
+        <section id="templates" className="py-24 bg-transparent relative overflow-hidden">
             <WavesBackground />
             <div className="container mx-auto px-6 relative z-10">
                 <motion.div

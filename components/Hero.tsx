@@ -53,8 +53,7 @@ export default function Hero() {
     };
 
     return (
-        <section className="pt-32 pb-24 px-6 lg:pt-40 relative overflow-hidden min-h-screen flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #f8faff 0%, #eef2ff 50%, #fcfdfe 100%)' }}>
+        <section className="pt-32 pb-24 px-6 lg:pt-40 relative overflow-hidden min-h-screen flex items-center justify-center bg-transparent">
 
             {/* Blobs decorativos de fondo */}
             <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"

@@ -8,7 +8,7 @@ export default function About() {
     const commitmentCount = useCountUp(100, 2000);
 
     return (
-        <section className="py-24 px-6 bg-white/65 overflow-hidden relative">
+        <section className="py-24 px-6 bg-transparent overflow-hidden relative">
             <WavesBackground />
             <div className="container mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
                 <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl group">

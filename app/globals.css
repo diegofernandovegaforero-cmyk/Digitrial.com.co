@@ -10,14 +10,14 @@
 /* ── Transición suave del fondo al hacer scroll ─────────────────────────── */
 body {
   color: var(--foreground);
-  background: #ffffff;
+  background: transparent;
   font-family: Arial, Helvetica, sans-serif;
   transition: background 0.6s ease;
 }
 
 /* Fondo oscuro activado por ThemeProvider al usar la clase .dark */
 .dark body {
-  background: #00050f;
+  background: rgba(0, 5, 15, 0.4);
 }
 
 .dark section {

@@ -46,9 +46,10 @@ export default function VideoBackground() {
                 container.style.opacity = '1';
             } else {
                 const scrollY = window.scrollY;
-                const maxOpacity = 0.35;
-                const scrollRange = 300;
-                const calculatedOpacity = Math.min(maxOpacity, (scrollY / scrollRange) * maxOpacity);
+                const baseOpacity = 0.15; // Visibilidad mínima al inicio
+                const maxOpacity = 0.45; // Máxima visibilidad sutil
+                const scrollRange = 400;
+                const calculatedOpacity = baseOpacity + Math.min(maxOpacity - baseOpacity, (scrollY / scrollRange) * (maxOpacity - baseOpacity));
                 container.style.opacity = calculatedOpacity.toString();
             }
         }
