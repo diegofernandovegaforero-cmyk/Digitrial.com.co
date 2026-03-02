@@ -21,9 +21,9 @@ export default function Home() {
                 <HeroSearch />
             </div>
             <div ref={videoRangeRef} className="h-[150vh] bg-transparent" />
-            <About />
             <div className="relative z-50 bg-white dark:bg-slate-950">
                 <Templates />
+                <About />
                 <Footer />
             </div>
 
