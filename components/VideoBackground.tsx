@@ -5,11 +5,9 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 const videos = [
     // Videos Locales (Nuevos)
     { url: "/videos/RESTAURANTE.mp4", category: "Restauración" },
-    { url: "/videos/TURISMO.mp4", category: "Turismo" },
-    { url: "/videos/GANADERIA.mp4", category: "Ganadería" },
-    { url: "/videos/CAFE.mp4", category: "Café" },
+    { url: "/videos/HAMBURGUESA.mp4", category: "Hamburguesa Gourmet" },
+    { url: "/videos/GIMNASIO.mp4", category: "Fitness & Gimnasio" },
     { url: "/videos/PLATANO.mp4", category: "Plátano" },
-    { url: "/videos/PAPA.mp4", category: "Papa" },
     { url: "/videos/CAFEMOLIDO.mp4", category: "Café Molido" },
     { url: "/videos/ABARROTES.mp4", category: "Abarrotes" },
     // Videos Externos (Existentes)
