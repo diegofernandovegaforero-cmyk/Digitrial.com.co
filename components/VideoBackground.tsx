@@ -17,16 +17,19 @@ const videos = [
     },
 ];
 
-export default function VideoBackground() {
+export default function VideoBackground({ targetRef }: { targetRef?: React.RefObject<HTMLDivElement | null> }) {
     const [index, setIndex] = useState(0);
-    const { scrollY } = useScroll();
+    const { scrollYProgress } = useScroll({
+        target: targetRef as React.RefObject<HTMLElement>,
+        offset: ["start end", "end start"]
+    });
 
-    // Opacidad basada en scroll: 
-    // - 0 hasta empezar scroll
-    // - Aparece (1) cerca del buscador (~400px)
-    // - Persiste durante Plantillas (~hasta 1800px)
-    // - Desaparece al entrar en About (>2200px)
-    const opacity = useTransform(scrollY, [0, 500, 1800, 2200], [0, 1, 1, 0]);
+    // Opacidad basada en el progreso del scroll en el contenedor:
+    // - Inicia invisible
+    // - Aparece rápido al inicio del contenedor (0.1)
+    // - Se mantiene visible hasta el final (0.9)
+    // - Desaparece al salir del contenedor (1.0)
+    const opacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {

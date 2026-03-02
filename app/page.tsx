@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Templates from "@/components/Templates";
@@ -8,12 +9,16 @@ import VideoBackground from "@/components/VideoBackground";
 import { MessageCircle } from "lucide-react";
 
 export default function Home() {
+    const videoRangeRef = useRef<HTMLDivElement>(null);
+
     return (
         <main className="relative">
-            <VideoBackground />
+            <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
-            <Hero />
-            <Templates />
+            <div ref={videoRangeRef} className="relative">
+                <Hero />
+                <Templates />
+            </div>
             <About />
             <Footer />
 
