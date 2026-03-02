@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useState } from 'react';
+import { motion, Variants } from 'framer-motion';
+import Link from 'next/link';
 import { Search, Sparkles, Globe, Server } from 'lucide-react';
 import WavesBackground from './WavesBackground';
 
@@ -8,11 +9,11 @@ import WavesBackground from './WavesBackground';
 // Navy: #1A2B4C  |  Green: #2ED573  |  Purple: #6C5CE7  |  White: #FFFFFF
 
 // ─── Variantes de animación ───────────────────────────────────────────────────
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: {},
     visible: { transition: { staggerChildren: 0.15 } },
 };
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { opacity: 0, y: 30, filter: 'blur(5px)' },
     visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: 'easeOut' } },
 };
@@ -89,7 +90,7 @@ export default function Hero() {
                         className="text-xl md:text-2xl font-bold mb-4 text-[#1A2B4C] dark:text-slate-200">
                         ¿No tienes experiencia técnica? No hay problema.
                     </motion.p>
-                    
+
                     <motion.p variants={itemVariants}
                         className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-[#666666] dark:text-slate-400">
                         Diseña, optimiza y publica una web profesional totalmente a tu medida en segundos. Digitrial toma tus ideas y las transforma en una realidad digital potente impulsada por Inteligencia Artificial.
@@ -97,20 +98,20 @@ export default function Hero() {
 
                     {/* CTA Principal */}
                     <motion.div variants={itemVariants} className="mb-16">
-                        <button
+                        <Link href="/disena-tu-pagina"
                             className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                            style={{ background: 'linear-gradient(135deg, #6C5CE7, #8e7df5)' }}>
+                            style={{ background: 'linear-gradient(135deg, #1A2B4C, #2ED573)' }}>
                             <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                             <Sparkles className="w-6 h-6 animate-pulse" />
-                            <span className="relative z-10">Inicia tu diseño con IA gratis</span>
-                        </button>
+                            <span className="relative z-10">INICIA TU DISEÑO CON IA GRATIS</span>
+                        </Link>
                         <p className="mt-4 text-sm font-semibold text-slate-500">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
 
                     {/* Buscador de Dominios */}
                     <motion.div variants={itemVariants}
                         className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 relative z-20">
-                        
+
                         <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-lg transform rotate-3">
                             ¡Asegura tu marca!
                         </div>
