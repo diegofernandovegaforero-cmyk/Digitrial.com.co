@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import ParticleBackground from "@/components/ParticleBackground";
+import VideoBackground from "@/components/VideoBackground";
 import ScrollThemeProvider from "@/components/ScrollThemeProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -32,8 +32,8 @@ export default function RootLayout({
                 >
                     {/* Proveedor de tema oscuro al hacer scroll */}
                     <ScrollThemeProvider />
-                    {/* Fondo animado de partículas — marca de agua fija en toda la página */}
-                    <ParticleBackground />
+                    {/* Fondo de video industrial - marca de agua dinámica */}
+                    <VideoBackground />
                     {/* Contenido principal sobre el fondo */}
                     <div style={{ position: 'relative', zIndex: 1 }}>
                         {children}
