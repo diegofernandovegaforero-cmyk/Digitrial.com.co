@@ -40,7 +40,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     });
 
     // Opacidad suavizada rápida: Revelación y ocultamiento más veloces
-    const opacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+    const opacity = useTransform(scrollYProgress, [0, 0.15, 0.95, 1], [0, 1, 1, 0]);
 
     // Animaciones para los 3 bloques de texto (Secuencial)
     const text1Opacity = useTransform(scrollYProgress, [0.1, 0.2, 0.3, 0.35], [0, 1, 1, 0]);
