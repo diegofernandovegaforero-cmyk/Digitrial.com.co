@@ -59,7 +59,7 @@ export default function Navbar() {
                             className="group relative hidden sm:flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-extrabold text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-lg hover:shadow-blue-500/40 hover:-translate-y-0.5 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500"
                         >
                             <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
-                            <span className="relative z-10">Diseña tu Página Web Gratis</span>
+                            <span className="relative z-10 text-xs md:text-sm">Diseña tu Página Web Gratis con IA</span>
                         </Link>
 
                         {/* Mobile Menu Button */}
@@ -84,7 +84,7 @@ export default function Navbar() {
                                 className="group relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-extrabold shadow-lg overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600"
                             >
                                 <div className="absolute inset-0 w-full h-full bg-white/10 -skew-x-12 -translate-x-full animate-[shimmer_3s_infinite]" />
-                                <span className="relative z-10 text-sm uppercase tracking-wider">Diseña tu Página Web Gratis</span>
+                                <span className="relative z-10 text-xs uppercase tracking-wider font-bold">Diseña tu Página Web Gratis con IA</span>
                             </Link>
                         </div>
                     </div>
