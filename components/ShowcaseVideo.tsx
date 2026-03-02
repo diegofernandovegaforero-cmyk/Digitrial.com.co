@@ -25,7 +25,7 @@ export default function ShowcaseVideo() {
     const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
     return (
-        <section ref={containerRef} className="relative h-[150vh] bg-slate-900 overflow-hidden">
+        <section ref={containerRef} className="relative h-[150vh] bg-transparent overflow-hidden">
             <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                 <motion.div
                     style={{

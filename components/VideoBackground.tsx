@@ -4,20 +4,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const videos = [
     {
-        url: "https://assets.mixkit.co/videos/preview/mixkit-chef-preparing-a-salad-in-a-professional-kitchen-862-large.mp4", // Gastronomía
+        url: "https://videos.pexels.com/video-files/3769033/3769033-hd_1920_1080_25fps.mp4", // Gastronomía
         category: "Gastronomía"
     },
     {
-        url: "https://assets.mixkit.co/videos/preview/mixkit-man-training-hard-in-the-gym-23424-large.mp4", // Fitness
+        url: "https://videos.pexels.com/video-files/3694919/3694919-uhd_1440_2560_30fps.mp4", // Fitness
         category: "Fitness"
     },
     {
-        url: "https://assets.mixkit.co/videos/preview/mixkit-professional-mechanic-working-on-a-car-engine-4664-large.mp4", // Automotriz
+        url: "https://videos.pexels.com/video-files/3066459/3066459-uhd_2732_1440_24fps.mp4", // Automotriz
         category: "Automotriz"
     },
     {
-        url: "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-woman-typing-on-a-laptop-406-large.mp4", // E-commerce/Tech
-        category: "E-commerce"
+        url: "https://videos.pexels.com/video-files/3129595/3129595-uhd_2560_1440_30fps.mp4", // Tecnología
+        category: "Tecnología"
     }
 ];
 
@@ -68,7 +68,7 @@ export default function VideoBackground() {
     return (
         <div
             ref={canvasRef}
-            className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-700"
+            className="fixed inset-0 z-[-1] pointer-events-none transition-opacity duration-700"
             style={{ opacity: 0 }}
         >
             <AnimatePresence mode="wait">
