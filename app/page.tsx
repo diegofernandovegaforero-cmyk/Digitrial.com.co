@@ -3,7 +3,6 @@ import { useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { HeroHeader, HeroSearch } from "@/components/Hero";
 import Templates from "@/components/Templates";
-import About from "@/components/About";
 import Footer from "@/components/Footer";
 import VideoBackground from "@/components/VideoBackground";
 import { MessageCircle } from "lucide-react";
@@ -20,7 +19,6 @@ export default function Home() {
                 <HeroSearch />
                 <Templates />
             </div>
-            <About />
             <Footer />
 
             {/* Floating WhatsApp Button */}
