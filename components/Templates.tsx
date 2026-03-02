@@ -88,7 +88,7 @@ export default function Templates() {
     }, [currentIndex]);
 
     return (
-        <section id="templates" className="pt-64 pb-24 bg-transparent relative overflow-hidden">
+        <section id="templates" className="py-24 bg-white dark:bg-slate-950 relative overflow-hidden">
             <WavesBackground />
             <div className="container mx-auto px-6 relative z-10">
 
