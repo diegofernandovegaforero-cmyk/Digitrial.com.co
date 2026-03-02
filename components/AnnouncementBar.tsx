@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 
 export default function AnnouncementBar() {
     const [timeLeft, setTimeLeft] = useState({ days: 5, hours: 0, minutes: 0, seconds: 0 });
@@ -40,34 +39,36 @@ export default function AnnouncementBar() {
     }, []);
 
     const countdownText = `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`;
-    const mainText = "⚡ Sin plantillas prefabricadas ⚡ Diseños únicos en 15 segundos con I.A 🚀 FASE DE LANZAMIENTO: 50% DE DESCUENTO 🚀 TERMINA EN:";
-    const fullText = `${mainText} ${countdownText}`;
-
-    // Repetimos el texto para asegurar una transición suave y continua
-    const repeatedText = `${fullText} \u00A0\u00A0\u00A0\u00A0 ${fullText} \u00A0\u00A0\u00A0\u00A0 ${fullText}`;
 
     return (
-        <div className="relative w-full bg-purple-600 overflow-hidden py-2 z-[60] select-none border-b border-purple-500/30">
-            <div className="flex whitespace-nowrap">
-                <motion.div
-                    animate={{ x: [0, "-33.33%"] }}
-                    transition={{
-                        duration: 25,
-                        repeat: Infinity,
-                        ease: "linear",
-                    }}
-                    className="flex shrink-0 items-center"
-                >
-                    <span className="text-white font-bold text-xs md:text-sm tracking-wide uppercase px-4 flex items-center gap-2">
-                        {repeatedText}
-                    </span>
-                    <span className="text-white font-bold text-xs md:text-sm tracking-wide uppercase px-4 flex items-center gap-2">
-                        {repeatedText}
-                    </span>
-                    <span className="text-white font-bold text-xs md:text-sm tracking-wide uppercase px-4 flex items-center gap-2">
-                        {repeatedText}
-                    </span>
-                </motion.div>
+        <div className="w-full bg-purple-600 py-1.5 px-4 z-[60] select-none border-b border-purple-500/30">
+            <div className="container mx-auto flex flex-wrap justify-center items-center gap-x-6 md:gap-x-12 text-[10px] md:text-[11px] font-bold text-white uppercase tracking-wider text-center">
+                <div className="flex items-center gap-2">
+                    <span className="text-purple-200">⚡</span>
+                    <span>Sin plantillas prefabricadas</span>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-2">
+                    <span className="text-purple-200">⚡</span>
+                    <span>Diseños únicos en 15s con I.A</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-white/10 px-3 py-0.5 rounded-full border border-white/20">
+                    <span className="animate-pulse text-red-400">🚀</span>
+                    <span>50% Descuento</span>
+                    <span className="mx-1 text-purple-300">|</span>
+                    <span className="text-purple-100">{countdownText}</span>
+                </div>
+
+                <div className="hidden lg:flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span>8 Cupos disponibles hoy</span>
+                </div>
+
+                <div className="hidden xl:flex items-center gap-2">
+                    <span className="text-purple-200">✨</span>
+                    <span>Garantía de Satisfacción</span>
+                </div>
             </div>
         </div>
     );
