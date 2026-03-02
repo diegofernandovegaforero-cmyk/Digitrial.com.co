@@ -121,13 +121,12 @@ export default function Hero() {
                     {/* CTA Principal */}
                     <motion.div variants={itemVariants} className="mb-16">
                         <Link href="/disena-tu-pagina"
-                            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                            style={{ background: 'linear-gradient(135deg, #1A2B4C, #2ED573)' }}>
+                            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:shadow-blue-600/40 dark:hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500">
                             <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                             <Sparkles className="w-6 h-6 animate-pulse" />
-                            <span className="relative z-10">INICIA TU DISEÑO CON IA GRATIS</span>
+                            <span className="relative z-10">INICIA TU DISEÑO CON AGENTE IA</span>
                         </Link>
-                        <p className="mt-4 text-sm font-semibold text-slate-500">Sin tarjeta de crédito. Resultados al instante.</p>
+                        <p className="mt-4 text-sm font-semibold text-slate-500 dark:text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
 
                     {/* Buscador de Dominios */}
@@ -150,8 +149,8 @@ export default function Hero() {
                                     }}
                                     placeholder="Encuentra el nombre perfecto para tu idea (ej. miempresa.com)"
                                     className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-50 border-2 outline-none transition-all text-lg font-medium text-slate-700 placeholder-slate-400 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
-                                            domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
-                                                'border-transparent focus:bg-white focus:border-[#6C5CE7]'
+                                        domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
+                                            'border-transparent focus:bg-white focus:border-[#6C5CE7]'
                                         }`}
                                     required
                                 />
@@ -171,7 +170,7 @@ export default function Hero() {
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className={`mt-4 p-4 rounded-xl flex items-center justify-between gap-3 text-left border ${domainStatus === 'AVAILABLE' ? 'bg-green-50 border-green-200 text-green-800' :
-                                        'bg-red-50 border-red-200 text-red-800'
+                                    'bg-red-50 border-red-200 text-red-800'
                                     }`}>
                                 <div className="flex items-center gap-3">
                                     {domainStatus === 'AVAILABLE' ? <CheckCircle2 className="w-6 h-6 text-green-600" /> : <XCircle className="w-6 h-6 text-red-600" />}

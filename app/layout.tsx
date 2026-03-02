@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "DIGITRIAL - Centro de Soluciones",
     description: "Transformamos desafíos complejos en oportunidades de crecimiento medibles a través de tecnología y estrategia.",
     icons: {
-        icon: '/favicon.ico',
+        icon: '/favicon.svg',
         apple: '/icon.png',
     },
 };
