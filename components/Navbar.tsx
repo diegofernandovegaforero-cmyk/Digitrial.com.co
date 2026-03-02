@@ -34,7 +34,7 @@ export default function Navbar() {
                     {/* Desktop Menu Links */}
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium">
                         <Link href="#" className="text-blue-600 font-semibold">Inicio</Link>
-                        <Link href="#templates" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Plantillas</Link>
+                        <Link href="#templates" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Diseños</Link>
                         <Link href="#services" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Tienda</Link>
                         <Link href="#contact" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Contacto</Link>
 
@@ -75,7 +75,7 @@ export default function Navbar() {
                 <div className="md:hidden bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 absolute w-full left-0 top-full shadow-xl transition-colors">
                     <div className="flex flex-col p-6 space-y-4 font-medium text-slate-900 dark:text-white">
                         <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Inicio</Link>
-                        <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Plantillas</Link>
+                        <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Diseños</Link>
                         <Link href="#services" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
                         <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
                         <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)}

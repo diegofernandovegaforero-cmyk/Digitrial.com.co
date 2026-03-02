@@ -39,7 +39,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
         offset: ["start end", "end start"]
     });
 
-    // Opacidad suavizada: El video permanece oculto hasta el 35% y se apaga al 60% para dar paso a las plantillas
+    // Opacidad suavizada: El video permanece oculto hasta el 35% y se apaga al 60% para dar paso a los diseños
     const opacity = useTransform(scrollYProgress, [0, 0.35, 0.60, 0.65], [0, 1, 1, 0]);
 
     // Animaciones para los 3 bloques de texto (Secuencial, compactadas antes del 60%)
