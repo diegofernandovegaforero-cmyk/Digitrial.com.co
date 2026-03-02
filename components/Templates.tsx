@@ -106,7 +106,7 @@ export default function Templates() {
                                 x: { type: "spring", stiffness: 300, damping: 30 },
                                 opacity: { duration: 0.5 }
                             }}
-                            className="absolute w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/20 flex flex-col md:flex-row h-full"
+                            className="absolute w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row h-full"
                         >
                             {/* Imagen del Template */}
                             <div className="relative w-full md:w-3/5 h-64 md:h-auto overflow-hidden">
