@@ -47,6 +47,16 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     // Opacidad suavizada rápida: Revelación y ocultamiento más veloces
     const opacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
 
+    // Animaciones para los 3 bloques de texto (Secuencial)
+    const text1Opacity = useTransform(scrollYProgress, [0.1, 0.2, 0.3, 0.35], [0, 1, 1, 0]);
+    const text1Y = useTransform(scrollYProgress, [0.1, 0.2], [20, 0]);
+
+    const text2Opacity = useTransform(scrollYProgress, [0.4, 0.5, 0.6, 0.65], [0, 1, 1, 0]);
+    const text2Y = useTransform(scrollYProgress, [0.4, 0.5], [20, 0]);
+
+    const text3Opacity = useTransform(scrollYProgress, [0.7, 0.8, 0.9, 0.95], [0, 1, 1, 0]);
+    const text3Y = useTransform(scrollYProgress, [0.7, 0.8], [20, 0]);
+
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
         const timer = setInterval(() => {
@@ -83,6 +93,49 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                     <div className="absolute inset-0 bg-slate-900/40" />
                 </motion.div>
             </AnimatePresence>
+
+            {/* Bloques de Texto Dinámicos */}
+            <div className="absolute inset-0 flex items-center justify-center px-6">
+                <div className="container max-w-4xl mx-auto text-center">
+                    {/* Segmento 1 */}
+                    <motion.div
+                        style={{ opacity: text1Opacity, y: text1Y }}
+                        className="absolute inset-0 flex items-center justify-center px-6"
+                    >
+                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
+                            Tu negocio es excepcional; <br className="hidden md:block" />
+                            tu presencia online también debe serlo.
+                        </h2>
+                    </motion.div>
+
+                    {/* Segmento 2 */}
+                    <motion.div
+                        style={{ opacity: text2Opacity, y: text2Y }}
+                        className="absolute inset-0 flex items-center justify-center px-6"
+                    >
+                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
+                            Diseñamos ecosistemas web dinámicos y premium <br className="hidden md:block" />
+                            que te posicionan como el líder de tu sector.
+                        </h2>
+                    </motion.div>
+
+                    {/* Segmento 3 */}
+                    <motion.div
+                        style={{ opacity: text3Opacity, y: text3Y }}
+                        className="absolute inset-0 flex items-center justify-center px-6"
+                    >
+                        <div className="flex flex-col items-center gap-6">
+                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
+                                La visibilidad no se negocia. <br className="hidden md:block" />
+                                Dale a tu industria el nivel digital que merece.
+                            </h2>
+                            <span className="text-xl md:text-3xl font-bold bg-white text-slate-950 px-8 py-3 rounded-2xl shadow-xl">
+                                🚀 Diseña tu web en tiempo real ahora.
+                            </span>
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
 
             {/* Viñeta sutil interna */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)] pointer-events-none" />
