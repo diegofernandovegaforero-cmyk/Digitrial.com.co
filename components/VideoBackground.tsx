@@ -56,7 +56,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     useEffect(() => {
         const timer = setInterval(() => {
             setIndex((prev) => (prev + 1) % videos.length);
-        }, 12000);
+        }, 6000);
         return () => clearInterval(timer);
     }, []);
 
@@ -65,13 +65,12 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
             style={{ opacity }}
             className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950 shadow-2xl z-0 pointer-events-none"
         >
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 <motion.div
                     key={index}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1, ease: "easeInOut" }}
+                    transition={{ duration: 0.3, ease: "linear" }}
                     className="absolute inset-0"
                 >
                     <video
