@@ -60,7 +60,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     return (
         <motion.div
             style={{ opacity }}
-            className="fixed inset-0 w-full h-full overflow-hidden shadow-2xl z-0 pointer-events-none"
+            className="fixed inset-0 w-full h-full overflow-hidden bg-slate-950 shadow-2xl z-0 pointer-events-none"
         >
             <AnimatePresence>
                 <motion.div
@@ -68,7 +68,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 2, ease: "easeInOut" }}
+                    transition={{ duration: 3, ease: "linear" }}
                     className="absolute inset-0"
                 >
                     <video
@@ -76,6 +76,7 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                         loop
                         muted
                         playsInline
+                        preload="auto"
                         className="w-full h-full object-cover"
                     >
                         <source src={videos[index].url} type="video/mp4" />
