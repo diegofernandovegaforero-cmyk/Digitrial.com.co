@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { useCountUp } from '@/hooks/useCountUp';
 import WavesBackground from './WavesBackground';
 import { motion } from 'framer-motion';
+import AICreationVisual from './AICreationVisual';
 
 export default function About() {
     const projectsCount = useCountUp(50, 2500);
@@ -12,17 +13,19 @@ export default function About() {
         <section id="about" className="py-24 px-6 bg-white dark:bg-slate-950 overflow-hidden relative z-30">
             <WavesBackground />
             <div className="container mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
-                {/* Illustration Column */}
+                {/* Illustration & Visual Column */}
                 <motion.div
                     initial={{ opacity: 0, x: -50 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
-                    className="relative"
+                    className="space-y-8"
                 >
+                    <AICreationVisual />
+
                     <div className="relative rounded-[2.5rem] overflow-hidden bg-slate-50 dark:bg-slate-900/50 p-8 md:p-12 border border-slate-100 dark:border-slate-800 shadow-2xl group transition-all duration-500 hover:shadow-indigo-500/10">
                         <Image
-                            src="/brain/6fe89d0a-1769-4ef6-b43d-66a3c9788aea/digital_team_illustration_1772482696481.png"
+                            src="/images/about/team_illustration.png"
                             alt="Digital Team Collaboration"
                             width={800}
                             height={600}
