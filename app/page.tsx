@@ -19,8 +19,10 @@ export default function Home() {
                 <HeroSearch />
             </div>
             <div ref={videoRangeRef} className="h-[150vh] bg-transparent" />
-            <Templates />
-            <Footer />
+            <div className="relative z-50 bg-white dark:bg-slate-950">
+                <Templates />
+                <Footer />
+            </div>
 
             {/* Floating WhatsApp Button */}
             <a

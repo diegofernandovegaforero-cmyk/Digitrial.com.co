@@ -39,18 +39,18 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
         offset: ["start end", "end start"]
     });
 
-    // Opacidad suavizada: El video permanece oculto hasta el 35% del scroll del contenedor
-    const opacity = useTransform(scrollYProgress, [0, 0.35, 0.95, 1], [0, 1, 1, 0]);
+    // Opacidad suavizada: El video permanece oculto hasta el 35% y se apaga al 60% para dar paso a las plantillas
+    const opacity = useTransform(scrollYProgress, [0, 0.35, 0.60, 0.65], [0, 1, 1, 0]);
 
-    // Animaciones para los 3 bloques de texto (Secuencial y retrasadas)
-    const text1Opacity = useTransform(scrollYProgress, [0.45, 0.50, 0.60, 0.65], [0, 1, 1, 0]);
-    const text1Y = useTransform(scrollYProgress, [0.45, 0.50], [20, 0]);
+    // Animaciones para los 3 bloques de texto (Secuencial, compactadas antes del 60%)
+    const text1Opacity = useTransform(scrollYProgress, [0.36, 0.40, 0.42, 0.44], [0, 1, 1, 0]);
+    const text1Y = useTransform(scrollYProgress, [0.36, 0.40], [20, 0]);
 
-    const text2Opacity = useTransform(scrollYProgress, [0.68, 0.73, 0.80, 0.85], [0, 1, 1, 0]);
-    const text2Y = useTransform(scrollYProgress, [0.68, 0.73], [20, 0]);
+    const text2Opacity = useTransform(scrollYProgress, [0.45, 0.48, 0.50, 0.52], [0, 1, 1, 0]);
+    const text2Y = useTransform(scrollYProgress, [0.45, 0.48], [20, 0]);
 
-    const text3Opacity = useTransform(scrollYProgress, [0.88, 0.92, 0.96, 1.0], [0, 1, 1, 0]);
-    const text3Y = useTransform(scrollYProgress, [0.88, 0.92], [20, 0]);
+    const text3Opacity = useTransform(scrollYProgress, [0.53, 0.56, 0.58, 0.60], [0, 1, 1, 0]);
+    const text3Y = useTransform(scrollYProgress, [0.53, 0.56], [20, 0]);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
