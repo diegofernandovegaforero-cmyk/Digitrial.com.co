@@ -14,8 +14,10 @@ export default function Home() {
         <main className="relative">
             <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
-            <HeroHeader />
-            <HeroSearch />
+            <div className="relative z-40 bg-white dark:bg-slate-950">
+                <HeroHeader />
+                <HeroSearch />
+            </div>
             <div ref={videoRangeRef} className="h-[150vh] bg-transparent" />
             <Templates />
             <Footer />
