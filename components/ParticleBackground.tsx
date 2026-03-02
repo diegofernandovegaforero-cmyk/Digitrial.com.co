@@ -61,22 +61,41 @@ export default function ParticleBackground() {
     const mouseRef = useRef({ x: -9999, y: -9999 });
     const animFrameRef = useRef<number>(0);
 
-    // Observar la clase page-dark en el body para mostrar/ocultar el canvas
+    // Observar la clase page-dark y el scroll para manejar la visibilidad
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
         function syncVisibility() {
             if (!canvas) return;
-            canvas.style.opacity = document.body.classList.contains('page-dark') ? '1' : '0';
+            const isDark = document.body.classList.contains('page-dark');
+
+            if (isDark) {
+                canvas.style.opacity = '1';
+            } else {
+                // En modo claro, la opacidad depende del scroll
+                // Aparece gradualmente hasta un máximo de 0.35 entre 0 y 300px
+                const scrollY = window.scrollY;
+                const maxOpacity = 0.35;
+                const scrollRange = 300;
+                const calculatedOpacity = Math.min(maxOpacity, (scrollY / scrollRange) * maxOpacity);
+                canvas.style.opacity = calculatedOpacity.toString();
+            }
         }
 
         syncVisibility(); // estado inicial
 
+        // Observar cambios de clase (modo oscuro/claro)
         const observer = new MutationObserver(syncVisibility);
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-        return () => observer.disconnect();
+        // Escuchar scroll para modo claro
+        window.addEventListener('scroll', syncVisibility, { passive: true });
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('scroll', syncVisibility);
+        };
     }, []);
 
     // ── Loop de animación principal ────────────────────────────────────────
