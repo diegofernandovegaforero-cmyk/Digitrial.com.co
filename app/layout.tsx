@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import VideoBackground from "@/components/VideoBackground";
 import ScrollThemeProvider from "@/components/ScrollThemeProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -32,9 +31,8 @@ export default function RootLayout({
                 >
                     {/* Proveedor de tema oscuro al hacer scroll */}
                     <ScrollThemeProvider />
-                    {/* Fondo de video industrial - marca de agua dinámica */}
-                    <VideoBackground />
-                    {/* Contenido principal sobre el fondo */}
+
+                    {/* Contenido principal */}
                     <div style={{ position: 'relative', zIndex: 1 }}>
                         {children}
                     </div>

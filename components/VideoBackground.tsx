@@ -23,7 +23,6 @@ const videos = [
 
 export default function VideoBackground() {
     const [index, setIndex] = useState(0);
-    const canvasRef = useRef<HTMLDivElement>(null);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
@@ -33,51 +32,15 @@ export default function VideoBackground() {
         return () => clearInterval(timer);
     }, []);
 
-    // Lógica de visibilidad por scroll (idéntica a la anterior para consistencia)
-    useEffect(() => {
-        const container = canvasRef.current;
-        if (!container) return;
-
-        function syncVisibility() {
-            if (!container) return;
-            const isDark = document.body.classList.contains('page-dark');
-
-            if (isDark) {
-                container.style.opacity = '1';
-            } else {
-                const scrollY = window.scrollY;
-                const baseOpacity = 0.15; // Visibilidad mínima al inicio
-                const maxOpacity = 0.45; // Máxima visibilidad sutil
-                const scrollRange = 400;
-                const calculatedOpacity = baseOpacity + Math.min(maxOpacity - baseOpacity, (scrollY / scrollRange) * (maxOpacity - baseOpacity));
-                container.style.opacity = calculatedOpacity.toString();
-            }
-        }
-
-        syncVisibility();
-        const observer = new MutationObserver(syncVisibility);
-        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-        window.addEventListener('scroll', syncVisibility, { passive: true });
-
-        return () => {
-            observer.disconnect();
-            window.removeEventListener('scroll', syncVisibility);
-        };
-    }, []);
-
     return (
-        <div
-            ref={canvasRef}
-            className="fixed inset-0 z-[-1] pointer-events-none transition-opacity duration-700"
-            style={{ opacity: 0 }}
-        >
+        <div className="relative w-full h-full overflow-hidden rounded-[2.5rem] shadow-2xl border-4 border-white/20">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={index}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 2 }}
+                    transition={{ duration: 1.5 }}
                     className="absolute inset-0"
                 >
                     <video
@@ -89,13 +52,13 @@ export default function VideoBackground() {
                     >
                         <source src={videos[index].url} type="video/mp4" />
                     </video>
-                    {/* Overlay para facilitar lectura */}
-                    <div className="absolute inset-0 bg-slate-900/30 dark:bg-slate-950/60 backdrop-blur-[2px]" />
+                    {/* Overlay semi-transparente para legibilidad de lo que esté encima */}
+                    <div className="absolute inset-0 bg-slate-900/40" />
                 </motion.div>
             </AnimatePresence>
 
-            {/* Viñeta sutil */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
+            {/* Viñeta sutil interna */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)] pointer-events-none" />
         </div>
     );
 }

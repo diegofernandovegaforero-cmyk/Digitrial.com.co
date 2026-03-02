@@ -4,6 +4,7 @@ import { motion, Variants } from 'framer-motion';
 import Link from 'next/link';
 import { Search, Sparkles, Globe, Server, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import WavesBackground from './WavesBackground';
+import VideoBackground from './VideoBackground';
 
 // ─── Paleta Digitrial ─────────────────────────────────────────────────────────
 // Navy: #1A2B4C  |  Green: #2ED573  |  Purple: #6C5CE7  |  White: #FFFFFF
@@ -128,92 +129,97 @@ export default function Hero() {
                         <p className="mt-4 text-sm font-semibold text-slate-500 dark:text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
 
-                    {/* Buscador de Dominios */}
-                    <motion.div variants={itemVariants}
-                        className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 relative z-20 transition-all duration-300">
-
-                        <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-10">
-                            ¡Asegura tu marca!
+                    {/* Buscador de Dominios con Showcase de Video Detrás */}
+                    <motion.div
+                        variants={itemVariants}
+                        className="w-full max-w-4xl relative mt-16"
+                    >
+                        {/* El "Rectángulo Bordeado" de Video detrás del buscador */}
+                        <div className="absolute inset-0 -m-4 md:-m-8 z-0">
+                            <VideoBackground />
                         </div>
 
-                        <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 relative">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
-                                <input
-                                    type="text"
-                                    value={domainQuery}
-                                    onChange={(e) => {
-                                        setDomainQuery(e.target.value);
-                                        if (domainStatus !== 'IDLE') setDomainStatus('IDLE');
-                                    }}
-                                    placeholder="Encuentra el nombre perfecto para tu idea (ej. miempresa.com)"
-                                    className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-50 border-2 outline-none transition-all text-lg font-medium text-slate-700 placeholder-slate-400 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
-                                        domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
-                                            'border-transparent focus:bg-white focus:border-[#6C5CE7]'
-                                        }`}
-                                    required
-                                />
+                        <div className="bg-white/95 dark:bg-slate-950/90 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20 relative z-10 transition-all duration-300">
+                            <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-10">
+                                ¡Asegura tu marca!
                             </div>
-                            <button
-                                type="submit"
-                                disabled={isChecking}
-                                className="w-full md:w-auto px-10 py-5 rounded-2xl font-bold text-white text-lg hover:-translate-y-1 transition-transform shadow-lg whitespace-nowrap disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center min-w-[200px]"
-                                style={{ backgroundColor: '#1A2B4C' }}>
-                                {isChecking ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Buscar Dominios'}
-                            </button>
-                        </form>
 
-                        {/* Mensaje de Resultado API */}
-                        {domainStatus !== 'IDLE' && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className={`mt-4 p-4 rounded-xl flex items-center justify-between gap-3 text-left border ${domainStatus === 'AVAILABLE' ? 'bg-green-50 border-green-200 text-green-800' :
-                                    'bg-red-50 border-red-200 text-red-800'
-                                    }`}>
-                                <div className="flex items-center gap-3">
-                                    {domainStatus === 'AVAILABLE' ? <CheckCircle2 className="w-6 h-6 text-green-600" /> : <XCircle className="w-6 h-6 text-red-600" />}
-                                    <span className="font-semibold">{statusMessage}</span>
+                            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 relative">
+                                <div className="relative flex-1 w-full">
+                                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        value={domainQuery}
+                                        onChange={(e) => {
+                                            setDomainQuery(e.target.value);
+                                            if (domainStatus !== 'IDLE') setDomainStatus('IDLE');
+                                        }}
+                                        placeholder="Encuentra el nombre perfecto para tu idea (ej. miempresa.com)"
+                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-white/50 border-2 outline-none transition-all text-lg font-medium text-slate-700 placeholder-slate-400 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
+                                            domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
+                                                'border-transparent focus:bg-white focus:border-[#6C5CE7]'
+                                            }`}
+                                        required
+                                    />
                                 </div>
-                                {domainStatus === 'AVAILABLE' && (
-                                    <Link href="/disena-tu-pagina" className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors">
-                                        ¡Reclámalo Ahora!
-                                    </Link>
-                                )}
-                            </motion.div>
-                        )}
+                                <button
+                                    type="submit"
+                                    disabled={isChecking}
+                                    className="w-full md:w-auto px-10 py-5 rounded-2xl font-bold text-white text-lg hover:-translate-y-1 transition-transform shadow-lg whitespace-nowrap disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center min-w-[200px]"
+                                    style={{ backgroundColor: '#1A2B4C' }}>
+                                    {isChecking ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Buscar Dominios'}
+                                </button>
+                            </form>
 
-                        {/* Explicación de Dominio y Hosting Integrado */}
-                        <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-slate-100 pt-6">
-                            <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                                <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                                    <Globe className="w-6 h-6" />
+                            {/* Mensaje de Resultado API */}
+                            {domainStatus !== 'IDLE' && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className={`mt-4 p-4 rounded-xl flex items-center justify-between gap-3 text-left border ${domainStatus === 'AVAILABLE' ? 'bg-green-50 border-green-200 text-green-800' :
+                                        'bg-red-50 border-red-200 text-red-800'
+                                        }`}>
+                                    <div className="flex items-center gap-3">
+                                        {domainStatus === 'AVAILABLE' ? <CheckCircle2 className="w-6 h-6 text-green-600" /> : <XCircle className="w-6 h-6 text-red-600" />}
+                                        <span className="font-semibold">{statusMessage}</span>
+                                    </div>
+                                    {domainStatus === 'AVAILABLE' && (
+                                        <Link href="/disena-tu-pagina" className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors">
+                                            ¡Reclámalo Ahora!
+                                        </Link>
+                                    )}
+                                </motion.div>
+                            )}
+
+                            {/* Explicación de Dominio y Hosting Integrado */}
+                            <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-slate-100 pt-6">
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                                        <Globe className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-[#1A2B4C] mb-1">¿Qué es un Dominio?</h4>
+                                        <p className="text-sm text-slate-500 leading-relaxed">
+                                            Es el nombre único de tu negocio en internet (como <strong>digitrial.com.co</strong>). Es lo que escriben tus clientes para encontrarte fácilmente. ¡Elige uno memorable!
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-bold text-[#1A2B4C] mb-1">¿Qué es un Dominio?</h4>
-                                    <p className="text-sm text-slate-500 leading-relaxed">
-                                        Es el nombre único de tu negocio en internet (como <strong>digitrial.com.co</strong>). Es lo que escriben tus clientes para encontrarte fácilmente. ¡Elige uno memorable!
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                                <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
-                                    <Server className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-[#1A2B4C] mb-1">Tu diseño alojado seguro</h4>
-                                    <p className="text-sm text-slate-500 leading-relaxed">
-                                        Una vez creado tu diseño con IA, nosotros lo guardamos en un <strong>Hosting</strong> de alto rendimiento: el "terreno" donde vive tu web, manteniéndola conectada, veloz y segura 24/7.
-                                    </p>
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                                        <Server className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-[#1A2B4C] mb-1">Tu diseño alojado seguro</h4>
+                                        <p className="text-sm text-slate-500 leading-relaxed">
+                                            Una vez creado tu diseño con IA, nosotros lo guardamos en un <strong>Hosting</strong> de alto rendimiento: el "terreno" donde vive tu web, manteniéndola conectada, veloz y segura 24/7.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     </motion.div>
                 </motion.div>
-
             </div>
         </section>
     );
 }
-
