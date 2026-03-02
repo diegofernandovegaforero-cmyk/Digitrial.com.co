@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
 const videos = [
     {
@@ -23,6 +23,14 @@ const videos = [
 
 export default function VideoBackground() {
     const [index, setIndex] = useState(0);
+    const { scrollY } = useScroll();
+
+    // Opacidad basada en scroll: 
+    // - 0 hasta empezar scroll
+    // - Aparece (1) cerca del buscador (~400px)
+    // - Persiste durante Plantillas (~hasta 1800px)
+    // - Desaparece al entrar en About (>2200px)
+    const opacity = useTransform(scrollY, [0, 500, 1800, 2200], [0, 1, 1, 0]);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
@@ -33,7 +41,10 @@ export default function VideoBackground() {
     }, []);
 
     return (
-        <div className="relative w-full h-full overflow-hidden rounded-[2.5rem] shadow-2xl border-4 border-white/20">
+        <motion.div
+            style={{ opacity }}
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-6xl aspect-video overflow-hidden rounded-[2.5rem] shadow-2xl border-4 border-white/20 z-0 pointer-events-none"
+        >
             <AnimatePresence mode="wait">
                 <motion.div
                     key={index}
@@ -52,13 +63,13 @@ export default function VideoBackground() {
                     >
                         <source src={videos[index].url} type="video/mp4" />
                     </video>
-                    {/* Overlay semi-transparente para legibilidad de lo que esté encima */}
+                    {/* Overlay semi-transparente para legibilidad */}
                     <div className="absolute inset-0 bg-slate-900/40" />
                 </motion.div>
             </AnimatePresence>
 
             {/* Viñeta sutil interna */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)] pointer-events-none" />
-        </div>
+        </motion.div>
     );
 }

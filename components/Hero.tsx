@@ -4,7 +4,6 @@ import { motion, Variants } from 'framer-motion';
 import Link from 'next/link';
 import { Search, Sparkles, Globe, Server, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import WavesBackground from './WavesBackground';
-import VideoBackground from './VideoBackground';
 
 // ─── Paleta Digitrial ─────────────────────────────────────────────────────────
 // Navy: #1A2B4C  |  Green: #2ED573  |  Purple: #6C5CE7  |  White: #FFFFFF
@@ -129,15 +128,11 @@ export default function Hero() {
                         <p className="mt-4 text-sm font-semibold text-slate-500 dark:text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
 
-                    {/* Buscador de Dominios con Showcase de Video Detrás */}
+                    {/* Buscador de Dominios */}
                     <motion.div
                         variants={itemVariants}
-                        className="w-full max-w-4xl relative mt-16"
+                        className="w-full max-w-4xl relative mt-16 z-10"
                     >
-                        {/* El "Rectángulo Bordeado" de Video detrás del buscador */}
-                        <div className="absolute inset-0 -m-4 md:-m-8 z-0">
-                            <VideoBackground />
-                        </div>
 
                         <div className="bg-white/95 dark:bg-slate-950/90 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20 relative z-10 transition-all duration-300">
                             <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-10">

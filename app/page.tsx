@@ -4,11 +4,13 @@ import Hero from "@/components/Hero";
 import Templates from "@/components/Templates";
 import About from "@/components/About";
 import Footer from "@/components/Footer";
+import VideoBackground from "@/components/VideoBackground";
 import { MessageCircle } from "lucide-react";
 
 export default function Home() {
     return (
-        <main className="relative z-10">
+        <main className="relative">
+            <VideoBackground />
             <Navbar />
             <Hero />
             <Templates />

@@ -134,7 +134,7 @@ export default function Templates() {
             <div className="container mx-auto px-6 relative z-10">
                 <motion.div
                     ref={headerRef}
-                    className="text-center mb-16 max-w-3xl mx-auto"
+                    className="text-center mb-16 max-w-3xl mx-auto p-8 rounded-3xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 shadow-xl"
                     initial={{ opacity: 0, y: 30 }}
                     animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     transition={{ duration: 0.7, ease: 'easeOut' }}
