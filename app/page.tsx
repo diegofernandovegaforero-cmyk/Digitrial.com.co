@@ -7,11 +7,13 @@ import Footer from "@/components/Footer";
 import VideoBackground from "@/components/VideoBackground";
 import { MessageCircle } from "lucide-react";
 
+import About from '@/components/About';
+
 export default function Home() {
     const videoRangeRef = useRef<HTMLDivElement>(null);
 
     return (
-        <main className="relative">
+        <main className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
             <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
             <div className="relative z-40 bg-white dark:bg-slate-950">
@@ -19,6 +21,7 @@ export default function Home() {
                 <HeroSearch />
             </div>
             <div ref={videoRangeRef} className="h-[150vh] bg-transparent" />
+            <About />
             <div className="relative z-50 bg-white dark:bg-slate-950">
                 <Templates />
                 <Footer />
