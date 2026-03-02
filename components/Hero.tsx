@@ -18,43 +18,10 @@ const itemVariants: Variants = {
     visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: 'easeOut' } },
 };
 
-// ─── Componente principal ─────────────────────────────────────────────────────
-export default function Hero() {
-    const [domainQuery, setDomainQuery] = useState('');
-    const [isChecking, setIsChecking] = useState(false);
-    const [domainStatus, setDomainStatus] = useState<'IDLE' | 'AVAILABLE' | 'UNAVAILABLE' | 'ERROR'>('IDLE');
-    const [statusMessage, setStatusMessage] = useState('');
-
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!domainQuery.trim()) return;
-
-        setIsChecking(true);
-        setDomainStatus('IDLE');
-        setStatusMessage('');
-
-        try {
-            const res = await fetch(`/api/domain-check?domain=${encodeURIComponent(domainQuery.trim())}`);
-            const data = await res.json();
-
-            if (res.ok) {
-                setDomainStatus(data.status); // 'AVAILABLE' o 'UNAVAILABLE'
-                setStatusMessage(data.message || (data.status === 'AVAILABLE' ? '¡El dominio está disponible!' : 'Dominio ya registrado.'));
-            } else {
-                setDomainStatus('ERROR');
-                setStatusMessage(data.error || 'Ocurrió un error al verificar el dominio.');
-            }
-        } catch (error) {
-            setDomainStatus('ERROR');
-            setStatusMessage('No se pudo conectar con el servidor.');
-        } finally {
-            setIsChecking(false);
-        }
-    };
-
+// ─── Componente de Cabecera (Headline, CTA) ──────────────────────────────────
+export function HeroHeader() {
     return (
-        <section className="pt-32 pb-24 px-6 lg:pt-40 relative overflow-hidden min-h-screen flex items-center justify-center bg-transparent">
-
+        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-transparent">
             {/* Blobs decorativos de fondo */}
             <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
@@ -67,7 +34,6 @@ export default function Hero() {
             <WavesBackground />
 
             <div className="container mx-auto max-w-5xl relative z-10">
-
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -118,7 +84,7 @@ export default function Hero() {
                     </motion.p>
 
                     {/* CTA Principal */}
-                    <motion.div variants={itemVariants} className="mb-16">
+                    <motion.div variants={itemVariants} className="mb-0">
                         <Link href="/disena-tu-pagina"
                             className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:shadow-blue-600/40 dark:hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500">
                             <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
@@ -127,13 +93,59 @@ export default function Hero() {
                         </Link>
                         <p className="mt-4 text-sm font-semibold text-slate-500 dark:text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
+                </motion.div>
+            </div>
+        </section>
+    );
+}
 
-                    {/* Buscador de Dominios */}
+// ─── Componente de Búsqueda de Dominios ───────────────────────────────────────
+export function HeroSearch() {
+    const [domainQuery, setDomainQuery] = useState('');
+    const [isChecking, setIsChecking] = useState(false);
+    const [domainStatus, setDomainStatus] = useState<'IDLE' | 'AVAILABLE' | 'UNAVAILABLE' | 'ERROR'>('IDLE');
+    const [statusMessage, setStatusMessage] = useState('');
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!domainQuery.trim()) return;
+
+        setIsChecking(true);
+        setDomainStatus('IDLE');
+        setStatusMessage('');
+
+        try {
+            const res = await fetch(`/api/domain-check?domain=${encodeURIComponent(domainQuery.trim())}`);
+            const data = await res.json();
+            if (res.ok) {
+                setDomainStatus(data.status);
+                setStatusMessage(data.message || (data.status === 'AVAILABLE' ? '¡El dominio está disponible!' : 'Dominio ya registrado.'));
+            } else {
+                setDomainStatus('ERROR');
+                setStatusMessage(data.error || 'Ocurrió un error al verificar el dominio.');
+            }
+        } catch (error) {
+            setDomainStatus('ERROR');
+            setStatusMessage('No se pudo conectar con el servidor.');
+        } finally {
+            setIsChecking(false);
+        }
+    };
+
+    return (
+        <section className="pb-24 px-6 relative z-10 flex flex-col items-center">
+            <div className="container mx-auto max-w-5xl">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="flex flex-col items-center text-center"
+                >
                     <motion.div
                         variants={itemVariants}
-                        className="w-full max-w-4xl relative mt-16 z-10"
+                        className="w-full max-w-4xl relative mt-0 z-10"
                     >
-
                         <div className="bg-white/95 dark:bg-slate-950/90 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20 relative z-10 transition-all duration-300">
                             <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-10">
                                 ¡Asegura tu marca!
@@ -216,5 +228,14 @@ export default function Hero() {
                 </motion.div>
             </div>
         </section>
+    );
+}
+
+export default function Hero() {
+    return (
+        <>
+            <HeroHeader />
+            <HeroSearch />
+        </>
     );
 }

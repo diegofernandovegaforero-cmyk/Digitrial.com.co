@@ -1,7 +1,7 @@
 'use client';
 import { useRef } from "react";
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
+import { HeroHeader, HeroSearch } from "@/components/Hero";
 import Templates from "@/components/Templates";
 import About from "@/components/About";
 import Footer from "@/components/Footer";
@@ -15,8 +15,9 @@ export default function Home() {
         <main className="relative">
             <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
+            <HeroHeader />
             <div ref={videoRangeRef} className="relative">
-                <Hero />
+                <HeroSearch />
                 <Templates />
             </div>
             <About />

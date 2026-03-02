@@ -24,12 +24,12 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
         offset: ["start end", "end start"]
     });
 
-    // Opacidad basada en el progreso del scroll en el contenedor:
-    // - Inicia invisible (Hero Headline)
-    // - Aparece justo al llegar al buscador (~0.4 del progreso del contenedor Hero+Templates)
-    // - Se mantiene visible hasta el final de plantillas (0.9)
-    // - Desaparece al salir (1.0)
-    const opacity = useTransform(scrollYProgress, [0.4, 0.5, 0.9, 1], [0, 1, 1, 0]);
+    // Opacidad basada en el progreso del scroll en el contenedor (Search + Templates):
+    // - Inicia invisible (justo al asomar el Buscador)
+    // - Aparece rápido (10% del progreso)
+    // - Se mantiene visible hasta el final de las plantillas (90%)
+    // - Desaparece al salir (100%)
+    const opacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
 
     // Cambio automático de video cada 12 segundos
     useEffect(() => {
