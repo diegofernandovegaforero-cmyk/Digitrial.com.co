@@ -99,8 +99,8 @@ export default function Templates() {
                     animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     transition={{ duration: 0.7, ease: 'easeOut' }}
                 >
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] uppercase tracking-tighter">
-                        Plantillas Generadas con IA
+                    <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tracking-tight font-[family-name:var(--font-outfit)]">
+                        Plantillas generadas con IA
                     </h2>
                 </motion.div>
 

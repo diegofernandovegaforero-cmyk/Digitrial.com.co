@@ -11,7 +11,7 @@
 body {
   color: var(--foreground);
   background: transparent;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
   transition: background 0.6s ease;
 }
 
@@ -83,7 +83,7 @@ header {
   border-color: rgba(30, 41, 59, 0.5) !important;
 }
 
-.dark header a:not([style*="background"]), 
+.dark header a:not([style*="background"]),
 .dark header button:not([style*="background"]) {
   color: #e2e8f0 !important;
 }
