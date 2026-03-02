@@ -6,7 +6,7 @@ const videos = [
     // Videos Locales (Nuevos)
     { url: "/videos/RESTAURANTE.mp4", category: "Restauración" },
     { url: "/videos/HAMBURGUESA.mp4", category: "Hamburguesa Gourmet" },
-    { url: "/videos/GIMNASIO.mp4", category: "Fitness & Gimnasio" },
+    { url: "/videos/GIMNASIO 2.mp4", category: "Fitness & Gimnasio" },
     { url: "/videos/PLATANO.mp4", category: "Plátano" },
     { url: "/videos/CAFEMOLIDO.mp4", category: "Café Molido" },
     { url: "/videos/ABARROTES.mp4", category: "Abarrotes" },
