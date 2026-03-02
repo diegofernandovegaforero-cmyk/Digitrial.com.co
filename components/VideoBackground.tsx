@@ -8,10 +8,6 @@ const videos = [
         category: "Gastronomía"
     },
     {
-        url: "https://videos.pexels.com/video-files/3694919/3694919-uhd_1440_2560_30fps.mp4",
-        category: "Fitness"
-    },
-    {
         url: "https://videos.pexels.com/video-files/4121625/4121625-uhd_2560_1440_25fps.mp4",
         category: "Supermercado"
     },
