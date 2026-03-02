@@ -17,10 +17,11 @@ export default function PlanesDigitrial() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => setIsExpanded(true)}
-                        className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-full shadow-[0_10px_40px_rgba(37,99,235,0.4)] flex items-center gap-2 transition-transform hover:scale-105"
+                        className="group relative fixed bottom-6 right-6 z-50 px-8 py-4 rounded-full font-extrabold text-white shadow-[0_10px_40px_rgba(37,99,235,0.4)] flex items-center gap-3 transition-all hover:scale-105 hover:-translate-y-1 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600"
                     >
-                        <Rocket className="w-5 h-5" />
-                        <span>Hacer realidad este diseño</span>
+                        <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                        <Rocket className="w-5 h-5 relative z-10 animate-pulse" />
+                        <span className="relative z-10">Hacer realidad este diseño</span>
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -85,8 +86,9 @@ export default function PlanesDigitrial() {
                                                 <span>Diseño generado por IA</span>
                                             </li>
                                         </ul>
-                                        <button className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3.5 rounded-xl transition-colors">
-                                            Elegir Despegue
+                                        <button className="group relative w-full px-6 py-4 rounded-xl font-extrabold text-white shadow-lg transition-all duration-300 overflow-hidden bg-slate-700 hover:bg-slate-600">
+                                            <div className="absolute inset-0 w-full h-full bg-white/10 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                                            <span className="relative z-10">Elegir Despegue</span>
                                         </button>
                                     </div>
 
@@ -121,8 +123,9 @@ export default function PlanesDigitrial() {
                                                 <span>SEO Básico en Google</span>
                                             </li>
                                         </ul>
-                                        <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-500/25">
-                                            Quiero mi web lista
+                                        <button className="group relative w-full px-6 py-4 rounded-xl font-extrabold text-white shadow-xl transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-blue-500/25">
+                                            <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                                            <span className="relative z-10">Quiero mi web lista</span>
                                         </button>
                                     </div>
 
@@ -155,8 +158,9 @@ export default function PlanesDigitrial() {
                                             <strong>NOTA:</strong> Para incluir Shopify en tu proyecto, contáctate con un asesor especializado.
                                         </div>
 
-                                        <button className="w-full bg-transparent border-2 border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white font-bold py-3 rounded-xl transition-colors">
-                                            Elegir Premium
+                                        <button className="group relative w-full px-6 py-3.5 rounded-xl font-extrabold text-purple-400 border-2 border-purple-600 transition-all duration-300 overflow-hidden hover:bg-purple-600 hover:text-white group-hover:border-purple-500">
+                                            <div className="absolute inset-0 w-full h-full bg-white/10 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                                            <span className="relative z-10">Elegir Premium</span>
                                         </button>
                                     </div>
 

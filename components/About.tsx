@@ -63,9 +63,10 @@ export default function About() {
                         href="https://wa.me/573123299053"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-14 bg-slate-900 text-white px-10 py-4 rounded-xl font-bold hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl w-full sm:w-auto text-center inline-block"
+                        className="group relative mt-14 px-10 py-4 rounded-xl font-extrabold text-white text-center inline-block shadow-lg hover:shadow-blue-500/30 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 w-full sm:w-auto"
                     >
-                        Hablemos de tu Proyecto
+                        <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                        <span className="relative z-10">Hablemos de tu Proyecto</span>
                     </a>
                 </div>
             </div>

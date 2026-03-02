@@ -54,10 +54,10 @@ export default function Navbar() {
                     {/* Desktop CTA (Hidden on mobile < sm) */}
                     <Link
                         href="https://ia.digitrial.com.co"
-                        className="hidden sm:flex text-white px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 whitespace-nowrap"
-                        style={{ background: 'linear-gradient(90deg, #1E3A8A 0%, #7C3AED 50%, #E11D48 100%)' }}
+                        className="group relative hidden sm:flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-extrabold text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-lg hover:shadow-blue-500/40 hover:-translate-y-0.5 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500"
                     >
-                        Diseña tu Página Web Gratis
+                        <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
+                        <span className="relative z-10">Diseña tu Página Web Gratis</span>
                     </Link>
 
                     {/* Mobile Menu Button */}
@@ -79,9 +79,10 @@ export default function Navbar() {
                         <Link href="#services" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
                         <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
                         <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)}
-                            className="text-white px-6 py-3 rounded-lg text-center font-bold shadow-lg"
-                            style={{ background: 'linear-gradient(90deg, #1E3A8A 0%, #7C3AED 50%, #E11D48 100%)' }}>
-                            Diseña tu Página Web Gratis
+                            className="group relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-extrabold shadow-lg overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600"
+                        >
+                            <div className="absolute inset-0 w-full h-full bg-white/10 -skew-x-12 -translate-x-full animate-[shimmer_3s_infinite]" />
+                            <span className="relative z-10 text-sm uppercase tracking-wider">Diseña tu Página Web Gratis</span>
                         </Link>
                     </div>
                 </div>
