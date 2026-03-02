@@ -9,15 +9,10 @@ const videos = [
     { url: "/videos/GIMNASIO 2.mp4", category: "Fitness & Gimnasio" },
     { url: "/videos/PLATANO.mp4", category: "Plátano" },
     { url: "/videos/CAFEMOLIDO.mp4", category: "Café Molido" },
-    { url: "/videos/ABARROTES.mp4", category: "Abarrotes" },
     // Videos Externos (Existentes)
     {
         url: "https://videos.pexels.com/video-files/3769033/3769033-hd_1920_1080_25fps.mp4",
         category: "Gastronomía"
-    },
-    {
-        url: "https://videos.pexels.com/video-files/4121625/4121625-uhd_2560_1440_25fps.mp4",
-        category: "Supermercado"
     },
     {
         url: "https://videos.pexels.com/video-files/3853624/3853624-hd_1920_1080_25fps.mp4",
