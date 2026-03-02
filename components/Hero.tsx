@@ -132,7 +132,7 @@ export function HeroSearch() {
     };
 
     return (
-        <section className="pb-24 px-6 relative z-10 flex flex-col items-center bg-white dark:bg-slate-950">
+        <section className="pb-24 pt-8 px-6 relative z-40 flex flex-col items-center bg-white dark:bg-slate-950">
             <div className="container mx-auto max-w-5xl">
                 <motion.div
                     variants={containerVariants}
@@ -146,8 +146,8 @@ export function HeroSearch() {
                         className="w-full max-w-4xl relative mt-0 z-10"
                     >
                         <div className="bg-white/95 dark:bg-slate-950/90 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20 relative z-10 transition-all duration-300">
-                            <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-xs font-black uppercase px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-10">
-                                ¡Asegura tu marca!
+                            <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-[10px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-20 whitespace-nowrap">
+                                Diseños Realizados con I.A
                             </div>
 
                             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 relative">
