@@ -1,19 +1,19 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sun, Moon, Menu, X, Triangle } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { Menu, X, Triangle, ShoppingCart } from 'lucide-react';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
-    const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
     // Evitar errores de hidratación
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    if (!mounted) return null;
 
     return (
         <div className="fixed w-full z-50">
@@ -44,15 +44,14 @@ export default function Navbar() {
                             <div className="h-4 w-px bg-gray-200 dark:bg-slate-700 mx-2"></div>
                         </div>
 
-                        {/* Theme Toggle - Always Visible */}
-                        <button
-                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        {/* Shopping Cart Link - Replaces Theme Toggle */}
+                        <Link
+                            href="https://ia.digitrial.com.co"
                             className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800"
-                            aria-label="Alternar modo oscuro"
+                            aria-label="Ir a la tienda"
                         >
-                            {mounted && (theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />)}
-                            {!mounted && <Sun className="w-5 h-5 opacity-0" />}
-                        </button>
+                            <ShoppingCart className="w-5 h-5" />
+                        </Link>
 
                         {/* Desktop CTA (Hidden on mobile < sm) */}
                         <Link
