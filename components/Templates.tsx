@@ -111,8 +111,8 @@ export default function Templates() {
                             {/* Etiqueta Elegante de IA */}
                             <div className="absolute top-6 right-8 z-20 hidden md:block">
                                 <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#A3FF12] animate-pulse shadow-[0_0_8px_#A3FF12]" />
+                                    <span className="text-[10px] font-bold tracking-[0.2em] text-white dark:text-slate-300 uppercase">
                                         Diseños Realizados con I.A
                                     </span>
                                 </div>

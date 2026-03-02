@@ -146,9 +146,20 @@ export function HeroSearch() {
                         className="w-full max-w-4xl relative mt-0 z-10"
                     >
                         <div className="bg-white dark:bg-slate-950 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20 relative z-10 transition-all duration-300">
-                            <div className="absolute -top-4 -right-4 bg-[#2ED573] text-[#1A2B4C] text-[10px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-20 whitespace-nowrap">
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.05, 1],
+                                    rotate: [3, 4, 3]
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="absolute -top-4 -right-4 bg-[#A3FF12] text-slate-900 text-[10px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(163,255,18,0.4)] z-20 whitespace-nowrap"
+                            >
                                 Diseños Realizados con I.A
-                            </div>
+                            </motion.div>
 
                             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 relative">
                                 <div className="relative flex-1 w-full">
