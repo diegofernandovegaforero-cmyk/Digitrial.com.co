@@ -15,10 +15,6 @@ const videos = [
         url: "https://videos.pexels.com/video-files/3066459/3066459-uhd_2732_1440_24fps.mp4", // Automotriz
         category: "Automotriz"
     },
-    {
-        url: "https://videos.pexels.com/video-files/3129595/3129595-uhd_2560_1440_30fps.mp4", // Tecnología
-        category: "Tecnología"
-    }
 ];
 
 export default function VideoBackground() {
