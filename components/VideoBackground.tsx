@@ -4,16 +4,32 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 
 const videos = [
     {
-        url: "https://videos.pexels.com/video-files/3769033/3769033-hd_1920_1080_25fps.mp4", // Gastronomía
+        url: "https://videos.pexels.com/video-files/3769033/3769033-hd_1920_1080_25fps.mp4",
         category: "Gastronomía"
     },
     {
-        url: "https://videos.pexels.com/video-files/3694919/3694919-uhd_1440_2560_30fps.mp4", // Fitness
+        url: "https://videos.pexels.com/video-files/3694919/3694919-uhd_1440_2560_30fps.mp4",
         category: "Fitness"
     },
     {
-        url: "https://videos.pexels.com/video-files/3066459/3066459-uhd_2732_1440_24fps.mp4", // Automotriz
-        category: "Automotriz"
+        url: "https://videos.pexels.com/video-files/4121625/4121625-uhd_2560_1440_25fps.mp4",
+        category: "Supermercado"
+    },
+    {
+        url: "https://videos.pexels.com/video-files/3853624/3853624-hd_1920_1080_25fps.mp4",
+        category: "Plaza de Mercado"
+    },
+    {
+        url: "https://videos.pexels.com/video-files/7125322/7125322-uhd_2560_1440_25fps.mp4",
+        category: "Finca de Café"
+    },
+    {
+        url: "https://videos.pexels.com/video-files/8274530/8274530-uhd_3840_2160_25fps.mp4",
+        category: "Cultivo de Aguacate"
+    },
+    {
+        url: "https://videos.pexels.com/video-files/35793608/35793608-hd_1920_1080_24fps.mp4",
+        category: "Cultivo de Mandarinas"
     },
 ];
 
