@@ -161,9 +161,9 @@ export function HeroSearch() {
                                             if (domainStatus !== 'IDLE') setDomainStatus('IDLE');
                                         }}
                                         placeholder="Encuentra el nombre perfecto para tu idea (ej. miempresa.com)"
-                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-white/50 border-2 outline-none transition-all text-lg font-medium text-slate-700 placeholder-slate-400 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
+                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border-2 outline-none transition-all text-lg font-medium text-slate-900 dark:text-white placeholder-slate-400/70 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
                                             domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
-                                                'border-transparent focus:bg-white focus:border-[#6C5CE7]'
+                                                'border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
                                             }`}
                                         required
                                     />
