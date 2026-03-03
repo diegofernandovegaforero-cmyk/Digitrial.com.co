@@ -405,9 +405,53 @@ function DisenaPageContent() {
                         transition: 'opacity 0.5s ease, transform 0.5s ease',
                     }}
                 >
-                    <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
-                        <div className="w-[50vw] h-[50vw] bg-purple-600/20 rounded-full blur-[130px]" />
-                        <div className="w-[35vw] h-[35vw] bg-blue-600/15 rounded-full blur-[100px] absolute translate-y-24" />
+                    <div className="absolute inset-0 flex justify-center items-center pointer-events-none overflow-hidden text-blue-500/20">
+                        {/* Animated Blobs */}
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.2, 1],
+                                x: [0, 50, 0],
+                                y: [0, -30, 0],
+                                rotate: [0, 20, 0]
+                            }}
+                            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute w-[60vw] h-[60vw] bg-purple-600/20 rounded-full blur-[130px]"
+                        />
+                        <motion.div
+                            animate={{
+                                scale: [1.2, 1, 1.2],
+                                x: [0, -60, 0],
+                                y: [0, 40, 0],
+                                rotate: [0, -15, 0]
+                            }}
+                            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                            className="absolute w-[45vw] h-[45vw] bg-blue-600/15 rounded-full blur-[100px] translate-y-24"
+                        />
+
+                        {/* Floating Particles */}
+                        {[...Array(20)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{
+                                    x: Math.random() * 100 - 50 + "%",
+                                    y: Math.random() * 100 - 50 + "%",
+                                    opacity: Math.random() * 0.3,
+                                    scale: Math.random() * 0.5 + 0.5
+                                }}
+                                animate={{
+                                    y: [0, -100, 0],
+                                    x: [0, (Math.random() - 0.5) * 50, 0],
+                                    opacity: [0.1, 0.4, 0.1]
+                                }}
+                                transition={{
+                                    duration: 10 + Math.random() * 15,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                    delay: Math.random() * 5
+                                }}
+                                className="absolute w-1 h-1 bg-white rounded-full blur-[1px]"
+                            />
+                        ))}
                     </div>
 
                     <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
