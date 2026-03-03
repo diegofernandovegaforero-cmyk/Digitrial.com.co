@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-    title: "¡Web Gratis Con I.A!",
+    title: "Digitrial - ¡Diseña Tu Web Gratis Con I.A!",
     description: "Transformamos desafíos complejos en oportunidades de crecimiento medibles a través de tecnología y estrategia.",
     icons: {
         icon: '/favicon.svg',
