@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Download, Eye, Type, Zap } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -705,36 +705,7 @@ function DisenaPageContent() {
                                 </div>
 
                                 <div className="p-4 overflow-y-auto max-h-[70vh]">
-                                    {/* LOGO SECTION */}
-                                    <div className="mb-4">
-                                        <h3 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
-                                            <Eye className="w-3.5 h-3.5" /> Logo Identificado
-                                        </h3>
 
-                                        <div className="w-full h-20 bg-white/5 rounded-lg flex items-center justify-center overflow-hidden mb-2 border border-white/10 p-2">
-                                            {logoLoading ? (
-                                                <div className="flex flex-col items-center text-slate-500">
-                                                    <Loader2 className="w-5 h-5 animate-spin mb-1" />
-                                                </div>
-                                            ) : logoUrl ? (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img src={logoUrl} alt="Logo Vectorial" className="max-w-full max-h-full object-contain" />
-                                            ) : (
-                                                <span className="text-slate-500 text-xs">Sin logo detectado</span>
-                                            )}
-                                        </div>
-
-                                        {logoUrl && (
-                                            <a
-                                                href={logoUrl}
-                                                download="Identidad-Visual.svg"
-                                                target="_blank"
-                                                className="w-full justify-center flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white font-medium py-2 rounded-lg text-xs transition-colors border border-white/10"
-                                            >
-                                                <Download className="w-3.5 h-3.5" /> Descargar Vector
-                                            </a>
-                                        )}
-                                    </div>
 
                                     {/* INSTRUCTIONS SECTION */}
                                     <h3 className="text-xs font-semibold text-slate-300 mb-2 block">
