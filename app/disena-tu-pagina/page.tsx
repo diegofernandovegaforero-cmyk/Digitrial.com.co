@@ -455,27 +455,47 @@ function DisenaPageContent() {
                     </div>
 
                     <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
-                        <div className="flex flex-wrap items-center justify-center gap-2 mb-8 text-sm sm:text-base text-gray-300">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="flex flex-wrap items-center justify-center gap-2 mb-8 text-sm sm:text-base text-gray-300"
+                        >
                             <span className="font-semibold text-white">Excelente</span>
                             <span className="text-green-400 text-xl tracking-widest leading-none">★★★★★</span>
                             <span className="opacity-70">La agencia digital preferida en Colombia</span>
-                        </div>
+                        </motion.div>
 
-                        <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                            className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight"
+                        >
                             Diseña tu web{' '}
                             <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400">
                                 hoy mismo
                             </span>
-                        </h1>
+                        </motion.h1>
 
-                        <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed">
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                            className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed"
+                        >
                             Crea la página web profesional para tu negocio simplemente
                             describiendo tu idea. La IA de Digitrial la diseña en tiempo real,
                             sin código, lista para atraer clientes.
-                        </p>
+                        </motion.p>
 
-                        <div className="flex flex-col items-center">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, delay: 0.6, type: "spring", stiffness: 200 }}
+                            className="flex flex-col items-center"
+                        >
                             <button
                                 onClick={handleStartDesigning}
                                 className="bg-white text-black font-bold text-lg px-10 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 hover:scale-105 shadow-[0_0_50px_rgba(255,255,255,0.15)] flex items-center gap-2"
@@ -486,12 +506,17 @@ function DisenaPageContent() {
                             <span className="text-sm text-gray-500 mt-4 font-medium tracking-wide">
                                 No necesitas tarjeta de crédito · Obtienes 15 créditos de regalo
                             </span>
-                        </div>
+                        </motion.div>
 
-                        <div className="mt-16 flex flex-col items-center gap-2 opacity-40">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.4 }}
+                            transition={{ duration: 1, delay: 1 }}
+                            className="mt-16 flex flex-col items-center gap-2"
+                        >
                             <span className="text-xs text-gray-500 uppercase tracking-widest">Generado con IA</span>
                             <div className="w-px h-8 bg-gradient-to-b from-gray-500 to-transparent" />
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
             )}
