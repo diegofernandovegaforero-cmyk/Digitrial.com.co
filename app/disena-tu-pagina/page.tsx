@@ -108,7 +108,19 @@ function ImmersiveLoader({ msgIdx }: { msgIdx: number }) {
                 </motion.p>
             </AnimatePresence>
 
-            <p className="text-slate-600 text-xs mt-6">Esto puede tomar entre 15 y 30 segundos</p>
+            <AnimatePresence mode="wait">
+                <motion.p 
+                    key={percent >= 100 ? "delayed" : "normal"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-slate-600 text-xs mt-6 text-center max-w-sm px-4"
+                >
+                    {percent >= 100 
+                        ? "Estamos finalizando los últimos detalles de tu diseño. El proceso de creación con IA puede tomar entre 1 y 2 minutos reales." 
+                        : "Esto puede tomar entre 15 y 60 segundos"}
+                </motion.p>
+            </AnimatePresence>
 
             <style>{`
                 @keyframes digitrialGlow {
