@@ -19,6 +19,21 @@ const emailToDocId = (email: string) =>
 function EditorContent() {
     const searchParams = useSearchParams();
     const emailFromUrl = searchParams.get('email') || '';
+    const instruccionFromUrl = searchParams.get('instruccion') || '';
+
+    // Check sessionStorage for HTML passed directly from the preview page
+    const [sessionHtml] = useState<string>(() => {
+        if (typeof window === 'undefined') return '';
+        try {
+            const stored = sessionStorage.getItem('digitrial_preview_html');
+            const storedEmail = sessionStorage.getItem('digitrial_preview_email');
+            // Only use if the email matches
+            if (stored && storedEmail && storedEmail === emailFromUrl) {
+                return stored;
+            }
+        } catch { /* ignore */ }
+        return '';
+    });
 
     const [email, setEmail] = useState(emailFromUrl);
     const [identificado, setIdentificado] = useState(!!emailFromUrl);
@@ -28,8 +43,14 @@ function EditorContent() {
         creditos_restantes: number;
         codigo_actual: string;
         historial_disenos?: { id: string; codigo_actual: string; descripcion: string; fecha: string }[];
-    } | null>(null);
-    const [cargando, setCargando] = useState(!!emailFromUrl);
+    } | null>(sessionHtml ? {
+        nombre_negocio: 'Tu negocio',
+        nombre_contacto: '',
+        creditos_restantes: 15,
+        codigo_actual: sessionHtml,
+        historial_disenos: [],
+    } : null);
+    const [cargando, setCargando] = useState(!sessionHtml && !!emailFromUrl);
     const [error, setError] = useState('');
 
     // Pestañas
@@ -56,12 +77,22 @@ function EditorContent() {
     const [logoLoading, setLogoLoading] = useState(false);
     const hasShownModalRef = useRef(false);
 
-    // Listener de Firestore en tiempo real
+    // Pre-fill instruction from URL param
+    useEffect(() => {
+        if (instruccionFromUrl) setInstruccion(instruccionFromUrl);
+    }, [instruccionFromUrl]);
+
+    // Listener de Firestore en tiempo real (solo si no tenemos HTML de sessionStorage)
     const [retryCount, setRetryCount] = useState(0);
     const maxRetries = 5;
 
     useEffect(() => {
         if (!identificado || !email) return;
+        // Si ya cargamos el HTML desde sessionStorage, no necesitamos Firebase
+        if (sessionHtml) {
+            setCargando(false);
+            return;
+        }
         const docId = emailToDocId(email);
         const docRef = doc(db, 'usuarios_leads', docId);
         setCargando(true);

@@ -379,8 +379,15 @@ function DisenaPageContent() {
     const handleEditRequest = async () => {
         if (!editInstruction.trim() || !userEmail) return;
         setIsEditing(true);
-        // Lógica futura para conectar directamente aquí con /api/editar-pagina
-        // O redirigir al editor con la instrucción. Por ahora redirige al editor pro:
+        // Guardar el HTML actual en sessionStorage para que el editor lo cargue directamente
+        if (generatedHtml) {
+            try {
+                sessionStorage.setItem('digitrial_preview_html', generatedHtml);
+                sessionStorage.setItem('digitrial_preview_email', userEmail);
+            } catch (e) {
+                console.warn('No se pudo guardar en sessionStorage:', e);
+            }
+        }
         router.push(`/editor?email=${encodeURIComponent(userEmail)}&instruccion=${encodeURIComponent(editInstruction)}`);
     };
 
