@@ -39,20 +39,11 @@ export default function Navbar() {
                         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
                             <Link href="#" className="text-blue-600 font-semibold">Inicio</Link>
                             <Link href="#templates" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Diseños</Link>
-                            <Link href="https://ia.digitrial.com.co" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Tienda</Link>
+                            <Link href="/login" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Iniciar sesión</Link>
                             <Link href="#contact" className="hover:text-blue-600 transition text-gray-600 dark:text-gray-300">Contacto</Link>
 
                             <div className="h-4 w-px bg-gray-200 dark:bg-slate-700 mx-2"></div>
                         </div>
-
-                        {/* Shopping Cart Link - Replaces Theme Toggle */}
-                        <Link
-                            href="https://ia.digitrial.com.co"
-                            className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800"
-                            aria-label="Ir a la tienda"
-                        >
-                            <ShoppingCart className="w-5 h-5" />
-                        </Link>
 
                         <motion.div
                             animate={{ scale: [1, 1.02, 1] }}
@@ -83,7 +74,7 @@ export default function Navbar() {
                         <div className="flex flex-col p-6 space-y-4 font-medium text-slate-900 dark:text-white">
                             <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Inicio</Link>
                             <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Diseños</Link>
-                            <Link href="https://ia.digitrial.com.co" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Tienda</Link>
+                            <Link href="/login" onClick={() => setIsOpen(false)} className="hover:text:hover-blue-600 transition-colors">Iniciar sesión</Link>
                             <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
                             <motion.div
                                 animate={{ scale: [1, 1.02, 1] }}
