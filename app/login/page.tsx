@@ -54,7 +54,7 @@ async function saveUserToFirestore(user: { uid: string; email: string | null; di
 function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirectTo = searchParams.get('redirect') || 'https://ia.digitrial.com.co/?form=true';
+    const redirectToUrl = searchParams.get('redirect');
 
     const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');
@@ -74,10 +74,13 @@ function LoginContent() {
     // Redirect if already logged in
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
-            if (user) router.replace(redirectTo);
+            if (user) {
+                const finalRedirect = redirectToUrl || `/editor?email=${encodeURIComponent(user.email || '')}`;
+                router.replace(finalRedirect);
+            }
         });
         return unsub;
-    }, [redirectTo, router]);
+    }, [redirectToUrl, router]);
 
     const handleGoogle = async () => {
         setGoogleLoading(true);
@@ -85,7 +88,8 @@ function LoginContent() {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             await saveUserToFirestore(result.user);
-            router.replace(redirectTo);
+            const finalRedirect = redirectToUrl || `/editor?email=${encodeURIComponent(result.user.email || '')}`;
+            router.replace(finalRedirect);
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : 'Error con Google. Intenta de nuevo.');
         } finally {
@@ -98,13 +102,17 @@ function LoginContent() {
         setLoading(true);
         setError('');
         try {
+            let loggedInUser = null;
             if (isRegister) {
                 const result = await createUserWithEmailAndPassword(auth, email, password);
                 await saveUserToFirestore(result.user);
+                loggedInUser = result.user;
             } else {
-                await signInWithEmailAndPassword(auth, email, password);
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                loggedInUser = result.user;
             }
-            router.replace(redirectTo);
+            const finalRedirect = redirectToUrl || `/editor?email=${encodeURIComponent(loggedInUser.email || '')}`;
+            router.replace(finalRedirect);
         } catch (e: unknown) {
             const code = (e as { code?: string }).code;
             if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {

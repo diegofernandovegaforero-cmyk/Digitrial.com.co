@@ -111,12 +111,20 @@ function EditorContent() {
         const unsubscribe = onSnapshot(docRef, async (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.data();
+                const pastDesigns = data.historial_disenos || [];
+                let currentCode = data.codigo_actual || '';
+
+                if (!currentCode && pastDesigns.length > 0) {
+                    currentCode = pastDesigns[0].codigo_actual;
+                    setSelectedDesignId(pastDesigns[0].id);
+                }
+
                 setUserData({
                     nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                     nombre_contacto: data.nombre_contacto || '',
                     creditos_restantes: data.creditos_restantes ?? 0,
-                    codigo_actual: data.codigo_actual || '',
-                    historial_disenos: data.historial_disenos || [],
+                    codigo_actual: currentCode,
+                    historial_disenos: pastDesigns,
                 });
                 setError('');
                 setCargando(false);
@@ -127,12 +135,20 @@ function EditorContent() {
                     getDocs(q).then((querySnapshot) => {
                         if (!querySnapshot.empty) {
                             const data = querySnapshot.docs[0].data();
+                            const pastDesigns = data.historial_disenos || [];
+                            let currentCode = data.codigo_actual || '';
+
+                            if (!currentCode && pastDesigns.length > 0) {
+                                currentCode = pastDesigns[0].codigo_actual;
+                                setSelectedDesignId(pastDesigns[0].id);
+                            }
+
                             setUserData({
                                 nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                                 nombre_contacto: data.nombre_contacto || '',
                                 creditos_restantes: data.creditos_restantes ?? 0,
-                                codigo_actual: data.codigo_actual || '',
-                                historial_disenos: data.historial_disenos || [],
+                                codigo_actual: currentCode,
+                                historial_disenos: pastDesigns,
                             });
                             setError('');
                             setCargando(false);
