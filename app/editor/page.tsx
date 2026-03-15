@@ -2,14 +2,13 @@
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, Sparkles, Mic, MicOff, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X } from 'lucide-react';
+import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X, ImagePlus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
 const CREDITOS_POR_EDICION = 3;
-const MAX_AUDIO_SEGUNDOS = 45;
 const MAX_TEXTO_CHARS = 500;
 
 // Sanitizar email para usarlo como Firestore doc ID (igual que en el backend)
@@ -63,14 +62,26 @@ function EditorContent() {
     const [exito, setExito] = useState('');
     const [transcripcion, setTranscripcion] = useState('');
 
-    // Audio recording
-    const [grabando, setGrabando] = useState(false);
-    const [segundosGrabacion, setSegundosGrabacion] = useState(0);
-    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
+    // Audio recording — REMOVED
+    // Image attachments
+    const [editImages, setEditImages] = useState<{ url: string; file: File }[]>([]);
+    const editFileInputRef = useRef<HTMLInputElement>(null);
 
+    const handleEditImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            setEditImages(prev => [...prev, ...files.map(f => ({ url: URL.createObjectURL(f), file: f }))].slice(0, 3));
+        }
+    };
+
+    const removeEditImage = (idx: number) => {
+        setEditImages(prev => {
+            const next = [...prev];
+            URL.revokeObjectURL(next[idx].url);
+            next.splice(idx, 1);
+            return next;
+        });
+    };
     // Modal de Bienvenida e Instrucciones
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -249,60 +260,11 @@ function EditorContent() {
         setIdentificado(true);
     };
 
-    // ── Grabación de audio ──
-    const iniciarGrabacion = useCallback(async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
-            audioChunksRef.current = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) audioChunksRef.current.push(e.data);
-            };
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                setAudioBlob(blob);
-                stream.getTracks().forEach(t => t.stop());
-            };
-
-            mediaRecorder.start();
-            setGrabando(true);
-            setSegundosGrabacion(0);
-
-            audioIntervalRef.current = setInterval(() => {
-                setSegundosGrabacion(prev => {
-                    if (prev >= MAX_AUDIO_SEGUNDOS - 1) {
-                        detenerGrabacion();
-                        return MAX_AUDIO_SEGUNDOS;
-                    }
-                    return prev + 1;
-                });
-            }, 1000);
-        } catch {
-            setError('No se pudo acceder al micrófono. Verifica los permisos.');
-        }
-    }, []);
-
-    const detenerGrabacion = useCallback(() => {
-        if (mediaRecorderRef.current && grabando) {
-            mediaRecorderRef.current.stop();
-            setGrabando(false);
-            if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
-        }
-    }, [grabando]);
-
-    const limpiarAudio = () => {
-        setAudioBlob(null);
-        setSegundosGrabacion(0);
-        setTranscripcion('');
-    };
-
     // ── Enviar edición ──
     const handleEditar = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!instruccion.trim() && !audioBlob) {
-            setError('Escribe una instrucción o graba un audio.');
+        if (!instruccion.trim() && editImages.length === 0) {
+            setError('Escribe una instrucción o adjunta al menos una imagen de referencia.');
             return;
         }
         if ((userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION) return;
@@ -311,17 +273,8 @@ function EditorContent() {
         setError('');
         setExito('');
 
-        let audio_base64 = '';
-        if (audioBlob) {
-            const arrayBuffer = await audioBlob.arrayBuffer();
-            const uint8Array = new Uint8Array(arrayBuffer);
-            let binary = '';
-            uint8Array.forEach(b => binary += String.fromCharCode(b));
-            audio_base64 = btoa(binary);
-        }
-
         try {
-            // Leer imágenes de referencia guardadas desde disena-tu-pagina (si las hay)
+            // Codificar imágenes adjuntas en base64
             let imagenes_base64: string[] = [];
             try {
                 const storedImgs = sessionStorage.getItem('digitrial_edit_images');
@@ -331,13 +284,24 @@ function EditorContent() {
                 }
             } catch { /* ignore */ }
 
+            // Codificar imágenes adjuntas directamente en el editor
+            if (editImages.length > 0) {
+                const encoded = await Promise.all(editImages.map(img => new Promise<string>((res, rej) => {
+                    const reader = new FileReader();
+                    reader.onload = () => res(reader.result as string);
+                    reader.onerror = rej;
+                    reader.readAsDataURL(img.file);
+                })));
+                imagenes_base64 = [...imagenes_base64, ...encoded];
+            }
+
             const res = await fetch('/api/editar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: email.toLowerCase().trim(),
                     instruccion_texto: instruccion,
-                    audio_base64,
+                    audio_base64: '',
                     id_diseno_base: selectedDesignId,
                     imagenes_base64,
                 }),
@@ -381,7 +345,7 @@ function EditorContent() {
 
                 setExito('¡Diseño actualizado! Los cambios ya están aplicados. 🎉');
                 setInstruccion('');
-                limpiarAudio();
+                setEditImages([]);
             }
         } catch {
             setError('Error de conexión. Intenta de nuevo.');
@@ -672,59 +636,61 @@ function EditorContent() {
                                         <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
                                     </div>
 
-                                    {/* Grabación de audio */}
+                                    {/* Grabación de audio — REPLACED by image upload */}
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                            🎤 Instrucción por audio (máx {MAX_AUDIO_SEGUNDOS}s)
+                                            🖼️ Imágenes de referencia
                                         </label>
                                         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                                            {!audioBlob ? (
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        {grabando ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-                                                                <span className="text-red-400 font-bold text-sm">
-                                                                    Grabando... {segundosGrabacion}s / {MAX_AUDIO_SEGUNDOS}s
-                                                                </span>
-                                                            </div>
-                                                        ) : (
-                                                            <p className="text-slate-500 text-sm">Graba tu instrucción en voz</p>
-                                                        )}
-                                                        {grabando && (
-                                                            <div className="mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden w-40">
-                                                                <div
-                                                                    className="h-full bg-red-500 rounded-full transition-all"
-                                                                    style={{ width: `${(segundosGrabacion / MAX_AUDIO_SEGUNDOS) * 100}%` }}
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <button type="button"
-                                                        onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-                                                        className={`p-3 rounded-full transition-colors ${grabando ? 'bg-red-500 hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-500'}`}>
-                                                        {grabando ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
-                                                        <CheckCircle className="w-4 h-4" />
-                                                        Audio listo ({segundosGrabacion}s)
-                                                    </div>
-                                                    <button type="button" onClick={limpiarAudio}
-                                                        className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
-                                                        <RefreshCw className="w-3 h-3" /> Regrabar
-                                                    </button>
+                                            {/* Thumbnails */}
+                                            {editImages.length > 0 && (
+                                                <div className="flex gap-2 flex-wrap mb-3">
+                                                    {editImages.map((img, idx) => (
+                                                        <div key={idx} className="relative w-16 h-16 rounded-lg border border-white/20 overflow-hidden group">
+                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                            <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeEditImage(idx)}
+                                                                className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            >
+                                                                <X className="w-4 h-4 text-white" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
+
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-slate-500">Máx. 3 imágenes · La IA las usará como referencia</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    className="hidden"
+                                                    ref={editFileInputRef}
+                                                    onChange={handleEditImageSelect}
+                                                    disabled={editImages.length >= 3}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => editFileInputRef.current?.click()}
+                                                    disabled={editImages.length >= 3}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                                        editImages.length >= 3
+                                                            ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                                            : 'bg-blue-600/30 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
+                                                    }`}
+                                                >
+                                                    <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
+                                                </button>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-slate-600 mt-1">Si grabas audio, tiene prioridad sobre el texto.</p>
                                     </div>
 
                                     {/* Botón de envío */}
                                     <button type="submit"
-                                        disabled={editando || sinCreditos || (!instruccion.trim() && !audioBlob)}
+                                        disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
                                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
                                         {editando ? (
                                             <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios con IA...</>
