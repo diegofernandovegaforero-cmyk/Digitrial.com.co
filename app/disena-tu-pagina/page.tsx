@@ -442,7 +442,7 @@ function DisenaPageContent() {
                         exit={{ opacity: 0, y: -20 }}
                         className="flex items-center justify-between px-6 py-4 border-b border-white/10 relative z-50"
                     >
-                        <Link href="/" className="flex items-center gap-2">
+                        <Link href="https://digitrial.com.co" className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30">
                                 <Triangle className="text-white fill-white w-4 h-4" />
                             </div>
@@ -450,7 +450,7 @@ function DisenaPageContent() {
                                 DIGI<span className="text-blue-400">TRIAL</span>
                             </span>
                         </Link>
-                        <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
+                        <Link href="https://digitrial.com.co" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
                     </motion.nav>
                 )}
             </AnimatePresence>
