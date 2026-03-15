@@ -80,6 +80,33 @@ export async function POST(req: NextRequest) {
 
     const inputUsuario = descripcion;
 
+    // PRE-CHECK LIMITS (if email is provided)
+    if (email) {
+      try {
+        const adminDb = await getAdminDb();
+        if (adminDb) {
+          const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+          const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+          const existing = await docRef.get();
+          
+          if (existing.exists) {
+            const data = existing.data() || {};
+            const historialLength = (data.historial_disenos || []).length;
+            const creditosRestantes = data.creditos_restantes ?? 0;
+
+            if (historialLength >= 3) {
+              return NextResponse.json({ error: 'Has alcanzado el límite máximo de 3 maquetas.' }, { status: 403 });
+            }
+            if (creditosRestantes < 5) {
+              return NextResponse.json({ error: 'No tienes los 5 créditos necesarios para generar una nueva página.' }, { status: 403 });
+            }
+          }
+        }
+      } catch (checkErr) {
+        console.warn('Error en validación previa de Firebase:', checkErr);
+      }
+    }
+
     if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
       const fallbackHtml = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);
       return NextResponse.json({ html: fallbackHtml });
@@ -156,12 +183,13 @@ export async function POST(req: NextRequest) {
                   }
 
                   historial.unshift(newDesign);
-                  historial = historial.slice(0, 8); // Mantener un máximo de 8 diseños recientes
+                  historial = historial.slice(0, 3); // Mantener un máximo de 3 diseños recientes (REGLA ESTRICTA)
 
                   await docRef.update({
                     codigo_actual: html,
                     historial_disenos: historial,
                     ultima_generacion: new Date().toISOString(),
+                    creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5) // RESTAR 5 CRÉDITOS
                   });
                 }
               }

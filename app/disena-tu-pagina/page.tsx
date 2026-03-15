@@ -715,10 +715,10 @@ function DisenaPageContent() {
                             disabled={!productosValido}
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/30 text-lg">
                             <Sparkles className="w-5 h-5" />
-                            {productosValido ? 'Generar mi Página Web con IA' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`}
+                            {productosValido ? 'Generar mi Página Web (5 créditos)' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`}
                             <ArrowRight className="w-5 h-5" />
                         </button>
-                        <p className="text-center text-xs text-slate-500">✅ 100% gratuito · Sin registro previo · Lista en segundos</p>
+                        <p className="text-center text-xs text-slate-500">✅ Costo: 5 créditos · Límite máximo: 3 diseños por cuenta</p>
                     </form>
                 </main>
             )}
