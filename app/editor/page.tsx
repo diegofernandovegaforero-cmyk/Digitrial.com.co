@@ -162,21 +162,30 @@ function EditorContent() {
                             });
                             setError('');
                             setCargando(false);
-                        } else {
-                            if (currentRetries < maxFirebaseRetries) {
-                                currentRetries++;
-                                // Small delay before trying again (simulated by re-running attempt)
-                                retryTimer = setTimeout(() => {
-                                    if (isSubscribed) {
-                                        unsubscribeSnapshot(); // stop old listener before starting new logic
-                                        attemptLoad();
-                                    }
-                                }, 3000);
                             } else {
-                                setError('No encontramos tu cuenta o diseños. Revisa tu correo o crea uno nuevo.');
-                                setCargando(false);
+                                // If the document doesn't exist even after retries, it means it's a new user without generations.
+                                if (currentRetries < maxFirebaseRetries) {
+                                    currentRetries++;
+                                    // Small delay before trying again (simulated by re-running attempt)
+                                    retryTimer = setTimeout(() => {
+                                        if (isSubscribed) {
+                                            unsubscribeSnapshot(); // stop old listener before starting new logic
+                                            attemptLoad();
+                                        }
+                                    }, 2000);
+                                } else {
+                                    // Successfully determine they are just empty
+                                    setUserData({
+                                        nombre_negocio: 'Tu negocio',
+                                        nombre_contacto: '',
+                                        creditos_restantes: 15,
+                                        codigo_actual: '',
+                                        historial_disenos: [],
+                                    });
+                                    setError('');
+                                    setCargando(false);
+                                }
                             }
-                        }
                     } catch (err) {
                         console.error('Error buscando doc antiguo:', err);
                         setError('Error al cargar la cuenta.');
