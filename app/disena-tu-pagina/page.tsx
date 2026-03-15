@@ -9,7 +9,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
-const emailToDocId = (email: string) => email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+const emailToDocId = (email: string) => email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
 
 type Step = 'form' | 'loading' | 'preview';
 

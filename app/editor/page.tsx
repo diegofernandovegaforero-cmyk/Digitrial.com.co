@@ -57,6 +57,9 @@ function EditorContent() {
     const hasShownModalRef = useRef(false);
 
     // Listener de Firestore en tiempo real
+    const [retryCount, setRetryCount] = useState(0);
+    const maxRetries = 5;
+
     useEffect(() => {
         if (!identificado || !email) return;
         const docId = emailToDocId(email);
@@ -90,10 +93,24 @@ function EditorContent() {
                                 historial_disenos: data.historial_disenos || [],
                             });
                             setError('');
+                            setCargando(false);
                         } else {
-                            setError('No encontramos tu cuenta. Primero genera tu página web.');
+                            // Reintento automático: la IA puede aún estar escribiendo en Firebase
+                            setRetryCount(prev => {
+                                const next = prev + 1;
+                                if (next < maxRetries) {
+                                    setTimeout(() => {
+                                        setCargando(true);
+                                        setRetryCount(n => n); // trigger re-render but not re-run
+                                    }, 4000);
+                                    setCargando(true); // Keep loading spinner
+                                } else {
+                                    setError('No encontramos tu cuenta. Primero genera tu página web.');
+                                    setCargando(false);
+                                }
+                                return next;
+                            });
                         }
-                        setCargando(false);
                     }).catch(err => {
                         console.error('Error buscando doc antiguo:', err);
                         setError('No encontramos tu cuenta. Primero genera tu página web.');
@@ -108,7 +125,7 @@ function EditorContent() {
         });
 
         return () => unsubscribe();
-    }, [identificado, email]);
+    }, [identificado, email, retryCount]);
 
     // Mostrar modal la primera vez que carga un diseño
     useEffect(() => {
@@ -396,7 +413,14 @@ function EditorContent() {
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-blue-400 mx-auto mb-4" />
-                    <p className="text-slate-400">Cargando tu diseño...</p>
+                    <p className="text-slate-300 font-medium">
+                        {retryCount > 0 ? 'Buscando tu diseño...' : 'Cargando tu diseño...'}
+                    </p>
+                    {retryCount > 0 && (
+                        <p className="text-slate-500 text-xs mt-2">
+                            Intento {retryCount}/{maxRetries} · Esto puede tardar unos segundos
+                        </p>
+                    )}
                 </div>
             </div>
         );
@@ -409,11 +433,22 @@ function EditorContent() {
                 <div className="max-w-md text-center">
                     <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                     <h2 className="text-xl font-bold mb-2">Cuenta no encontrada</h2>
-                    <p className="text-slate-400 mb-6">{error}</p>
-                    <Link href="https://ia.digitrial.com.co"
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-block">
-                        Generar mi página gratis
-                    </Link>
+                    <p className="text-slate-400 mb-2">{error}</p>
+                    <p className="text-slate-500 text-sm mb-6">
+                        Si acabas de generar tu página, espera unos segundos y haz clic en Reintentar.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button
+                            onClick={() => { setError(''); setRetryCount(0); setCargando(true); }}
+                            className="bg-slate-700 hover:bg-slate-600 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-flex items-center justify-center gap-2"
+                        >
+                            <RefreshCw className="w-4 h-4" /> Reintentar
+                        </button>
+                        <Link href="https://ia.digitrial.com.co"
+                            className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-block">
+                            Generar mi página gratis
+                        </Link>
+                    </div>
                 </div>
             </div>
         );
