@@ -321,6 +321,16 @@ function EditorContent() {
         }
 
         try {
+            // Leer imágenes de referencia guardadas desde disena-tu-pagina (si las hay)
+            let imagenes_base64: string[] = [];
+            try {
+                const storedImgs = sessionStorage.getItem('digitrial_edit_images');
+                if (storedImgs) {
+                    imagenes_base64 = JSON.parse(storedImgs);
+                    sessionStorage.removeItem('digitrial_edit_images');
+                }
+            } catch { /* ignore */ }
+
             const res = await fetch('/api/editar-pagina', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -329,6 +339,7 @@ function EditorContent() {
                     instruccion_texto: instruccion,
                     audio_base64,
                     id_diseno_base: selectedDesignId,
+                    imagenes_base64,
                 }),
             });
 

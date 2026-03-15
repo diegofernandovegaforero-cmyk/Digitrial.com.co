@@ -293,6 +293,27 @@ function DisenaPageContent() {
     const [exitoGuardado, setExitoGuardado] = useState('');
     const hasParsedLogoRef = useRef(false);
 
+    // ─── IMÁGENES ADJUNTAS AL EDITAR ───
+    const [editImages, setEditImages] = useState<{ url: string; file: File }[]>([]);
+    const editFileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleEditImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            const newImgs = files.map(f => ({ url: URL.createObjectURL(f), file: f }));
+            setEditImages(prev => [...prev, ...newImgs].slice(0, 3));
+        }
+    };
+
+    const removeEditImage = (idx: number) => {
+        setEditImages(prev => {
+            const next = [...prev];
+            URL.revokeObjectURL(next[idx].url);
+            next.splice(idx, 1);
+            return next;
+        });
+    };
+
     // ─── LÓGICA DEL MODAL ONBOARDING Y EXTRACCIÓN DE LOGO ───
     useEffect(() => {
         if (step === 'preview' && generatedHtml && !hasParsedLogoRef.current) {
@@ -388,6 +409,26 @@ function DisenaPageContent() {
                 console.warn('No se pudo guardar en sessionStorage:', e);
             }
         }
+
+        // Codificar imágenes adjuntas en base64
+        let base64Images: string[] = [];
+        if (editImages.length > 0) {
+            try {
+                base64Images = await Promise.all(editImages.map(img => getBase64(img.file)));
+            } catch (e) {
+                console.warn('Error codificando imágenes:', e);
+            }
+        }
+
+        // Guardar imágenes también en sessionStorage para que el editor las use
+        if (base64Images.length > 0) {
+            try {
+                sessionStorage.setItem('digitrial_edit_images', JSON.stringify(base64Images));
+            } catch (e) { /* ignore */ }
+        } else {
+            sessionStorage.removeItem('digitrial_edit_images');
+        }
+
         router.push(`/editor?email=${encodeURIComponent(userEmail)}&instruccion=${encodeURIComponent(editInstruction)}`);
     };
 
@@ -827,6 +868,49 @@ function DisenaPageContent() {
                                                     placeholder="Ej: Haz que el fondo sea claro en lugar de oscuro, cambia las imágenes por ilustraciones 3D y usa rojo como color principal..."
                                                     className="w-full bg-transparent text-sm text-white border-0 p-0 focus:ring-0 resize-none min-h-[120px] placeholder:text-slate-600"
                                                 />
+
+                                                {/* Imágenes adjuntas */}
+                                                {editImages.length > 0 && (
+                                                    <div className="flex gap-2 flex-wrap mt-3 pt-3 border-t border-white/10">
+                                                        {editImages.map((img, idx) => (
+                                                            <div key={idx} className="relative w-14 h-14 rounded-lg border border-white/20 overflow-hidden group">
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeEditImage(idx)}
+                                                                    className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                >
+                                                                    <X className="w-4 h-4 text-white" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Botón adjuntar imágenes */}
+                                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                                                    <span className="text-[10px] text-slate-600">Máx. 3 imágenes de referencia</span>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        multiple
+                                                        className="hidden"
+                                                        ref={editFileInputRef}
+                                                        onChange={handleEditImageSelect}
+                                                        disabled={editImages.length >= 3}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => editFileInputRef.current?.click()}
+                                                        disabled={editImages.length >= 3}
+                                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${editImages.length >= 3
+                                                            ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                                            : 'bg-white/10 hover:bg-blue-600/60 text-slate-400 hover:text-white'}`}
+                                                    >
+                                                        <ImagePlus className="w-3.5 h-3.5" /> Adjuntar imágenes
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <button

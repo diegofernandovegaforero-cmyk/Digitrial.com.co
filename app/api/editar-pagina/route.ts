@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { email, instruccion_texto, id_diseno_base } = await req.json();
+        const { email, instruccion_texto, id_diseno_base, audio_base64, imagenes_base64 } = await req.json();
 
         if (!email) {
             return NextResponse.json({ error: 'Se requiere el correo electrónico.' }, { status: 400 });
@@ -114,9 +114,25 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
             apiKey: apiKey,
         });
 
+        const userContent: any[] = [{ type: 'text', text: promptEdicion }];
+
+        // Adjuntar imágenes de referencia si las hay
+        if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+            imagenes_base64.forEach((imgBase64: string) => {
+                const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
+                const mimeType = match ? match[1] : 'image/jpeg';
+                const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
+                userContent.push({
+                    type: 'image',
+                    image: Buffer.from(base64Data, 'base64'),
+                    mimeType,
+                });
+            });
+        }
+
         const result = streamText({
             model: customGoogle('gemini-3.1-pro-preview'),
-            prompt: promptEdicion,
+            messages: [{ role: 'user', content: userContent }],
             onFinish: async ({ text }) => {
                 const nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
                 const dbForUpdate = getAdminDbSafe();
