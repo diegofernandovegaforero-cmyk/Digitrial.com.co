@@ -622,119 +622,139 @@ function EditorContent() {
                                 <h2 className="text-lg font-bold mb-1">
                                     Editando: <span className="text-blue-400">{userData?.nombre_negocio}</span>
                                 </h2>
-                                <p className="text-slate-500 text-xs mb-6">
-                                    {userData?.nombre_contacto && `Hola, ${userData.nombre_contacto.split(' ')[0]} · `}
-                                    Cada edición cuesta {CREDITOS_POR_EDICION} créditos
-                                </p>
-
-                                {creditosBajos && (
-                                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
-                                        ⚠️ Te quedan <strong>{userData?.creditos_restantes ?? 0}</strong> créditos.{' '}
-                                        <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
-                                            Contáctanos
-                                        </a>{' '}para recargar.
+                                {(!userData?.codigo_actual) ? (
+                                    <div className="flex flex-col items-center text-center p-6 bg-blue-900/10 border border-blue-500/20 rounded-xl mt-4">
+                                        <Sparkles className="w-8 h-8 text-blue-400 mb-3" />
+                                        <h3 className="text-white font-bold text-lg mb-2">Comienza tu primer diseño</h3>
+                                        <p className="text-sm text-slate-400 mb-4 px-4">
+                                            Aún no tienes ningún diseño para editar. Genera tu primera página web con inteligencia artificial y luego podrás personalizarla aquí.
+                                        </p>
+                                        <Link 
+                                            href="/disena-tu-pagina?form=true" 
+                                            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-blue-600/20 w-full"
+                                        >
+                                            Generar mi página web
+                                        </Link>
                                     </div>
-                                )}
-
-                                {exito && (
-                                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
-                                        <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
-                                    </div>
-                                )}
-
-                                {error && (
-                                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
-                                        <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
-                                    </div>
-                                )}
-
-                                {transcripcion && (
-                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
-                                        🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
-                                    </div>
-                                )}
-
-                                <form onSubmit={handleEditar} className="space-y-4">
-                                    {/* Instrucción de texto */}
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                            ✍️ Instrucción en texto
-                                        </label>
-                                        <textarea
-                                            value={instruccion}
-                                            onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
-                                            placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
-                                            rows={4}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
-                                        />
-                                        <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
-                                    </div>
-
-                                    {/* Grabación de audio — REPLACED by image upload */}
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                            🖼️ Imágenes de referencia
-                                        </label>
-                                        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                                            {/* Thumbnails */}
-                                            {editImages.length > 0 && (
-                                                <div className="flex gap-2 flex-wrap mb-3">
-                                                    {editImages.map((img, idx) => (
-                                                        <div key={idx} className="relative w-16 h-16 rounded-lg border border-white/20 overflow-hidden group">
-                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img src={img.url} alt="" className="w-full h-full object-cover" />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeEditImage(idx)}
-                                                                className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                                            >
-                                                                <X className="w-4 h-4 text-white" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs text-slate-500">Máx. 3 imágenes · La IA las usará como referencia</span>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    multiple
-                                                    className="hidden"
-                                                    ref={editFileInputRef}
-                                                    onChange={handleEditImageSelect}
-                                                    disabled={editImages.length >= 3}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => editFileInputRef.current?.click()}
-                                                    disabled={editImages.length >= 3}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                                        editImages.length >= 3
-                                                            ? 'bg-white/5 text-slate-500 cursor-not-allowed'
-                                                            : 'bg-blue-600/30 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
-                                                    }`}
-                                                >
-                                                    <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
-                                                </button>
+                                ) : (
+                                    <>
+                                        {/* Estado y créditos */}
+                                        <div className="flex items-center justify-between mb-4 mt-2">
+                                            <div className="text-xs text-slate-400 font-medium tracking-wide">
+                                                Costo por edición: <span className="text-slate-200">{CREDITOS_POR_EDICION} créditos</span>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Botón de envío */}
-                                    <button type="submit"
-                                        disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
-                                        {editando ? (
-                                            <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios con IA...</>
-                                        ) : sinCreditos ? (
-                                            <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
-                                        ) : (
-                                            <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
+                                        {creditosBajos && (
+                                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
+                                                ⚠️ Te quedan <strong>{userData?.creditos_restantes ?? 0}</strong> créditos.{' '}
+                                                <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
+                                                    Contáctanos
+                                                </a>{' '}para recargar.
+                                            </div>
                                         )}
-                                    </button>
-                                </form>
+
+                                        {exito && (
+                                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
+                                                <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
+                                            </div>
+                                        )}
+
+                                        {error && (
+                                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
+                                                <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
+                                            </div>
+                                        )}
+
+                                        {transcripcion && (
+                                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
+                                                🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
+                                            </div>
+                                        )}
+
+                                        <form onSubmit={handleEditar} className="space-y-4">
+                                            {/* Instrucción de texto */}
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                                    ✍️ Instrucción en texto
+                                                </label>
+                                                <textarea
+                                                    value={instruccion}
+                                                    onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
+                                                    placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
+                                                    rows={4}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
+                                                />
+                                                <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
+                                            </div>
+
+                                            {/* Imágenes de referencia */}
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                                    🖼️ Imágenes de referencia
+                                                </label>
+                                                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                                    {/* Thumbnails */}
+                                                    {editImages.length > 0 && (
+                                                        <div className="flex gap-2 flex-wrap mb-3">
+                                                            {editImages.map((img, idx) => (
+                                                                <div key={idx} className="relative w-16 h-16 rounded-lg border border-white/20 overflow-hidden group">
+                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeEditImage(idx)}
+                                                                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    >
+                                                                        <X className="w-4 h-4 text-white" />
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs text-slate-500">Máx. 3 imágenes</span>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            multiple
+                                                            className="hidden"
+                                                            ref={editFileInputRef}
+                                                            onChange={handleEditImageSelect}
+                                                            disabled={editImages.length >= 3}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => editFileInputRef.current?.click()}
+                                                            disabled={editImages.length >= 3}
+                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                                                editImages.length >= 3
+                                                                    ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                                                    : 'bg-blue-600/30 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
+                                                            }`}
+                                                        >
+                                                            <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Botón de envío */}
+                                            <button type="submit"
+                                                disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
+                                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                                                {editando ? (
+                                                    <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios...</>
+                                                ) : sinCreditos ? (
+                                                    <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
+                                                ) : (
+                                                    <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
+                                                )}
+                                            </button>
+                                        </form>
+                                    </>
+                                )}
                             </>
                         ) : (
                             <div className="space-y-4">
