@@ -496,13 +496,21 @@ function DisenaPageContent() {
                             transition={{ duration: 0.5, delay: 0.6, type: "spring", stiffness: 200 }}
                             className="flex flex-col items-center"
                         >
-                            <button
+                            <motion.button
                                 onClick={handleStartDesigning}
-                                className="bg-white text-black font-bold text-lg px-10 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 hover:scale-105 shadow-[0_0_50px_rgba(255,255,255,0.15)] flex items-center gap-2"
+                                animate={{ scale: [1, 1.06, 1, 1.06, 1] }}
+                                transition={{ 
+                                    duration: 1.5, 
+                                    repeat: Infinity, 
+                                    repeatDelay: 1,
+                                    ease: "easeInOut" 
+                                }}
+                                whileHover={{ scale: 1.08 }}
+                                className="bg-white text-black font-bold text-lg px-10 py-4 rounded-xl hover:bg-gray-100 transition-colors shadow-[0_0_50px_rgba(255,255,255,0.15)] flex items-center gap-2"
                             >
                                 <Sparkles className="w-5 h-5" />
                                 Empezar a diseñar gratis
-                            </button>
+                            </motion.button>
                             <span className="text-sm text-gray-500 mt-4 font-medium tracking-wide">
                                 No necesitas tarjeta de crédito · Obtienes 15 créditos de regalo
                             </span>
