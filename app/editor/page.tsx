@@ -94,9 +94,6 @@ function EditorContent() {
     }, [instruccionFromUrl]);
 
     // Listener de Firestore en tiempo real (solo si no tenemos HTML de sessionStorage)
-    const [retryCount, setRetryCount] = useState(0);
-    const maxRetries = 5;
-
     useEffect(() => {
         if (!identificado || !email) return;
         // Si ya cargamos el HTML desde sessionStorage, no necesitamos Firebase
@@ -104,35 +101,48 @@ function EditorContent() {
             setCargando(false);
             return;
         }
+
+        let isSubscribed = true;
         const docId = emailToDocId(email);
         const docRef = doc(db, 'usuarios_leads', docId);
-        setCargando(true);
 
-        const unsubscribe = onSnapshot(docRef, async (snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.data();
-                const pastDesigns = data.historial_disenos || [];
-                let currentCode = data.codigo_actual || '';
+        // Limit the retry mechanism logic so it doesn't infinite loop with React state
+        let currentRetries = 0;
+        const maxFirebaseRetries = 5;
+        let retryTimer: NodeJS.Timeout;
 
-                if (!currentCode && pastDesigns.length > 0) {
-                    currentCode = pastDesigns[0].codigo_actual;
-                    setSelectedDesignId(pastDesigns[0].id);
-                }
+        const attemptLoad = () => {
+            if (!isSubscribed) return;
+            setCargando(true);
 
-                setUserData({
-                    nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
-                    nombre_contacto: data.nombre_contacto || '',
-                    creditos_restantes: data.creditos_restantes ?? 0,
-                    codigo_actual: currentCode,
-                    historial_disenos: pastDesigns,
-                });
-                setError('');
-                setCargando(false);
-            } else {
-                // Compatibilidad hacia atrás: buscar por campo 'email' si el ID no coincide
-                import('firebase/firestore').then(({ collection, query, where, getDocs }) => {
-                    const q = query(collection(db, 'usuarios_leads'), where('email', '==', email.toLowerCase().trim()));
-                    getDocs(q).then((querySnapshot) => {
+            const unsubscribeSnapshot = onSnapshot(docRef, async (snapshot) => {
+                if (!isSubscribed) return;
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const pastDesigns = data.historial_disenos || [];
+                    let currentCode = data.codigo_actual || '';
+
+                    if (!currentCode && pastDesigns.length > 0) {
+                        currentCode = pastDesigns[0].codigo_actual;
+                        setSelectedDesignId(pastDesigns[0].id);
+                    }
+
+                    setUserData({
+                        nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
+                        nombre_contacto: data.nombre_contacto || '',
+                        creditos_restantes: data.creditos_restantes ?? 0,
+                        codigo_actual: currentCode,
+                        historial_disenos: pastDesigns,
+                    });
+                    setError('');
+                    setCargando(false);
+                } else {
+                    // Compatibilidad hacia atrás: buscar por campo 'email'
+                    try {
+                        const { collection, query, where, getDocs } = await import('firebase/firestore');
+                        const q = query(collection(db, 'usuarios_leads'), where('email', '==', email.toLowerCase().trim()));
+                        const querySnapshot = await getDocs(q);
+
                         if (!querySnapshot.empty) {
                             const data = querySnapshot.docs[0].data();
                             const pastDesigns = data.historial_disenos || [];
@@ -153,37 +163,43 @@ function EditorContent() {
                             setError('');
                             setCargando(false);
                         } else {
-                            // Reintento automático: la IA puede aún estar escribiendo en Firebase
-                            setRetryCount(prev => {
-                                const next = prev + 1;
-                                if (next < maxRetries) {
-                                    setTimeout(() => {
-                                        setCargando(true);
-                                        setRetryCount(n => n); // trigger re-render but not re-run
-                                    }, 4000);
-                                    setCargando(true); // Keep loading spinner
-                                } else {
-                                    setError('No encontramos tu cuenta. Primero genera tu página web.');
-                                    setCargando(false);
-                                }
-                                return next;
-                            });
+                            if (currentRetries < maxFirebaseRetries) {
+                                currentRetries++;
+                                // Small delay before trying again (simulated by re-running attempt)
+                                retryTimer = setTimeout(() => {
+                                    if (isSubscribed) {
+                                        unsubscribeSnapshot(); // stop old listener before starting new logic
+                                        attemptLoad();
+                                    }
+                                }, 3000);
+                            } else {
+                                setError('No encontramos tu cuenta o diseños. Revisa tu correo o crea uno nuevo.');
+                                setCargando(false);
+                            }
                         }
-                    }).catch(err => {
+                    } catch (err) {
                         console.error('Error buscando doc antiguo:', err);
-                        setError('No encontramos tu cuenta. Primero genera tu página web.');
+                        setError('Error al cargar la cuenta.');
                         setCargando(false);
-                    });
-                });
-            }
-        }, (err) => {
-            console.error(err);
-            setError('Error conectando con Firebase.');
-            setCargando(false);
-        });
+                    }
+                }
+            }, (err) => {
+                console.error('Error de Firebase:', err);
+                setError('Error conectando con los datos.');
+                setCargando(false);
+            });
 
-        return () => unsubscribe();
-    }, [identificado, email, retryCount]);
+            return unsubscribeSnapshot;
+        };
+
+        const finalUnsub = attemptLoad();
+
+        return () => {
+            isSubscribed = false;
+            clearTimeout(retryTimer);
+            if (finalUnsub && typeof finalUnsub === 'function') finalUnsub();
+        };
+    }, [identificado, email, sessionHtml]);
 
     // Mostrar modal la primera vez que carga un diseño
     useEffect(() => {
@@ -435,14 +451,7 @@ function EditorContent() {
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-blue-400 mx-auto mb-4" />
-                    <p className="text-slate-300 font-medium">
-                        {retryCount > 0 ? 'Buscando tu diseño...' : 'Cargando tu diseño...'}
-                    </p>
-                    {retryCount > 0 && (
-                        <p className="text-slate-500 text-xs mt-2">
-                            Intento {retryCount}/{maxRetries} · Esto puede tardar unos segundos
-                        </p>
-                    )}
+                    <p className="text-slate-300 font-medium">Cargando tu cuenta y diseños...</p>
                 </div>
             </div>
         );
@@ -461,7 +470,7 @@ function EditorContent() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
-                            onClick={() => { setError(''); setRetryCount(0); setCargando(true); }}
+                            onClick={() => { setError(''); setCargando(true); window.location.reload(); }}
                             className="bg-slate-700 hover:bg-slate-600 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-flex items-center justify-center gap-2"
                         >
                             <RefreshCw className="w-4 h-4" /> Reintentar
