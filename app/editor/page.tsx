@@ -518,27 +518,7 @@ function EditorContent() {
                         </div>
 
                         <div className="p-4 overflow-y-auto max-h-[70vh]">
-                            {/* LOGO SECTION */}
-                            <div className="mb-4">
-                                <h3 className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
-                                    <Eye className="w-3.5 h-3.5" /> Logo Identificado
-                                </h3>
 
-                                <div className="w-full h-20 bg-white/5 rounded-lg flex items-center justify-center overflow-hidden mb-2 border border-white/10 p-2 relative">
-                                    {logoLoading ? (
-                                        <div className="flex flex-col items-center text-slate-500">
-                                            <Loader2 className="w-5 h-5 animate-spin mb-1" />
-                                        </div>
-                                    ) : logoUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={logoUrl} alt="Logo Vectorial" className="max-w-full max-h-full object-contain" />
-                                    ) : (
-                                        <span className="text-slate-500 text-xs text-center">Sin logo<br />detectado</span>
-                                    )}
-                                </div>
-
-
-                            </div>
 
                             {/* INSTRUCTIONS SECTION */}
                             <h3 className="text-xs font-semibold text-slate-300 mb-2 block">
