@@ -71,12 +71,34 @@ function LoginContent() {
         return () => clearInterval(t);
     }, []);
 
+    // Helper to check user history and route them
+    const performRedirect = async (user: any) => {
+        if (redirectToUrl) {
+            router.replace(redirectToUrl);
+            return;
+        }
+        
+        try {
+            const docId = emailToDocId(user.email);
+            const ref = doc(db, 'usuarios_leads', docId);
+            const snap = await getDoc(ref);
+            
+            if (snap.exists() && snap.data().codigo_actual) {
+                router.replace(`/editor?email=${encodeURIComponent(user.email)}`);
+            } else {
+                router.replace('https://ia.digitrial.com.co/?form=true');
+            }
+        } catch (e) {
+            console.error(e);
+            router.replace('https://ia.digitrial.com.co/?form=true');
+        }
+    };
+
     // Redirect if already logged in
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (user) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const finalRedirect = redirectToUrl || 'https://ia.digitrial.com.co/?form=true';
-                router.replace(finalRedirect);
+                await performRedirect(user);
             }
         });
         return unsub;
@@ -88,8 +110,7 @@ function LoginContent() {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             await saveUserToFirestore(result.user);
-            const finalRedirect = redirectToUrl || 'https://ia.digitrial.com.co/?form=true';
-            router.replace(finalRedirect);
+            await performRedirect(result.user);
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : 'Error con Google. Intenta de nuevo.');
         } finally {
@@ -111,8 +132,9 @@ function LoginContent() {
                 const result = await signInWithEmailAndPassword(auth, email, password);
                 loggedInUser = result.user;
             }
-            const finalRedirect = redirectToUrl || 'https://ia.digitrial.com.co/?form=true';
-            router.replace(finalRedirect);
+            if (loggedInUser) {
+                await performRedirect(loggedInUser);
+            }
         } catch (e: unknown) {
             const code = (e as { code?: string }).code;
             if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
