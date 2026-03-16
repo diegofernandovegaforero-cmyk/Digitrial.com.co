@@ -65,10 +65,7 @@ export default function AnnouncementBar() {
                     <span>8 Cupos disponibles hoy</span>
                 </div>
 
-                <div className="hidden xl:flex items-center gap-2">
-                    <span className="text-purple-200">✨</span>
-                    <span>Garantía de Satisfacción</span>
-                </div>
+
             </div>
         </div>
     );
