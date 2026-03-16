@@ -477,6 +477,16 @@ function EditorContent() {
 
                 // Actualizar el DOM SOLO al final para evitar congelar el navegador (re-renders masivos del iframe)
                 let cleanHtml = htmlTemp.replace(/```html\n?/gi, '').replace(/```\n?/g, '');
+                
+                // 1. Restaurar imágenes que ya existían (preservadas por el backend como EXISTING_IMG_N)
+                if (userData?.codigo_actual) {
+                    const imagenesExistentes = Array.from(userData.codigo_actual.matchAll(/src="(data:image\/[^;]+;base64,[^"]+)"/gi)).map(m => m[1]);
+                    imagenesExistentes.forEach((b64, idx) => {
+                        cleanHtml = cleanHtml.split(`EXISTING_IMG_${idx + 1}`).join(b64);
+                    });
+                }
+
+                // 2. Restaurar nuevas imágenes subidas en esta edición
                 if (imagenes_base64.length > 0) {
                     imagenes_base64.forEach((b64, idx) => {
                         cleanHtml = cleanHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);

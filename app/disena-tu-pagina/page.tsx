@@ -301,9 +301,16 @@ function DisenaPageContent() {
                         setGeneratedHtml(cleanHtml);
                     }
 
-                    if (htmlTemp && userEmail) {
+                    let finalHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
+                    if (base64Images.length > 0) {
+                        base64Images.forEach((b64, idx) => {
+                            finalHtml = finalHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                        });
+                    }
+
+                    if (finalHtml && userEmail) {
                         try {
-                            sessionStorage.setItem('digitrial_preview_html', htmlTemp);
+                            sessionStorage.setItem('digitrial_preview_html', finalHtml);
                             sessionStorage.setItem('digitrial_preview_email', userEmail);
                         } catch (e) {
                             console.warn('Error saving to sessionStorage:', e);
