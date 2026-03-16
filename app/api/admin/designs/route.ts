@@ -1,0 +1,74 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+// Firebase Admin helper
+const getAdminDb = async () => {
+  const { getAdminDbSafe } = await import('@/lib/firebase-admin');
+  return getAdminDbSafe();
+};
+
+const ADMIN_EMAIL = 'diegofernandovegaforero@gmail.com';
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get('email');
+
+    // Basic security check (ideally this should use a proper session/token)
+    if (!email || email.toLowerCase().trim() !== ADMIN_EMAIL) {
+      return NextResponse.json({ error: 'Acceso no autorizado' }, { status: 403 });
+    }
+
+    const adminDb = await getAdminDb();
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
+    }
+
+    const snapshot = await adminDb.collection('usuarios_leads').get();
+    
+    interface Design {
+        id: string;
+        codigo_actual: string;
+        descripcion: string;
+        fecha: string;
+        userName: string;
+        userEmail: string;
+    }
+
+    const allDesigns: Design[] = [];
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const userName = data.nombre_contacto || data.nombre_negocio || 'Usuario';
+      const userEmail = data.email || 'Sin correo';
+      const historial = data.historial_disenos || [];
+
+      // Add the current code if it's not in the history yet or just to be sure we have the latest
+      if (data.codigo_actual && !historial.find((h: any) => h.codigo_actual === data.codigo_actual)) {
+          allDesigns.push({
+              id: (data.ultima_generacion || data.fecha_creacion || Date.now()).toString(),
+              codigo_actual: data.codigo_actual,
+              descripcion: data.descripcion || 'Diseño actual',
+              fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString(),
+              userName,
+              userEmail
+          });
+      }
+
+      historial.forEach((design: any) => {
+        allDesigns.push({
+          ...design,
+          userName,
+          userEmail
+        });
+      });
+    });
+
+    // Sort by date descending
+    allDesigns.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+    return NextResponse.json({ designs: allDesigns });
+  } catch (error) {
+    console.error('Error in admin designs API:', error);
+    return NextResponse.json({ error: 'Error fetching designs' }, { status: 500 });
+  }
+}
