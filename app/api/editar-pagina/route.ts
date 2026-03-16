@@ -69,11 +69,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No se recibió ninguna instrucción de edición.' }, { status: 400 });
         }
 
-        // Strip base64 images from the HTML before sending to Gemini to avoid token-limit crashes.
-        // Base64 images stored in the DB can be hundreds of KB each.
-        const codigoSinBase64 = codigoActual
-            .replace(/src="data:image\/[^;]+;base64,[^"]+"/gi, 'src="/api/pexels?q=uploaded+user+image"')
-            .slice(0, 200000); // Hard cap at ~200KB chars to be safe with token budgets
+        // Detectar y preservar imágenes en base64 existentes para no perderlas
+        const mapImagenesExistentes = new Map<string, string>();
+        let contadorImg = 0;
+        let codigoParaGemini = codigoActual.replace(/src="(data:image\/[^;]+;base64,[^"]+)"/gi, (match, b64) => {
+            contadorImg++;
+            const placeholder = `EXISTING_IMG_${contadorImg}`;
+            mapImagenesExistentes.set(placeholder, b64);
+            return `src="${placeholder}"`;
+        });
+
+        // Cap de seguridad
+        codigoParaGemini = codigoParaGemini.slice(0, 250000);
 
         // ── Prompt Maestro de Edición ──
         const promptEdicion = `
@@ -87,7 +94,7 @@ Usa EXACTAMENTE esta estructura para el 'src' de la imagen:
 <img src="/api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]" alt="..." class="...">
 
 CÓDIGO HTML ACTUAL:
-${codigoSinBase64}
+${codigoParaGemini}
 
 INSTRUCCIÓN DE CLIENTE: "${instruccion_texto}"
 
@@ -134,7 +141,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                     image: Buffer.from(base64Data, 'base64'),
                     mimeType,
                 });
-                placeholdersEdicion += `- [UPLOADED_IMG_${idx + 1}]\n`;
+                placeholdersEdicion += `UPLOADED_IMG_${idx + 1}\n`;
             });
             
             userContent.push({
@@ -151,6 +158,13 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
             onFinish: async ({ text }) => {
                 let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
                 
+                // RESTAURACIÓN DE IMÁGENES:
+                // 1. Restaurar imágenes que ya existían (las preservadas antes)
+                mapImagenesExistentes.forEach((b64, placeholder) => {
+                    nuevoHtml = nuevoHtml.split(placeholder).join(b64);
+                });
+
+                // 2. Restaurar nuevas imágenes subidas en esta edición
                 if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
                     imagenes_base64.forEach((b64, idx) => {
                         nuevoHtml = nuevoHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);

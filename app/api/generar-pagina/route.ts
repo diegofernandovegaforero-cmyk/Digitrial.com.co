@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
             image: Buffer.from(base64Data, 'base64'),
             mimeType: mimeType
           });
-          placeholdersInstruccion += `- [UPLOADED_IMG_${idx + 1}]\n`;
+          placeholdersInstruccion += `UPLOADED_IMG_${idx + 1}\n`;
         });
         
         userContent.push({
