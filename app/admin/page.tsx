@@ -27,17 +27,22 @@ export default function AdminPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        console.log('ADMIN_AUTH: Initializing Auth Listener...');
         const unsubscribe = onAuthStateChanged(auth, (u) => {
             if (u) {
+                console.log('ADMIN_AUTH: User detected:', u.email);
                 if (u.email?.toLowerCase().trim() === ADMIN_EMAIL) {
+                    console.log('ADMIN_AUTH: Access Granted');
                     setUser(u);
                     fetchDesigns(u.email);
                 } else {
+                    console.warn('ADMIN_AUTH: Unauthorized Email:', u.email);
                     setUser(null);
                     setError('Tu cuenta no tiene permisos de administrador.');
                     setLoading(false);
                 }
             } else {
+                console.log('ADMIN_AUTH: No user detected');
                 setUser(null);
                 setLoading(false);
             }
@@ -46,19 +51,23 @@ export default function AdminPage() {
     }, []);
 
     const fetchDesigns = async (email: string) => {
+        console.log('ADMIN_FETCH: Starting fetch for', email);
         setFetching(true);
         setError(null);
         try {
             const res = await fetch(`/api/admin/designs?email=${encodeURIComponent(email)}`);
+            console.log('ADMIN_FETCH: Response Status:', res.status);
             if (res.ok) {
                 const data = await res.json();
+                console.log(`ADMIN_FETCH: Fetched ${data.designs?.length} designs`);
                 setDesigns(data.designs || []);
             } else {
                 const errData = await res.json();
+                console.error('ADMIN_FETCH: API Error:', errData);
                 setError(errData.error || 'Error al cargar los diseños');
             }
         } catch (error) {
-            console.error('Error fetching designs:', error);
+            console.error('ADMIN_FETCH: Catch block Error:', error);
             setError('Error de conexión con el servidor');
         } finally {
             setFetching(false);

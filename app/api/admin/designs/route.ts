@@ -20,10 +20,13 @@ export async function GET(req: NextRequest) {
 
     const adminDb = await getAdminDb();
     if (!adminDb) {
+      console.error('ADMIN_ERROR: Database not configured or Env Vars missing');
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
     }
 
+    console.log('ADMIN_FETCH: Querying usuarios_leads collection...');
     const snapshot = await adminDb.collection('usuarios_leads').get();
+    console.log(`ADMIN_FETCH: Found ${snapshot.size} documents in usuarios_leads`);
     
     interface Design {
         id: string;
