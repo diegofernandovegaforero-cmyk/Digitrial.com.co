@@ -159,6 +159,21 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                 
                 const dbForUpdate = getAdminDbSafe();
                 if (dbForUpdate) {
+                    const historyId = Date.now().toString();
+                    const newDesignMetadata = {
+                        id: historyId,
+                        descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición de texto',
+                        fecha: new Date().toISOString(),
+                        has_separate_code: true
+                    };
+
+                    // 1. Guardar código en subcolección (PESADO)
+                    await dbForUpdate.collection('usuarios_leads').doc(docRef.id).collection('historial_codigos').doc(historyId).set({
+                        codigo_html: nuevoHtml,
+                        fecha: new Date().toISOString()
+                    });
+
+                    // 2. Metadata en doc principal
                     let historial = userData.historial_disenos || [];
 
                     // Migración silenciosa
@@ -171,14 +186,8 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                         });
                     }
 
-                    historial.unshift({
-                        id: Date.now().toString(),
-                        codigo_actual: nuevoHtml,
-                        descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición de texto',
-                        fecha: new Date().toISOString()
-                    });
-
-                    historial = historial.slice(0, 8); // Guardar historial de 8 maximo
+                    historial.unshift(newDesignMetadata);
+                    historial = historial.slice(0, 10); // Aumentar límite ya que es ligero
 
                     await dbForUpdate.collection('usuarios_leads').doc(docRef.id).update({
                         codigo_actual: nuevoHtml,

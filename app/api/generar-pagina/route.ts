@@ -169,12 +169,19 @@ export async function POST(req: NextRequest) {
                 const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
                 const existing = await docRef.get();
 
-                const newDesign = {
-                  id: Date.now().toString(),
-                  codigo_actual: html,
-                  descripcion: descripcion.substring(0, 200), // Guardar un extracto de la desc original
+                const historyId = Date.now().toString();
+                const newDesignMetadata = {
+                  id: historyId,
+                  descripcion: descripcion.substring(0, 200),
                   fecha: new Date().toISOString(),
+                  has_separate_code: true
                 };
+
+                // 1. Guardar código en subcolección (PESADO)
+                await docRef.collection('historial_codigos').doc(historyId).set({
+                  codigo_html: html,
+                  fecha: new Date().toISOString()
+                });
 
                 if (!existing.exists) {
                   await docRef.set({
@@ -183,7 +190,7 @@ export async function POST(req: NextRequest) {
                     email: email.toLowerCase().trim(),
                     descripcion,
                     codigo_actual: html,
-                    historial_disenos: [newDesign],
+                    historial_disenos: [newDesignMetadata],
                     creditos_restantes: 15,
                     fecha_creacion: new Date().toISOString(),
                   });
@@ -191,7 +198,7 @@ export async function POST(req: NextRequest) {
                   const data = existing.data() || {};
                   let historial = data.historial_disenos || [];
 
-                  // Migración silenciosa: si no había historial, registrar el diseño vigente primero
+                  // Migración silenciosa si es necesario
                   if (historial.length === 0 && data.codigo_actual) {
                     historial.push({
                       id: (Date.now() - 1000).toString(),
@@ -201,14 +208,14 @@ export async function POST(req: NextRequest) {
                     });
                   }
 
-                  historial.unshift(newDesign);
-                  historial = historial.slice(0, 3); // Mantener un máximo de 3 diseños recientes (REGLA ESTRICTA)
+                  historial.unshift(newDesignMetadata);
+                  historial = historial.slice(0, 10); // Aumentar a 10 ya que ahora son livianos
 
                   await docRef.update({
                     codigo_actual: html,
                     historial_disenos: historial,
                     ultima_generacion: new Date().toISOString(),
-                    creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5) // RESTAR 5 CRÉDITOS
+                    creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5)
                   });
                 }
               }

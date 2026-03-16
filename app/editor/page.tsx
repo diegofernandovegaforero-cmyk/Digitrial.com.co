@@ -6,7 +6,7 @@ import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw,
 import { AnimatePresence, motion } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
 const CREDITOS_POR_EDICION = 3;
@@ -300,23 +300,32 @@ function EditorContent() {
                     const shouldPushHistory = now - lastHistoryPushRef.current > 5 * 60 * 1000; // Cada 5 minutos
 
                     const updateData: any = { 
-                        codigo_actual: event.data.html,
+                        codigo_actual: event.data.html, // Seguimos guardando el actual para vista rápida
                         ultima_edicion: new Date().toISOString()
                     };
 
                     if (shouldPushHistory) {
-                        const newDesign = {
-                            id: now.toString(),
-                            codigo_actual: event.data.html,
-                            descripcion: "Autoguardado: Edición de texto nativa",
+                        const historyId = now.toString();
+                        
+                        // 1. Guardar código en subcolección (PESADO)
+                        const codeRef = doc(db, 'usuarios_leads', docId, 'historial_codigos', historyId);
+                        await setDoc(codeRef, { 
+                            codigo_html: event.data.html,
                             fecha: new Date().toISOString()
+                        });
+
+                        // 2. Guardar metadata en doc principal (LIGERO)
+                        const newDesignMetadata = {
+                            id: historyId,
+                            descripcion: "Autoguardado: Edición de texto nativa",
+                            fecha: new Date().toISOString(),
+                            has_separate_code: true
                         };
                         
-                        // Obtener historial actual para no sobreescribir
                         const snap = await getDoc(docRef);
                         const data = snap.data();
                         const currentHistory = data?.historial_disenos || [];
-                        const updatedHistory = [newDesign, ...currentHistory].slice(0, 10);
+                        const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
                         
                         updateData.historial_disenos = updatedHistory;
                         lastHistoryPushRef.current = now;
@@ -325,7 +334,7 @@ function EditorContent() {
                     }
 
                     await updateDoc(docRef, updateData);
-                    setExito('Cambios sincronizados con el administrador.');
+                    setExito('Cambios sincronizados.');
                     setTimeout(() => setExito(''), 3000);
                 } catch (err) {
                     console.error('Error guardando HTML editado nativamente:', err);
@@ -348,15 +357,24 @@ function EditorContent() {
         try {
             const docId = emailToDocId(email);
             const docRef = doc(db, 'usuarios_leads', docId);
+            const historyId = Date.now().toString();
             
-            const newDesign = {
-                id: Date.now().toString(),
-                codigo_actual: userData.codigo_actual,
-                descripcion: instruccion.trim() || (editando ? `Edición: ${instruccion.substring(0, 30)}...` : "Guardado manual desde editor"),
+            // 1. Guardar código en subcolección (PESADO)
+            const codeRef = doc(db, 'usuarios_leads', docId, 'historial_codigos', historyId);
+            await setDoc(codeRef, { 
+                codigo_html: userData.codigo_actual,
                 fecha: new Date().toISOString()
+            });
+
+            // 2. Guardar metadata en doc principal (LIGERO)
+            const newDesignMetadata = {
+                id: historyId,
+                descripcion: instruccion.trim() || (editando ? `Edición: ${instruccion.substring(0, 30)}...` : "Guardado manual desde editor"),
+                fecha: new Date().toISOString(),
+                has_separate_code: true
             };
 
-            const updatedHistory = [newDesign, ...(userData.historial_disenos || [])].slice(0, 10);
+            const updatedHistory = [newDesignMetadata, ...(userData.historial_disenos || [])].slice(0, 10);
 
             await updateDoc(docRef, {
                 codigo_actual: userData.codigo_actual,
@@ -365,11 +383,11 @@ function EditorContent() {
             });
 
             setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
-            setExito('¡Maqueta guardada con éxito! Ya puedes verla en tu historial.');
+            setExito('¡Maqueta guardada con éxito!');
             setInstruccion('');
         } catch (err) {
             console.error('Error in manual save:', err);
-            setError('Error al guardar la maqueta en la base de datos.');
+            setError('Error al guardar la maqueta. El archivo es muy grande.');
         } finally {
             setEditando(false);
         }

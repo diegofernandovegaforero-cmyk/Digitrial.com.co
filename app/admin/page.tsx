@@ -83,10 +83,10 @@ export default function AdminPage() {
         }
     };
 
-    const fetchFullCode = async (designId: string) => {
+    const fetchFullCode = async (designId: string, targetEmail: string) => {
         if (!user) return null;
         try {
-            const res = await fetch(`/api/admin/designs/code?email=${encodeURIComponent(user.email)}&id=${designId}`);
+            const res = await fetch(`/api/admin/designs/code?email=${encodeURIComponent(user.email)}&id=${designId}&targetEmail=${encodeURIComponent(targetEmail)}`);
             if (res.ok) {
                 const data = await res.json();
                 return data.code;
@@ -101,7 +101,7 @@ export default function AdminPage() {
         let code = design.codigo_actual;
         if (code === "[CODE_AVAILABLE]") {
             setStatusMsg('Descargando código completo...');
-            code = await fetchFullCode(design.id);
+            code = await fetchFullCode(design.id, design.userEmail);
             if (!code) {
                 setError('No se pudo recuperar el código completo.');
                 return;
@@ -123,7 +123,7 @@ export default function AdminPage() {
     const handlePreview = async (design: Design) => {
         if (design.codigo_actual === "[CODE_AVAILABLE]") {
             setStatusMsg('Cargando previsualización...');
-            const code = await fetchFullCode(design.id);
+            const code = await fetchFullCode(design.id, design.userEmail);
             if (code) {
                 setPreviewDesign({ ...design, codigo_actual: code });
                 setStatusMsg('Código cargado.');

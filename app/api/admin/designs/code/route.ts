@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email');
     const designId = searchParams.get('id');
+    const targetEmail = searchParams.get('targetEmail');
 
     if (!email || email.toLowerCase().trim() !== ADMIN_EMAIL) {
       return NextResponse.json({ error: 'Acceso no autorizado' }, { status: 403 });
@@ -24,19 +25,58 @@ export async function GET(req: NextRequest) {
     const adminDb = await getAdminDb();
     if (!adminDb) return NextResponse.json({ error: 'DB not configured' }, { status: 500 });
 
-    const snapshot = await adminDb.collection('usuarios_leads').get();
     let foundCode: string | null = null;
 
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        if (data.codigo_actual && (data.ultima_generacion || data.fecha_creacion || "").toString().includes(designId)) {
-            foundCode = data.codigo_actual;
+    // 1. Si tenemos el email del dueño, vamos directamente al grano (MÁS RÁPIDO)
+    if (targetEmail) {
+        const emailKey = targetEmail.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+        const userRef = adminDb.collection('usuarios_leads').doc(emailKey);
+        const userSnap = await userRef.get();
+
+        if (userSnap.exists) {
+            const data = userSnap.data() || {};
+            // Caso A: Está en el doc principal (Autosave o Legacy)
+            if (data.codigo_actual && (data.ultima_generacion || data.fecha_creacion || "").toString().includes(designId)) {
+                foundCode = data.codigo_actual;
+            }
+            if (!foundCode && data.historial_disenos) {
+                const match = data.historial_disenos.find((h: any) => h.id === designId);
+                if (match && match.codigo_actual) foundCode = match.codigo_actual;
+            }
+            
+            // Caso B: Está en la subcolección (Nuevo sistema)
+            if (!foundCode) {
+                const subSnap = await userRef.collection('historial_codigos').doc(designId).get();
+                if (subSnap.exists) {
+                    foundCode = subSnap.data()?.codigo_html || null;
+                }
+            }
         }
-        if (!foundCode && data.historial_disenos) {
-            const match = data.historial_disenos.find((h: any) => h.id === designId);
-            if (match) foundCode = match.codigo_actual;
+    }
+
+    // 2. Si no lo encontramos o no hay targetEmail, buscamos en todos (BÚSQUEDA EXHAUSTIVA LEGACY)
+    if (!foundCode) {
+        const snapshot = await adminDb.collection('usuarios_leads').get();
+        for (const doc of snapshot.docs) {
+            const data = doc.data();
+            if (data.codigo_actual && (data.ultima_generacion || data.fecha_creacion || "").toString().includes(designId)) {
+                foundCode = data.codigo_actual;
+            }
+            if (!foundCode && data.historial_disenos) {
+                const match = data.historial_disenos.find((h: any) => h.id === designId);
+                if (match) {
+                    if (match.codigo_actual) {
+                        foundCode = match.codigo_actual;
+                    } else {
+                        // Podría estar en su subcolección
+                        const subSnap = await doc.ref.collection('historial_codigos').doc(designId).get();
+                        if (subSnap.exists) foundCode = subSnap.data()?.codigo_html || null;
+                    }
+                }
+            }
+            if (foundCode) break;
         }
-    });
+    }
 
     if (!foundCode) {
         return NextResponse.json({ error: 'Diseño no encontrado' }, { status: 404 });
