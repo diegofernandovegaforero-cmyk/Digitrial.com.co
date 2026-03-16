@@ -75,7 +75,7 @@ function LoginContent() {
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
-                const finalRedirect = redirectToUrl || `/editor?email=${encodeURIComponent(user.email || '')}`;
+                const finalRedirect = redirectToUrl || 'https://ia.digitrial.com.co/?form=true';
                 router.replace(finalRedirect);
             }
         });
@@ -88,7 +88,7 @@ function LoginContent() {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             await saveUserToFirestore(result.user);
-            const finalRedirect = redirectToUrl || `/editor?email=${encodeURIComponent(result.user.email || '')}`;
+            const finalRedirect = redirectToUrl || 'https://ia.digitrial.com.co/?form=true';
             router.replace(finalRedirect);
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : 'Error con Google. Intenta de nuevo.');
@@ -111,7 +111,7 @@ function LoginContent() {
                 const result = await signInWithEmailAndPassword(auth, email, password);
                 loggedInUser = result.user;
             }
-            const finalRedirect = redirectToUrl || `/editor?email=${encodeURIComponent(loggedInUser.email || '')}`;
+            const finalRedirect = redirectToUrl || 'https://ia.digitrial.com.co/?form=true';
             router.replace(finalRedirect);
         } catch (e: unknown) {
             const code = (e as { code?: string }).code;
