@@ -7,6 +7,11 @@ export function middleware(req: NextRequest) {
 
     // Si el usuario entra al subdominio IA
     if (hostname === 'ia.digitrial.com.co' || hostname.startsWith('ia.digitrial')) {
+        // No tocar rutas de admin ni API de admin
+        if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin')) {
+            return NextResponse.next();
+        }
+
         // Y están yendo a la raíz (ia.digitrial.com.co/)
         if (url.pathname === '/') {
             // Reescribimos silenciosamente a nuestra ruta real de la herramienta
