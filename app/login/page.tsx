@@ -90,8 +90,13 @@ function LoginContent() {
             const ref = doc(db, 'usuarios_leads', docId);
             const snap = await getDoc(ref);
             
-            if (snap.exists() && snap.data().codigo_actual) {
-                router.replace(`/editor?email=${encodeURIComponent(user.email)}`);
+            if (snap.exists()) {
+                const data = snap.data();
+                if (data.codigo_actual || (data.historial_disenos && data.historial_disenos.length > 0)) {
+                    router.replace(`/editor?email=${encodeURIComponent(user.email)}`);
+                } else {
+                    router.replace('https://ia.digitrial.com.co/?form=true');
+                }
             } else {
                 router.replace('https://ia.digitrial.com.co/?form=true');
             }

@@ -308,6 +308,44 @@ function EditorContent() {
         return () => window.removeEventListener('message', handleMessage);
     }, [email]);
 
+    const handleManualSave = async () => {
+        if (!email || !userData?.codigo_actual) {
+            setError('No hay diseño para guardar.');
+            return;
+        }
+        setEditando(true);
+        setError('');
+        setExito('');
+        try {
+            const docId = emailToDocId(email);
+            const docRef = doc(db, 'usuarios_leads', docId);
+            
+            const newDesign = {
+                id: Date.now().toString(),
+                codigo_actual: userData.codigo_actual,
+                descripcion: instruccion.trim() || (editando ? `Edición: ${instruccion.substring(0, 30)}...` : "Guardado manual desde editor"),
+                fecha: new Date().toISOString()
+            };
+
+            const updatedHistory = [newDesign, ...(userData.historial_disenos || [])].slice(0, 10);
+
+            await updateDoc(docRef, {
+                codigo_actual: userData.codigo_actual,
+                historial_disenos: updatedHistory,
+                ultima_generacion: new Date().toISOString()
+            });
+
+            setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
+            setExito('¡Maqueta guardada con éxito! Ya puedes verla en tu historial.');
+            setInstruccion('');
+        } catch (err) {
+            console.error('Error in manual save:', err);
+            setError('Error al guardar la maqueta en la base de datos.');
+        } finally {
+            setEditando(false);
+        }
+    };
+
     const handleIdentificar = (e: React.FormEvent) => {
         e.preventDefault();
         if (!email.trim()) return;
@@ -730,17 +768,27 @@ function EditorContent() {
                                             </div>
 
                                             {/* Botón de envío */}
-                                            <button type="submit"
-                                                disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
-                                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
-                                                {editando ? (
-                                                    <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios...</>
-                                                ) : sinCreditos ? (
-                                                    <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
-                                                ) : (
-                                                    <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
-                                                )}
-                                            </button>
+                                            <div className="space-y-3">
+                                                <button type="submit"
+                                                    disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
+                                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                                                    {editando ? (
+                                                        <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios...</>
+                                                    ) : sinCreditos ? (
+                                                        <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
+                                                    ) : (
+                                                        <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
+                                                    )}
+                                                </button>
+
+                                                <button type="button"
+                                                    onClick={handleManualSave}
+                                                    disabled={editando || !userData?.codigo_actual}
+                                                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                                                    <History className="w-4 h-4 text-blue-400" />
+                                                    Guardar esta Maqueta (Gratis)
+                                                </button>
+                                            </div>
                                         </form>
                                     </>
                                 )}
