@@ -537,16 +537,7 @@ function EditorContent() {
                                     )}
                                 </div>
 
-                                {logoUrl && (
-                                    <a
-                                        href={logoUrl}
-                                        download={`Identidad_${userData?.nombre_negocio ? userData.nombre_negocio.replace(/\s+/g, '_') : 'Visual'}.svg`}
-                                        target="_blank"
-                                        className="w-full justify-center flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-white font-medium py-2 rounded-lg text-xs transition-colors border border-white/10"
-                                    >
-                                        <Download className="w-3.5 h-3.5" /> Descargar Vector
-                                    </a>
-                                )}
+
                             </div>
 
                             {/* INSTRUCTIONS SECTION */}
