@@ -69,6 +69,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No se recibió ninguna instrucción de edición.' }, { status: 400 });
         }
 
+        // Strip base64 images from the HTML before sending to Gemini to avoid token-limit crashes.
+        // Base64 images stored in the DB can be hundreds of KB each.
+        const codigoSinBase64 = codigoActual
+            .replace(/src="data:image\/[^;]+;base64,[^"]+"/gi, 'src="/api/pexels?q=uploaded+user+image"')
+            .slice(0, 200000); // Hard cap at ~200KB chars to be safe with token budgets
+
         // ── Prompt Maestro de Edición ──
         const promptEdicion = `
 Eres el Desarrollador Front-End Senior de Digitrial centro de soluciones.
@@ -81,7 +87,7 @@ Usa EXACTAMENTE esta estructura para el 'src' de la imagen:
 <img src="/api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]" alt="..." class="...">
 
 CÓDIGO HTML ACTUAL:
-${codigoActual}
+${codigoSinBase64}
 
 INSTRUCCIÓN DE CLIENTE: "${instruccion_texto}"
 
