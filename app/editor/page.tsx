@@ -224,12 +224,13 @@ function EditorContent() {
         };
     }, [identificado, email, sessionHtml]);
 
-    // Mostrar modal la primera vez que carga un diseño
+    // Mostrar modal la primera vez que carga un diseño - Desactivado por petición de usuario
+    useEffect(() => {
         if (userData?.codigo_actual && !hasShownModalRef.current) {
             hasShownModalRef.current = true;
-            setShowWelcomeModal(false); // Omitir modal a petición del usuario
+            setShowWelcomeModal(false); // Omitir modal a petición del usuario para ir directo al editor
             setLogoLoading(true);
-
+            
             // Extraer logo nativo directamente del HTML generado
             try {
                 const parser = new DOMParser();
@@ -257,13 +258,10 @@ function EditorContent() {
 
                 // 3. Fallback: Tipografía convertida a SVG Vectorial (Parte Superior Izquierda)
                 if (!finalSrc) {
-                    // Evitar 'nav a' genéricos que capturan menús como "Quiénes Somos"
                     // Buscamos clases típicas de logo, o el primer enlace del header
                     let txtElem = doc.querySelector('.logo, #logo, .brand, #brand, header h1, nav h1');
 
                     if (!txtElem) {
-                        // Si no hay clase explícita, buscar el primer enlace del header que destaque (negrita o tamaño)
-                        // o simplemente el primerísimo enlace de la barra superior.
                         const headerLinks = Array.from(doc.querySelectorAll('header a, nav a'));
                         txtElem = headerLinks.find(a => {
                             const c = a.className || '';
