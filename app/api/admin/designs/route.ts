@@ -45,11 +45,11 @@ export async function GET(req: NextRequest) {
       const userEmail = data.email || 'Sin correo';
       const historial = data.historial_disenos || [];
 
-      // Add the current code if it's not in the history yet or just to be sure we have the latest
-      if (data.codigo_actual && !historial.find((h: any) => h.codigo_actual === data.codigo_actual)) {
+      // Add the current code (metadata only for list)
+      if (data.codigo_actual) {
           allDesigns.push({
               id: (data.ultima_generacion || data.fecha_creacion || Date.now()).toString(),
-              codigo_actual: data.codigo_actual,
+              codigo_actual: "[CODE_AVAILABLE]", 
               descripcion: data.descripcion || 'Diseño actual',
               fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString(),
               userName,
@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
       historial.forEach((design: any) => {
         allDesigns.push({
           ...design,
+          codigo_actual: "[CODE_AVAILABLE]", // Metadata only initially
           userName,
           userEmail
         });

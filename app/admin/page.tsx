@@ -25,24 +25,29 @@ export default function AdminPage() {
     const [previewDesign, setPreviewDesign] = useState<Design | null>(null);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [statusMsg, setStatusMsg] = useState<string>('Iniciando...');
 
     useEffect(() => {
         console.log('ADMIN_AUTH: Initializing Auth Listener...');
+        setStatusMsg('Verificando sesión...');
         const unsubscribe = onAuthStateChanged(auth, (u) => {
             if (u) {
                 console.log('ADMIN_AUTH: User detected:', u.email);
                 if (u.email?.toLowerCase().trim() === ADMIN_EMAIL) {
                     console.log('ADMIN_AUTH: Access Granted');
+                    setStatusMsg('Acceso concedido. Cargando datos...');
                     setUser(u);
                     fetchDesigns(u.email);
                 } else {
                     console.warn('ADMIN_AUTH: Unauthorized Email:', u.email);
+                    setStatusMsg('Acceso denegado: Email no autorizado.');
                     setUser(null);
-                    setError('Tu cuenta no tiene permisos de administrador.');
+                    setError(`Tu cuenta (${u.email}) no tiene permisos de administrador.`);
                     setLoading(false);
                 }
             } else {
                 console.log('ADMIN_AUTH: No user detected');
+                setStatusMsg('No hay sesión activa.');
                 setUser(null);
                 setLoading(false);
             }
@@ -75,8 +80,32 @@ export default function AdminPage() {
         }
     };
 
-    const handleDownload = (design: Design) => {
-        const blob = new Blob([design.codigo_actual], { type: 'text/html' });
+    const fetchFullCode = async (designId: string) => {
+        if (!user) return null;
+        try {
+            const res = await fetch(`/api/admin/designs/code?email=${encodeURIComponent(user.email)}&id=${designId}`);
+            if (res.ok) {
+                const data = await res.json();
+                return data.code;
+            }
+        } catch (e) {
+            console.error('Error fetching full code:', e);
+        }
+        return null;
+    };
+
+    const handleDownload = async (design: Design) => {
+        let code = design.codigo_actual;
+        if (code === "[CODE_AVAILABLE]") {
+            setStatusMsg('Descargando código completo...');
+            code = await fetchFullCode(design.id);
+            if (!code) {
+                setError('No se pudo recuperar el código completo.');
+                return;
+            }
+        }
+        
+        const blob = new Blob([code], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -85,6 +114,22 @@ export default function AdminPage() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        setStatusMsg('Descarga completada.');
+    };
+
+    const handlePreview = async (design: Design) => {
+        if (design.codigo_actual === "[CODE_AVAILABLE]") {
+            setStatusMsg('Cargando previsualización...');
+            const code = await fetchFullCode(design.id);
+            if (code) {
+                setPreviewDesign({ ...design, codigo_actual: code });
+                setStatusMsg('Código cargado.');
+            } else {
+                setError('Error al cargar el código.');
+            }
+        } else {
+            setPreviewDesign(design);
+        }
     };
 
     const handleCopy = (code: string) => {
@@ -153,6 +198,9 @@ export default function AdminPage() {
             </nav>
 
             <main className="p-8 max-w-7xl mx-auto">
+                <div className="mb-4 text-xs font-mono text-slate-500 bg-white/5 p-2 rounded">
+                    Status: {statusMsg}
+                </div>
                 <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold mb-2">Diseños Generados</h1>
@@ -229,7 +277,7 @@ export default function AdminPage() {
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button 
-                                                        onClick={() => setPreviewDesign(design)}
+                                                        onClick={() => handlePreview(design)}
                                                         className="p-2 bg-white/5 hover:bg-blue-600/20 text-blue-400 rounded-lg transition"
                                                         title="Ver Código"
                                                     >
