@@ -832,15 +832,18 @@ function DisenaPageContent() {
                     </AnimatePresence>
 
                     {/* Botón Flotante para abrir panel lateral */}
-                    <motion.button
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: editPanelOpen ? 100 : 0 }}
-                        onClick={() => setEditPanelOpen(true)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-600 text-white p-3 md:p-4 rounded-l-2xl shadow-[-10px_0_30px_rgba(37,99,235,0.3)] backdrop-blur-md border border-r-0 border-white/20 transition-all z-40 group flex items-center gap-2"
-                    >
-                        <Sparkles className="w-5 h-5 group-hover:animate-pulse" />
-                        <span className="font-bold text-sm tracking-wide mr-1 shadow-black drop-shadow-md">Editar Web</span>
-                    </motion.button>
+                    {!editPanelOpen && (
+                        <motion.button
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 50 }}
+                            onClick={() => setEditPanelOpen(true)}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-600 text-white p-3 md:p-4 rounded-l-2xl shadow-[-10px_0_30px_rgba(37,99,235,0.3)] backdrop-blur-md border border-r-0 border-white/20 transition-all z-40 group flex items-center gap-2"
+                        >
+                            <Sparkles className="w-5 h-5 group-hover:animate-pulse" />
+                            <span className="font-bold text-sm tracking-wide mr-1 shadow-black drop-shadow-md">Editar Web</span>
+                        </motion.button>
+                    )}
 
                     {/* Panel flotante de Edición */}
                     <AnimatePresence>
