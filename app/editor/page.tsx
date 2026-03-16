@@ -4,7 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X, ImagePlus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
@@ -92,6 +93,18 @@ function EditorContent() {
     useEffect(() => {
         if (instruccionFromUrl) setInstruccion(instruccionFromUrl);
     }, [instruccionFromUrl]);
+
+    // Auto-identify user if they are logged in via Firebase Auth
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, (user) => {
+            if (user && user.email && !identificado) {
+                setEmail(user.email);
+                setIdentificado(true);
+            }
+        });
+        return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Listener de Firestore en tiempo real (solo si no tenemos HTML de sessionStorage)
     useEffect(() => {

@@ -146,7 +146,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
         }
 
         const result = streamText({
-            model: customGoogle('gemini-2.5-pro'),
+            model: customGoogle('gemini-2.0-flash'),
             messages: [{ role: 'user', content: userContent }],
             onFinish: async ({ text }) => {
                 let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
