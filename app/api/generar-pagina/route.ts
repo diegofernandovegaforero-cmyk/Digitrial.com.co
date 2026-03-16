@@ -138,7 +138,9 @@ export async function POST(req: NextRequest) {
         
         userContent.push({
             type: 'text',
-            text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES!: El usuario ha adjuntado imágenes reales para el diseño (que estás viendo). DEBES usarlas en tu código HTML. Para insertar cada una, debes usar EXACTAMENTE estos identificadores literales en el atributo 'src' de la etiqueta <img>:\n${placeholdersInstruccion}\nEjemplo: <img src="UPLOADED_IMG_1" alt="Imagen del cliente" class="...">. Para cualquier OTRA imagen extra que necesites y el usuario no haya provisto, sigue usando /api/pexels.`
+            text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES Y LOGOS!: El usuario ha adjuntado imágenes reales (que estás viendo). 
+1. DEBES usarlas en tu código HTML insertando EXACTAMENTE estos identificadores literales en el 'src' de la etiqueta <img>:\n${placeholdersInstruccion}\nEjemplo: <img src="UPLOADED_IMG_1" class="...">. (Para OTRAS imágenes extras usa SIEMPRE /api/pexels).
+2. ¡ATENCIÓN AL LOGO Y COLORES!: Si el usuario te indica que alguna de estas imágenes anexas ES UN LOGO, DEBES colocarla obligatoriamente en la barra de navegación (Header/Nav) como logo destacado. ADEMÁS, DEBES analizar visualmente esa imagen y extraer sus COLORES PREDOMINANTES para construir rigurosamente toda la Paleta de Colores (botones, fondos, textos, acentos) del sitio web con ellos.`
         });
       }
 

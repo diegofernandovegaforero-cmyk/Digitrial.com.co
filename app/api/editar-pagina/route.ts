@@ -133,7 +133,9 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
             
             userContent.push({
                 type: 'text',
-                text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES!: El usuario ha adjuntado imágenes reales para la edición (que estás viendo arriba). DEBES incorporarlas en el HTML reemplazando imágenes antiguas o ubicándolas donde el usuario indicó. Para insertar cada una de estas imágenes aportadas por el usuario, DEBES usar EXACTAMENTE estos identificadores literales en el atributo 'src' de la etiqueta <img>:\n${placeholdersEdicion}\nEjemplo: <img src="UPLOADED_IMG_1" alt="Nueva imagen" class="...">. (Para cualquier OTRA imagen extra que necesites y el usuario no haya provisto, sigue usando /api/pexels).`
+                text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES Y LOGOS!: El usuario ha adjuntado imágenes reales para la edición (que estás viendo). 
+1. DEBES incorporarlas en el HTML ubicándolas donde el usuario indicó usando EXACTAMENTE estos identificadores literales en el 'src' de la etiqueta <img>:\n${placeholdersEdicion}\nEjemplo: <img src="UPLOADED_IMG_1" class="...">. (Para OTRAS imágenes extra sigue usando /api/pexels).
+2. ¡ATENCIÓN AL LOGO Y COLORES!: Si el usuario te indica en las instrucciones que alguna de estas imágenes ES UN LOGO, DEBES colocarla en la barra de navegación (Header) reemplazando al logo anterior. ADEMÁS, DEBES analizar visualmente ese logo y extraer sus COLORES PREDOMINANTES para recodificar toda la Paleta de Colores del sitio (textos, botones, fondos) basándote estrictamente en ellos.`
             });
         }
 
