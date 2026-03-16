@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
             allDesigns.push({
                 id: (data.ultima_generacion || data.fecha_creacion || doc.id).toString(),
                 codigo_actual: "[CODE_AVAILABLE]", 
-                descripcion: data.descripcion || 'Diseño actual',
+                descripcion: "🌐 " + (data.descripcion || 'Diseño actual') + " (VIVO)",
                 fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString(),
                 userName,
                 userEmail

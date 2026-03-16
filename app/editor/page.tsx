@@ -6,7 +6,7 @@ import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw,
 import { AnimatePresence, motion } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
 const CREDITOS_POR_EDICION = 3;
@@ -88,6 +88,7 @@ function EditorContent() {
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [logoLoading, setLogoLoading] = useState(false);
     const hasShownModalRef = useRef(false);
+    const lastHistoryPushRef = useRef<number>(0);
 
     // Pre-fill instruction from URL param
     useEffect(() => {
@@ -294,9 +295,37 @@ function EditorContent() {
                 try {
                     const docId = emailToDocId(email);
                     const docRef = doc(db, 'usuarios_leads', docId);
-                    // Actualizar silenciosamente el código en Firebase sin gastar créditos
-                    await updateDoc(docRef, { codigo_actual: event.data.html });
-                    setExito('Texto modificado nativamente guardado con éxito.');
+                    
+                    const now = Date.now();
+                    const shouldPushHistory = now - lastHistoryPushRef.current > 5 * 60 * 1000; // Cada 5 minutos
+
+                    const updateData: any = { 
+                        codigo_actual: event.data.html,
+                        ultima_edicion: new Date().toISOString()
+                    };
+
+                    if (shouldPushHistory) {
+                        const newDesign = {
+                            id: now.toString(),
+                            codigo_actual: event.data.html,
+                            descripcion: "Autoguardado: Edición de texto nativa",
+                            fecha: new Date().toISOString()
+                        };
+                        
+                        // Obtener historial actual para no sobreescribir
+                        const snap = await getDoc(docRef);
+                        const data = snap.data();
+                        const currentHistory = data?.historial_disenos || [];
+                        const updatedHistory = [newDesign, ...currentHistory].slice(0, 10);
+                        
+                        updateData.historial_disenos = updatedHistory;
+                        lastHistoryPushRef.current = now;
+                        
+                        setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
+                    }
+
+                    await updateDoc(docRef, updateData);
+                    setExito('Cambios sincronizados con el administrador.');
                     setTimeout(() => setExito(''), 3000);
                 } catch (err) {
                     console.error('Error guardando HTML editado nativamente:', err);
