@@ -215,8 +215,29 @@ function DisenaPageContent() {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
+            reader.onload = () => {
+                const img = new globalThis.Image();
+                img.src = reader.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/webp', 0.6));
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
         });
     };
 
@@ -263,7 +284,12 @@ function DisenaPageContent() {
                         const { done, value } = await reader.read();
                         if (done) break;
                         htmlTemp += decoder.decode(value, { stream: true });
-                        const cleanHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
+                        let cleanHtml = htmlTemp.replace(/```html/gi, '').replace(/```/g, '');
+                        if (base64Images.length > 0) {
+                            base64Images.forEach((b64, idx) => {
+                                cleanHtml = cleanHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                            });
+                        }
                         setGeneratedHtml(cleanHtml);
                     }
 

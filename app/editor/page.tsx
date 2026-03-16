@@ -381,7 +381,12 @@ function EditorContent() {
                 }
 
                 // Actualizar el DOM SOLO al final para evitar congelar el navegador (re-renders masivos del iframe)
-                const cleanHtml = htmlTemp.replace(/```html\n?/gi, '').replace(/```\n?/g, '');
+                let cleanHtml = htmlTemp.replace(/```html\n?/gi, '').replace(/```\n?/g, '');
+                if (imagenes_base64.length > 0) {
+                    imagenes_base64.forEach((b64, idx) => {
+                        cleanHtml = cleanHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                    });
+                }
                 setUserData(prev => prev ? { ...prev, codigo_actual: cleanHtml } : null);
 
                 setExito('¡Diseño actualizado! Los cambios ya están aplicados. 🎉');

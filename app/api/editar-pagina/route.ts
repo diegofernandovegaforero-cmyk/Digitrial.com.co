@@ -117,8 +117,9 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
         const userContent: any[] = [{ type: 'text', text: promptEdicion }];
 
         // Adjuntar imágenes de referencia si las hay
+        let placeholdersEdicion = "";
         if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-            imagenes_base64.forEach((imgBase64: string) => {
+            imagenes_base64.forEach((imgBase64: string, idx) => {
                 const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
                 const mimeType = match ? match[1] : 'image/jpeg';
                 const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
@@ -127,6 +128,12 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
                     image: Buffer.from(base64Data, 'base64'),
                     mimeType,
                 });
+                placeholdersEdicion += `- [UPLOADED_IMG_${idx + 1}]\n`;
+            });
+            
+            userContent.push({
+                type: 'text',
+                text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES!: El usuario ha adjuntado imágenes reales para la edición (que estás viendo arriba). DEBES incorporarlas en el HTML reemplazando imágenes antiguas o ubicándolas donde el usuario indicó. Para insertar cada una de estas imágenes aportadas por el usuario, DEBES usar EXACTAMENTE estos identificadores literales en el atributo 'src' de la etiqueta <img>:\n${placeholdersEdicion}\nEjemplo: <img src="UPLOADED_IMG_1" alt="Nueva imagen" class="...">. (Para cualquier OTRA imagen extra que necesites y el usuario no haya provisto, sigue usando /api/pexels).`
             });
         }
 
@@ -134,7 +141,14 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
             model: customGoogle('gemini-2.5-pro'),
             messages: [{ role: 'user', content: userContent }],
             onFinish: async ({ text }) => {
-                const nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+                let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+                
+                if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+                    imagenes_base64.forEach((b64, idx) => {
+                        nuevoHtml = nuevoHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                    });
+                }
+                
                 const dbForUpdate = getAdminDbSafe();
                 if (dbForUpdate) {
                     let historial = userData.historial_disenos || [];

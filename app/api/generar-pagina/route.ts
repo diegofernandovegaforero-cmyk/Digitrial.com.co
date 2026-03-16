@@ -121,8 +121,9 @@ export async function POST(req: NextRequest) {
 
       const userContent: any[] = [{ type: 'text', text: promptText }];
 
+      let placeholdersInstruccion = "";
       if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-        imagenes_base64.forEach(imgBase64 => {
+        imagenes_base64.forEach((imgBase64, idx) => {
           const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
           const mimeType = match ? match[1] : 'image/jpeg';
           const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
@@ -132,6 +133,12 @@ export async function POST(req: NextRequest) {
             image: Buffer.from(base64Data, 'base64'),
             mimeType: mimeType
           });
+          placeholdersInstruccion += `- [UPLOADED_IMG_${idx + 1}]\n`;
+        });
+        
+        userContent.push({
+            type: 'text',
+            text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES!: El usuario ha adjuntado imágenes reales para el diseño (que estás viendo). DEBES usarlas en tu código HTML. Para insertar cada una, debes usar EXACTAMENTE estos identificadores literales en el atributo 'src' de la etiqueta <img>:\n${placeholdersInstruccion}\nEjemplo: <img src="UPLOADED_IMG_1" alt="Imagen del cliente" class="...">. Para cualquier OTRA imagen extra que necesites y el usuario no haya provisto, sigue usando /api/pexels.`
         });
       }
 
@@ -140,7 +147,14 @@ export async function POST(req: NextRequest) {
         messages: [{ role: 'user', content: userContent }],
         onFinish: async ({ text }) => {
           // Limpiar markdown si el LLM no obedeció completamente
-          const html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+          let html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+
+          // Reemplazar placeholders en el HTML final para guardarlo en Firebase
+          if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+            imagenes_base64.forEach((b64, idx) => {
+              html = html.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+            });
+          }
 
           if (email) {
             try {
