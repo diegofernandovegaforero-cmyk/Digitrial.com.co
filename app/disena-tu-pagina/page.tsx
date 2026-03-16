@@ -273,8 +273,16 @@ function DisenaPageContent() {
 
                 if (contentType.includes('application/json')) {
                     const data = await res.json();
-                    setGeneratedHtml(data.html || data.error || '');
-                    setStep('preview');
+                    const html = data.html || data.error || '';
+                    if (html && userEmail) {
+                        try {
+                            sessionStorage.setItem('digitrial_preview_html', html);
+                            sessionStorage.setItem('digitrial_preview_email', userEmail);
+                        } catch (e) {
+                            console.warn('Error saving to sessionStorage:', e);
+                        }
+                    }
+                    router.push(`/editor?email=${encodeURIComponent(userEmail)}`);
                 } else {
                     const reader = res.body.getReader();
                     const decoder = new TextDecoder();
@@ -293,8 +301,15 @@ function DisenaPageContent() {
                         setGeneratedHtml(cleanHtml);
                     }
 
-                    // Mostrar la vista preliminar SOLO cuando la IA haya terminado de armar toda la web
-                    setStep('preview');
+                    if (htmlTemp && userEmail) {
+                        try {
+                            sessionStorage.setItem('digitrial_preview_html', htmlTemp);
+                            sessionStorage.setItem('digitrial_preview_email', userEmail);
+                        } catch (e) {
+                            console.warn('Error saving to sessionStorage:', e);
+                        }
+                    }
+                    router.push(`/editor?email=${encodeURIComponent(userEmail)}`);
                 }
             } else {
                 const data = await res.json().catch(() => ({}));

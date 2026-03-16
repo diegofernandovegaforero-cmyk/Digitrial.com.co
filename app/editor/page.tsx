@@ -225,10 +225,9 @@ function EditorContent() {
     }, [identificado, email, sessionHtml]);
 
     // Mostrar modal la primera vez que carga un diseño
-    useEffect(() => {
         if (userData?.codigo_actual && !hasShownModalRef.current) {
             hasShownModalRef.current = true;
-            setShowWelcomeModal(true);
+            setShowWelcomeModal(false); // Omitir modal a petición del usuario
             setLogoLoading(true);
 
             // Extraer logo nativo directamente del HTML generado
