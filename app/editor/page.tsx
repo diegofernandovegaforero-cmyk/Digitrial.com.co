@@ -42,7 +42,13 @@ function EditorContent() {
         nombre_contacto: string;
         creditos_restantes: number;
         codigo_actual: string;
-        historial_disenos?: { id: string; codigo_actual: string; descripcion: string; fecha: string }[];
+        historial_disenos?: { 
+            id: string; 
+            codigo_actual?: string; 
+            descripcion: string; 
+            fecha: string;
+            has_separate_code?: boolean;
+        }[];
     } | null>(sessionHtml ? {
         nombre_negocio: 'Tu negocio',
         nombre_contacto: '',
@@ -385,6 +391,37 @@ function EditorContent() {
         } catch (err) {
             console.error('Error in manual save:', err);
             setError('Error al guardar la maqueta. El archivo es muy grande.');
+        } finally {
+            setEditando(false);
+        }
+    };
+
+    const loadHistoricalDesign = async (diseno: any) => {
+        if (selectedDesignId === diseno.id) return;
+        
+        setSelectedDesignId(diseno.id);
+        setError('');
+        setExito('');
+        
+        // Si el diseño ya tiene el código inyectado (historial viejo), lo usamos directamente
+        if (diseno.codigo_actual) {
+            setUserData(prev => prev ? { ...prev, codigo_actual: diseno.codigo_actual } : null);
+            return;
+        }
+
+        // Si no tiene el código (historial nuevo con subcolección), lo descargamos del servidor
+        setEditando(true);
+        try {
+            const res = await fetch(`/api/usuario/disenos/codigo?email=${encodeURIComponent(email)}&id=${diseno.id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setUserData(prev => prev ? { ...prev, codigo_actual: data.html } : null);
+            } else {
+                setError('No se pudo cargar el código de este diseño.');
+            }
+        } catch (err) {
+            console.error('Error loading history design:', err);
+            setError('Error de conexión al cargar diseño historial.');
         } finally {
             setEditando(false);
         }
@@ -860,10 +897,7 @@ function EditorContent() {
                                     userData.historial_disenos.map((diseno, index) => (
                                         <div
                                             key={diseno.id}
-                                            onClick={() => {
-                                                setSelectedDesignId(diseno.id);
-                                                setUserData(prev => prev ? { ...prev, codigo_actual: diseno.codigo_actual } : null);
-                                            }}
+                                            onClick={() => loadHistoricalDesign(diseno)}
                                             className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedDesignId === diseno.id || (!selectedDesignId && index === 0) ? 'bg-blue-600/20 border-blue-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                         >
                                             <div className="flex justify-between items-start mb-2">

@@ -52,12 +52,17 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Si el usuario seleccionó un diseño antiguo del historial, lo buscamos.
+        // Si el usuario seleccionó un diseño antiguo del historial, lo buscamos en la subcolección
         let codigoActual = userData.codigo_actual || '';
-        if (id_diseno_base && userData.historial_disenos) {
-            const disenoAntiguo = userData.historial_disenos.find((d: any) => d.id === id_diseno_base);
-            if (disenoAntiguo) {
-                codigoActual = disenoAntiguo.codigo_actual;
+        if (id_diseno_base) {
+            try {
+                const historyRef = db.collection('usuarios_leads').doc(docId).collection('historial_codigos').doc(id_diseno_base);
+                const historySnap = await historyRef.get();
+                if (historySnap.exists) {
+                    codigoActual = historySnap.data()?.codigo_html || '';
+                }
+            } catch (historyErr) {
+                console.warn('Error fetching historical code, falling back to current:', historyErr);
             }
         }
 
@@ -153,7 +158,7 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
         }
 
         const result = streamText({
-            model: customGoogle('gemini-3.1-pro-preview'),
+            model: customGoogle('gemini-3.1-pro'),
             messages: [{ role: 'user', content: userContent }],
             onFinish: async ({ text }) => {
                 let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
