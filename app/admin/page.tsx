@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { Triangle, Download, Eye, Search, User, Mail, Calendar, FileCode, Loader2, LogOut } from 'lucide-react';
+import { Triangle, Download, Eye, Search, User, Mail, Calendar, FileCode, Loader2, LogOut, Copy, Check, X } from 'lucide-react';
 import Link from 'next/link';
 
 const ADMIN_EMAIL = 'diegofernandovegaforero@gmail.com';
@@ -23,12 +23,20 @@ export default function AdminPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [fetching, setFetching] = useState(false);
     const [previewDesign, setPreviewDesign] = useState<Design | null>(null);
+    const [copied, setCopied] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (u) => {
-            if (u && u.email?.toLowerCase().trim() === ADMIN_EMAIL) {
-                setUser(u);
-                fetchDesigns(u.email);
+            if (u) {
+                if (u.email?.toLowerCase().trim() === ADMIN_EMAIL) {
+                    setUser(u);
+                    fetchDesigns(u.email);
+                } else {
+                    setUser(null);
+                    setError('Tu cuenta no tiene permisos de administrador.');
+                    setLoading(false);
+                }
             } else {
                 setUser(null);
                 setLoading(false);
@@ -39,14 +47,19 @@ export default function AdminPage() {
 
     const fetchDesigns = async (email: string) => {
         setFetching(true);
+        setError(null);
         try {
             const res = await fetch(`/api/admin/designs?email=${encodeURIComponent(email)}`);
             if (res.ok) {
                 const data = await res.json();
                 setDesigns(data.designs || []);
+            } else {
+                const errData = await res.json();
+                setError(errData.error || 'Error al cargar los diseños');
             }
         } catch (error) {
             console.error('Error fetching designs:', error);
+            setError('Error de conexión con el servidor');
         } finally {
             setFetching(false);
             setLoading(false);
@@ -63,6 +76,12 @@ export default function AdminPage() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    };
+
+    const handleCopy = (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const filteredDesigns = designs.filter(d => 
@@ -82,16 +101,21 @@ export default function AdminPage() {
     if (!user) {
         return (
             <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
-                    <LogOut className="w-8 h-8 text-red-500" />
+                <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
+                    <User className="w-8 h-8 text-blue-500" />
                 </div>
-                <h1 className="text-2xl font-bold text-white mb-2">Acceso Denegado</h1>
+                <h1 className="text-2xl font-bold text-white mb-2">Panel de Administrador</h1>
                 <p className="text-slate-400 max-w-sm mb-8">
-                    Esta sección es exclusiva para el administrador del sistema. Por favor, inicia sesión con la cuenta autorizada.
+                    {error ? error : 'Por favor, inicia sesión con la cuenta autorizada para gestionar los diseños.'}
                 </p>
-                <Link href="/login" className="bg-white text-black px-6 py-2 rounded-lg font-bold hover:bg-gray-200 transition">
-                    Ir al Login
+                <Link href="/login" className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-lg shadow-white/5">
+                    Iniciar Sesión como Admin
                 </Link>
+                {error && (
+                   <button onClick={() => auth.signOut()} className="mt-4 text-xs text-slate-500 underline">
+                       Cerrar sesión actual
+                   </button>
+                )}
             </div>
         );
     }
@@ -124,6 +148,7 @@ export default function AdminPage() {
                     <div>
                         <h1 className="text-3xl font-bold mb-2">Diseños Generados</h1>
                         <p className="text-slate-400">Gestiona y descarga los códigos HTML creados por tus clientes.</p>
+                        {error && <p className="text-red-400 text-sm mt-2 flex items-center gap-2">⚠️ {error}</p>}
                     </div>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -233,8 +258,15 @@ export default function AdminPage() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <button 
+                                    onClick={() => handleCopy(previewDesign.codigo_actual)}
+                                    className="px-4 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold transition flex items-center gap-2"
+                                >
+                                    {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                    {copied ? 'Copiado' : 'Copiar Código'}
+                                </button>
+                                <button 
                                     onClick={() => handleDownload(previewDesign)}
-                                    className="px-4 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg text-xs font-bold transition flex items-center gap-2"
+                                    className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold transition flex items-center gap-2"
                                 >
                                     <Download className="w-3.5 h-3.5" /> Descargar
                                 </button>
@@ -242,12 +274,12 @@ export default function AdminPage() {
                                     onClick={() => setPreviewDesign(null)}
                                     className="p-2 hover:bg-white/10 rounded-lg transition"
                                 >
-                                    <Triangle className="w-4 h-4 rotate-180" />
+                                    <X className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-auto bg-black/50 p-6 font-mono text-[11px] leading-relaxed">
-                            <pre className="text-slate-300 whitespace-pre-wrap">
+                        <div className="flex-1 overflow-auto bg-black/50 p-6 font-mono text-[11px] leading-relaxed scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                            <pre className="text-slate-300 whitespace-pre-wrap selection:bg-blue-500/30">
                                 {previewDesign.codigo_actual}
                             </pre>
                         </div>

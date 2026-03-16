@@ -1,7 +1,10 @@
-public/
+# Exluye videos pesados que causan timeout en la subida local
+public/videos/
 backup/
 *.mjs
 *.ts
+# Mantener el resto
+!public/
 !app/
 !components/
 !lib/
@@ -13,3 +16,5 @@ backup/
 !tsconfig.json
 !nixpacks.toml
 !middleware.ts
+!public/favicon.ico
+!public/favicon.svg

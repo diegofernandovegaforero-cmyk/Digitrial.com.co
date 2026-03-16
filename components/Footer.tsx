@@ -132,8 +132,11 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="text-center mt-20 pt-8 border-t border-slate-800 text-slate-600 text-xs">
-                    © {new Date().getFullYear()} DIGITRIAL. Todos los derechos reservados.
+                <div className="text-center mt-20 pt-8 border-t border-slate-800 text-slate-600 text-xs flex flex-col md:flex-row justify-center items-center gap-4">
+                    <span>© {new Date().getFullYear()} DIGITRIAL. Todos los derechos reservados.</span>
+                    <Link href="/admin" className="hover:text-slate-400 transition opacity-20 hover:opacity-100 italic">
+                        Portal Administrativo
+                    </Link>
                 </div>
             </div>
         </footer>
