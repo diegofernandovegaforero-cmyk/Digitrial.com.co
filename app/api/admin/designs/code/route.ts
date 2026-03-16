@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     if (!adminDb) return NextResponse.json({ error: 'DB not configured' }, { status: 500 });
 
     const snapshot = await adminDb.collection('usuarios_leads').get();
-    let foundCode = null;
+    let foundCode: string | null = null;
 
     snapshot.forEach(doc => {
         const data = doc.data();

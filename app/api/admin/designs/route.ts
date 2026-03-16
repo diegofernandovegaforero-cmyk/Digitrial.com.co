@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
     }
 
-    console.log('ADMIN_FETCH: Querying usuarios_leads collection...');
+    console.log('ADMIN_FETCH: Querying snapshot...');
     const snapshot = await adminDb.collection('usuarios_leads').get();
     console.log(`ADMIN_FETCH: Found ${snapshot.size} documents in usuarios_leads`);
     
@@ -40,39 +40,49 @@ export async function GET(req: NextRequest) {
     const allDesigns: Design[] = [];
 
     snapshot.forEach(doc => {
-      const data = doc.data();
-      const userName = data.nombre_contacto || data.nombre_negocio || 'Usuario';
-      const userEmail = data.email || 'Sin correo';
-      const historial = data.historial_disenos || [];
+      try {
+        const data = doc.data();
+        const userName = data.nombre_contacto || data.nombre_negocio || 'Usuario';
+        const userEmail = data.email || 'Sin correo';
+        const historial = data.historial_disenos || [];
 
-      // Add the current code (metadata only for list)
-      if (data.codigo_actual) {
+        // Add the current code (metadata only for list)
+        if (data.codigo_actual) {
+            allDesigns.push({
+                id: (data.ultima_generacion || data.fecha_creacion || doc.id).toString(),
+                codigo_actual: "[CODE_AVAILABLE]", 
+                descripcion: data.descripcion || 'Diseño actual',
+                fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString(),
+                userName,
+                userEmail
+            });
+        }
+
+        historial.forEach((design: any) => {
           allDesigns.push({
-              id: (data.ultima_generacion || data.fecha_creacion || Date.now()).toString(),
-              codigo_actual: "[CODE_AVAILABLE]", 
-              descripcion: data.descripcion || 'Diseño actual',
-              fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString(),
-              userName,
-              userEmail
+            ...design,
+            codigo_actual: "[CODE_AVAILABLE]", 
+            userName,
+            userEmail
           });
-      }
-
-      historial.forEach((design: any) => {
-        allDesigns.push({
-          ...design,
-          codigo_actual: "[CODE_AVAILABLE]", // Metadata only initially
-          userName,
-          userEmail
         });
-      });
+      } catch (e) {
+        console.error(`ADMIN_FETCH: Error processing doc ${doc.id}:`, e);
+      }
     });
+
+    console.log(`ADMIN_FETCH: Total designs processed: ${allDesigns.length}`);
 
     // Sort by date descending
     allDesigns.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
     return NextResponse.json({ designs: allDesigns });
-  } catch (error) {
-    console.error('Error in admin designs API:', error);
-    return NextResponse.json({ error: 'Error fetching designs' }, { status: 500 });
+  } catch (error: any) {
+    console.error('CRITICAL_ADMIN_API_ERROR:', error);
+    return NextResponse.json({ 
+      error: 'Error fetching designs', 
+      details: error.message,
+      stack: error.stack?.substring(0, 100) 
+    }, { status: 500 });
   }
 }

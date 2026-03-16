@@ -73,8 +73,15 @@ function LoginContent() {
 
     // Helper to check user history and route them
     const performRedirect = async (user: any) => {
+        // First priority: explicit redirect parameter
         if (redirectToUrl) {
             router.replace(redirectToUrl);
+            return;
+        }
+
+        // Second priority: If it's the admin, send to admin panel as default
+        if (user.email?.toLowerCase().trim() === 'diegofernandovegaforero@gmail.com') {
+            router.replace('/admin');
             return;
         }
         

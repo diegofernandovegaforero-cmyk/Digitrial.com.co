@@ -69,11 +69,14 @@ export default function AdminPage() {
             } else {
                 const errData = await res.json();
                 console.error('ADMIN_FETCH: API Error:', errData);
-                setError(errData.error || 'Error al cargar los diseños');
+                const detailStr = errData.details ? ` (${errData.details})` : '';
+                setError((errData.error || 'Error al cargar los diseños') + detailStr);
+                setStatusMsg('Error en la carga de datos.');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('ADMIN_FETCH: Catch block Error:', error);
-            setError('Error de conexión con el servidor');
+            setError('Error de conexión: ' + (error.message || 'Error desconocido'));
+            setStatusMsg('Error crítico de conexión.');
         } finally {
             setFetching(false);
             setLoading(false);
@@ -162,7 +165,7 @@ export default function AdminPage() {
                 <p className="text-slate-400 max-w-sm mb-8">
                     {error ? error : 'Por favor, inicia sesión con la cuenta autorizada para gestionar los diseños.'}
                 </p>
-                <Link href="/login" className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-lg shadow-white/5">
+                <Link href="/login?redirect=/admin" className="bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-lg shadow-white/5">
                     Iniciar Sesión como Admin
                 </Link>
                 {error && (
