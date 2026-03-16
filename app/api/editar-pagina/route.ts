@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
         // Detectar y preservar imágenes en base64 existentes para no perderlas
         const mapImagenesExistentes = new Map<string, string>();
         let contadorImg = 0;
-        let codigoParaGemini = codigoActual.replace(/src="(data:image\/[^;]+;base64,[^"]+)"/gi, (match, b64) => {
+        let codigoParaGemini = codigoActual.replace(/src="(data:image\/[^;]+;base64,[^"]+)"/gi, (match: string, b64: string) => {
             contadorImg++;
             const placeholder = `EXISTING_IMG_${contadorImg}`;
             mapImagenesExistentes.set(placeholder, b64);
