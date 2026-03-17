@@ -253,6 +253,11 @@ function DisenaPageContent() {
         let idx = 0;
         const interval = setInterval(() => { idx = (idx + 1) % LOADING_MESSAGES.length; setLoadingMsg(idx); }, 2200);
         try {
+            if (!authUser || !authUser.email) {
+                setError('Debes iniciar sesión para generar una página.');
+                setStep('form');
+                return;
+            }
             const base64Images = await Promise.all(imagenesAdjuntas.map(img => getBase64(img.file)));
 
             const res = await fetch('/api/generar-pagina', {
@@ -261,8 +266,8 @@ function DisenaPageContent() {
                 body: JSON.stringify({
                     descripcion,
                     imagenes_base64: base64Images,
-                    email: authUser?.email,
-                    nombre_contacto: authUser?.displayName || ''
+                    email: authUser.email,
+                    nombre_contacto: authUser.displayName || ''
                 }),
             });
 
@@ -273,7 +278,12 @@ function DisenaPageContent() {
 
                 if (contentType.includes('application/json')) {
                     const data = await res.json();
-                    const html = data.html || data.error || '';
+                    if (data.error) {
+                        setError(data.error);
+                        setStep('form');
+                        return;
+                    }
+                    const html = data.html || '';
                     if (html && userEmail) {
                         try {
                             sessionStorage.setItem('digitrial_preview_html', html);
@@ -282,7 +292,10 @@ function DisenaPageContent() {
                             console.warn('Error saving to sessionStorage:', e);
                         }
                     }
-                    router.push(`/editor?email=${encodeURIComponent(userEmail)}`);
+                    // Pequeño delay para dejar que Firebase guarde en segundo plano
+                    setTimeout(() => {
+                        router.push(`/editor?email=${encodeURIComponent(userEmail)}`);
+                    }, 1500);
                 } else {
                     const reader = res.body.getReader();
                     const decoder = new TextDecoder();
@@ -316,7 +329,10 @@ function DisenaPageContent() {
                             console.warn('Error saving to sessionStorage:', e);
                         }
                     }
-                    router.push(`/editor?email=${encodeURIComponent(userEmail)}`);
+                    // Pequeño delay para dejar que Firebase guarde en segundo plano
+                    setTimeout(() => {
+                        router.push(`/editor?email=${encodeURIComponent(userEmail)}`);
+                    }, 2000);
                 }
             } else {
                 const data = await res.json().catch(() => ({}));
@@ -759,11 +775,13 @@ function DisenaPageContent() {
                             </div>
                         </div>
 
-                        <button type="submit"
-                            disabled={!productosValido}
+                            <button type="submit"
+                            disabled={!productosValido || !authUser}
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/30 text-lg">
                             <Sparkles className="w-5 h-5" />
-                            {productosValido ? 'Generar mi Página Web (5 créditos)' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`}
+                            {!authUser 
+                                ? 'Inicia sesión para generar' 
+                                : (productosValido ? 'Generar mi Página Web (5 créditos)' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`)}
                             <ArrowRight className="w-5 h-5" />
                         </button>
                         <p className="text-center text-xs text-slate-500">✅ Costo: 5 créditos · Límite máximo: 3 diseños por cuenta</p>
