@@ -57,9 +57,6 @@ export default function Navbar() {
                             <Link href="#templates" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Diseños</Link>
-                            <Link href="/login" className={`transition-colors duration-300 ${
-                                isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
-                            }`}>Iniciar sesión</Link>
                             <Link href="#contact" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Contacto</Link>
@@ -100,7 +97,6 @@ export default function Navbar() {
                         }`}>
                             <Link href="#" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
                             <Link href="#templates" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Diseños</Link>
-                            <Link href="/login" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Iniciar sesión</Link>
                             <Link href="#contact" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
                             <motion.div
                                 animate={{ scale: [1, 1.02, 1] }}
