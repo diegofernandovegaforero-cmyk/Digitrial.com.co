@@ -50,38 +50,35 @@ export function HeroHeader() {
                     <div className="relative mix-blend-multiply bg-white">
                         <motion.h1 
                             variants={itemVariants}
-                            className="text-7xl md:text-9xl lg:text-[14rem] font-black leading-[0.8] mb-4 tracking-[-0.05em] text-black bg-white font-anton uppercase select-none"
+                            className="text-5xl md:text-7xl lg:text-9xl font-black leading-[0.9] mb-4 tracking-[-0.05em] text-black bg-white font-anton uppercase select-none"
                         >
-                            <span className="block">OLVIDA</span>
-                            <span className="block">PROGRAMAR.</span>
+                            <span className="block">CREA TU WEB</span>
+                            <span className="block">EN MINUTOS.</span>
                         </motion.h1>
                     </div>
 
                     <motion.div variants={itemVariants} className="flex flex-col items-center mt-6">
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-6 tracking-tight uppercase font-anton">
-                            Construye tu éxito de forma{' '}
-                            <span className="text-blue-600">brillante.</span>
+                        <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-6 tracking-tight uppercase font-anton">
+                            Transforma tus ideas en una realidad{' '}
+                            <span className="text-blue-600">digital potente.</span>
                         </h2>
                     </motion.div>
 
-                    {/* Subtítulos */}
-                    <motion.p variants={itemVariants}
-                        className="text-xl md:text-2xl font-bold mb-4 text-slate-800">
-                        ¿No tienes experiencia técnica? No hay problema.
-                    </motion.p>
-
                     <motion.p variants={itemVariants}
                         className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-600">
-                        Diseña, optimiza y publica una web profesional totalmente a tu medida en segundos. Digitrial toma tus ideas y las transforma en una realidad digital potente impulsada por Inteligencia Artificial.
+                        Creamos tu página web a medida, moderna y altamente funcional impulsada por IA.
                     </motion.p>
 
                     {/* CTA Principal */}
-                    <motion.div variants={itemVariants} className="mb-0">
+                    <motion.div variants={itemVariants} className="mb-0 flex flex-col items-center">
+                        <p className="mb-4 text-sm font-bold text-blue-600 uppercase tracking-wider">
+                            Rápido, sencillo y 100% profesional.
+                        </p>
                         <Link href="/disena-tu-pagina"
-                            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:shadow-blue-600/40 dark:hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500">
+                            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:shadow-blue-600/40 dark:hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 uppercase">
                             <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                             <Sparkles className="w-6 h-6 animate-pulse" />
-                            <span className="relative z-10">INICIA TU DISEÑO CON AGENTE IA</span>
+                            <span className="relative z-10">Lanzar mi web hoy</span>
                         </Link>
                         <p className="mt-4 text-sm font-semibold text-slate-500">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
