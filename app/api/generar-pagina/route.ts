@@ -121,7 +121,6 @@ export async function POST(req: NextRequest) {
       });
 
       const promptText = buildPrompt(inputUsuario);
-
       const userContent: any[] = [{ type: 'text', text: promptText }];
 
       let placeholdersInstruccion = "";
@@ -147,86 +146,103 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const result = streamText({
-        model: customGoogle('gemini-3.1-pro'),
-        messages: [{ role: 'user', content: userContent }],
-        onFinish: async ({ text }) => {
-          // Limpiar markdown si el LLM no obedeció completamente
-          let html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+      // Intentar con modelos en orden de prioridad
+      const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+      let lastError: any = null;
 
-          // Reemplazar placeholders en el HTML final para guardarlo en Firebase
-          if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-            imagenes_base64.forEach((b64, idx) => {
-              html = html.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
-            });
-          }
+      for (const modelName of modelosFallback) {
+        try {
+          console.log(`Intentando generar con modelo: ${modelName}`);
+          const result = await streamText({
+            model: customGoogle(modelName),
+            messages: [{ role: 'user', content: userContent }],
+            onFinish: async ({ text }) => {
+              // Limpiar markdown si el LLM no obedeció completamente
+              let html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
 
-          if (email) {
-            try {
-              const adminDb = await getAdminDb();
-              if (adminDb) {
-                const emailKey = email.toLowerCase().trim().replace(/[.#$[\\]]/g, '_');
-                const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
-                const existing = await docRef.get();
-
-                const historyId = Date.now().toString();
-                const newDesignMetadata = {
-                  id: historyId,
-                  descripcion: descripcion.substring(0, 200),
-                  fecha: new Date().toISOString(),
-                  has_separate_code: true
-                };
-
-                // 1. Guardar código en subcolección (PESADO)
-                await docRef.collection('historial_codigos').doc(historyId).set({
-                  codigo_html: html,
-                  fecha: new Date().toISOString()
+              // Reemplazar placeholders en el HTML final para guardarlo en Firebase
+              if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+                imagenes_base64.forEach((b64, idx) => {
+                  html = html.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
                 });
+              }
 
-                if (!existing.exists) {
-                  await docRef.set({
-                    nombre_negocio: descripcion.substring(0, 60),
-                    nombre_contacto: nombre_contacto || '',
-                    email: email.toLowerCase().trim(),
-                    descripcion,
-                    codigo_actual: html,
-                    historial_disenos: [newDesignMetadata],
-                    creditos_restantes: 15,
-                    fecha_creacion: new Date().toISOString(),
-                  });
-                } else {
-                  const data = existing.data() || {};
-                  let historial = data.historial_disenos || [];
+              if (email) {
+                try {
+                  const adminDb = await getAdminDb();
+                  if (adminDb) {
+                    const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+                    const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+                    const existing = await docRef.get();
 
-                  // Migración silenciosa si es necesario
-                  if (historial.length === 0 && data.codigo_actual) {
-                    historial.push({
-                      id: (Date.now() - 1000).toString(),
-                      codigo_actual: data.codigo_actual,
-                      descripcion: data.descripcion ? data.descripcion.substring(0, 200) : 'Diseño anterior',
-                      fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString()
+                    const historyId = Date.now().toString();
+                    const newDesignMetadata = {
+                      id: historyId,
+                      descripcion: descripcion.substring(0, 200),
+                      fecha: new Date().toISOString(),
+                      has_separate_code: true
+                    };
+
+                    // 1. Guardar código en subcolección (PESADO)
+                    await docRef.collection('historial_codigos').doc(historyId).set({
+                      codigo_html: html,
+                      fecha: new Date().toISOString()
                     });
+
+                    if (!existing.exists) {
+                      await docRef.set({
+                        nombre_negocio: descripcion.substring(0, 60),
+                        nombre_contacto: nombre_contacto || '',
+                        email: email.toLowerCase().trim(),
+                        descripcion,
+                        codigo_actual: html,
+                        historial_disenos: [newDesignMetadata],
+                        creditos_restantes: 15,
+                        fecha_creacion: new Date().toISOString(),
+                      });
+                    } else {
+                      const data = existing.data() || {};
+                      let historial = data.historial_disenos || [];
+
+                      // Migración silenciosa si es necesario
+                      if (historial.length === 0 && data.codigo_actual) {
+                        historial.push({
+                          id: (Date.now() - 1000).toString(),
+                          codigo_actual: data.codigo_actual,
+                          descripcion: data.descripcion ? data.descripcion.substring(0, 200) : 'Diseño anterior',
+                          fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString()
+                        });
+                      }
+
+                      historial.unshift(newDesignMetadata);
+                      historial = historial.slice(0, 10); // Aumentar a 10 ya que ahora son livianos
+
+                      await docRef.update({
+                        codigo_actual: html,
+                        historial_disenos: historial,
+                        ultima_generacion: new Date().toISOString(),
+                        creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5)
+                      });
+                    }
                   }
-
-                  historial.unshift(newDesignMetadata);
-                  historial = historial.slice(0, 10); // Aumentar a 10 ya que ahora son livianos
-
-                  await docRef.update({
-                    codigo_actual: html,
-                    historial_disenos: historial,
-                    ultima_generacion: new Date().toISOString(),
-                    creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5)
-                  });
+                } catch (fbErr) {
+                  console.warn('Firebase no disponible:', fbErr);
                 }
               }
-            } catch (fbErr) {
-              console.warn('Firebase no disponible:', fbErr);
-            }
-          }
-        },
-      });
+            },
+          });
 
-      return result.toTextStreamResponse();
+          return result.toTextStreamResponse();
+        } catch (err: any) {
+          console.warn(`Fallo con modelo ${modelName}:`, err.message);
+          lastError = err;
+          // Continuar al siguiente modelo
+        }
+      }
+
+      // Si todos los modelos fallan
+      throw lastError || new Error('Todos los modelos de AI fallaron');
+
     } catch (geminiError) {
       console.warn('Gemini API falló, usando fallback:', geminiError);
       return NextResponse.json({ html: buildFallbackHTML(descripcion.substring(0, 60), descripcion) });

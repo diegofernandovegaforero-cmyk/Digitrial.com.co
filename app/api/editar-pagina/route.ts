@@ -157,74 +157,90 @@ Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de 
             });
         }
 
-        const result = streamText({
-            model: customGoogle('gemini-3.1-pro'),
-            messages: [{ role: 'user', content: userContent }],
-            onFinish: async ({ text }) => {
-                let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
-                
-                // RESTAURACIÓN DE IMÁGENES:
-                // 1. Restaurar imágenes que ya existían (las preservadas antes)
-                mapImagenesExistentes.forEach((b64, placeholder) => {
-                    nuevoHtml = nuevoHtml.split(placeholder).join(b64);
+        // Intentar con modelos en orden de prioridad
+        const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+        let lastError: any = null;
+
+        for (const modelName of modelosFallback) {
+            try {
+                console.log(`Intentando editar con modelo: ${modelName}`);
+                const result = await streamText({
+                    model: customGoogle(modelName),
+                    messages: [{ role: 'user', content: userContent }],
+                    onFinish: async ({ text }) => {
+                        let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+                        
+                        // RESTAURACIÓN DE IMÁGENES:
+                        // 1. Restaurar imágenes que ya existían (las preservadas antes)
+                        mapImagenesExistentes.forEach((b64, placeholder) => {
+                            nuevoHtml = nuevoHtml.split(placeholder).join(b64);
+                        });
+
+                        // 2. Restaurar nuevas imágenes subidas en esta edición
+                        if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+                            imagenes_base64.forEach((b64, idx) => {
+                                nuevoHtml = nuevoHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                            });
+                        }
+                        
+                        const dbForUpdate = getAdminDbSafe();
+                        if (dbForUpdate) {
+                            const historyId = Date.now().toString();
+                            const newDesignMetadata = {
+                                id: historyId,
+                                descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición de texto',
+                                fecha: new Date().toISOString(),
+                                has_separate_code: true
+                            };
+
+                            // 1. Guardar código en subcolección (PESADO)
+                            await dbForUpdate.collection('usuarios_leads').doc(docRef.id).collection('historial_codigos').doc(historyId).set({
+                                codigo_html: nuevoHtml,
+                                fecha: new Date().toISOString()
+                            });
+
+                            // 2. Metadata en doc principal
+                            let historial = userData.historial_disenos || [];
+
+                            // Migración silenciosa
+                            if (historial.length === 0 && userData.codigo_actual) {
+                                historial.push({
+                                    id: (Date.now() - 1000).toString(),
+                                    codigo_actual: userData.codigo_actual,
+                                    descripcion: userData.descripcion || 'Diseño base',
+                                    fecha: userData.ultima_edicion || userData.fecha_creacion || new Date().toISOString()
+                                });
+                            }
+
+                            historial.unshift(newDesignMetadata);
+                            historial = historial.slice(0, 10); // Aumentar límite ya que es ligero
+
+                            await dbForUpdate.collection('usuarios_leads').doc(docRef.id).update({
+                                codigo_actual: nuevoHtml,
+                                historial_disenos: historial,
+                                creditos_restantes: nuevosCreditos,
+                                ultima_edicion: new Date().toISOString(),
+                                instruccion_texto: instruccion_texto || '',
+                            });
+                        }
+                    },
                 });
 
-                // 2. Restaurar nuevas imágenes subidas en esta edición
-                if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-                    imagenes_base64.forEach((b64, idx) => {
-                        nuevoHtml = nuevoHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
-                    });
-                }
-                
-                const dbForUpdate = getAdminDbSafe();
-                if (dbForUpdate) {
-                    const historyId = Date.now().toString();
-                    const newDesignMetadata = {
-                        id: historyId,
-                        descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición de texto',
-                        fecha: new Date().toISOString(),
-                        has_separate_code: true
-                    };
-
-                    // 1. Guardar código en subcolección (PESADO)
-                    await dbForUpdate.collection('usuarios_leads').doc(docRef.id).collection('historial_codigos').doc(historyId).set({
-                        codigo_html: nuevoHtml,
-                        fecha: new Date().toISOString()
-                    });
-
-                    // 2. Metadata en doc principal
-                    let historial = userData.historial_disenos || [];
-
-                    // Migración silenciosa
-                    if (historial.length === 0 && userData.codigo_actual) {
-                        historial.push({
-                            id: (Date.now() - 1000).toString(),
-                            codigo_actual: userData.codigo_actual,
-                            descripcion: userData.descripcion || 'Diseño base',
-                            fecha: userData.ultima_edicion || userData.fecha_creacion || new Date().toISOString()
-                        });
+                // Retornamos el stream. Adicionalmente, podríamos retornar cabeceras extra si se necesitan.
+                return result.toTextStreamResponse({
+                    headers: {
+                        'x-creditos-restantes': nuevosCreditos.toString()
                     }
-
-                    historial.unshift(newDesignMetadata);
-                    historial = historial.slice(0, 10); // Aumentar límite ya que es ligero
-
-                    await dbForUpdate.collection('usuarios_leads').doc(docRef.id).update({
-                        codigo_actual: nuevoHtml,
-                        historial_disenos: historial,
-                        creditos_restantes: nuevosCreditos,
-                        ultima_edicion: new Date().toISOString(),
-                        instruccion_texto: instruccion_texto || '',
-                    });
-                }
-            },
-        });
-
-        // Retornamos el stream. Adicionalmente, podríamos retornar cabeceras extra si se necesitan.
-        return result.toTextStreamResponse({
-            headers: {
-                'x-creditos-restantes': nuevosCreditos.toString()
+                });
+            } catch (err: any) {
+                console.warn(`Fallo con modelo ${modelName} en edición:`, err.message);
+                lastError = err;
+                // Continuar al siguiente modelo
             }
-        });
+        }
+
+        // Si todos los modelos fallan
+        throw lastError || new Error('Todos los modelos de AI fallaron en edición');
 
     } catch (error) {
         console.error('Error editando página:', error);
