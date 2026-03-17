@@ -33,18 +33,25 @@ export function HeroHeader() {
             <WavesBackground />
 
             <div className="container mx-auto max-w-5xl relative z-10">
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="flex flex-col items-center text-center"
-                >
-
-                    {/* Titular Principal con Efecto Knockout Blanco (Estilo Adjunto 2) */}
-                    <div className="relative mix-blend-multiply bg-white">
+                    {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) */}
+                    <div className="relative overflow-hidden bg-white group">
+                        {/* Video de fondo para las letras */}
+                        <div className="absolute inset-0 z-0">
+                            <video
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
+                            >
+                                <source src="/videos/COMPILADOVIDEOS.mp4" type="video/mp4" />
+                            </video>
+                        </div>
+                        
+                        {/* Texto con blend mode para actuar como máscara */}
                         <motion.h1 
                             variants={itemVariants}
-                            className="text-5xl md:text-7xl lg:text-9xl font-black leading-[0.9] mb-4 tracking-[-0.05em] text-black bg-white font-anton uppercase select-none"
+                            className="relative z-10 text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
                         >
                             <span className="block">CREA TU WEB</span>
                             <span className="block">EN MINUTOS.</span>
