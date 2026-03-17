@@ -39,8 +39,8 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
         offset: ["start end", "end start"]
     });
 
-    // Opacidad suavizada: El video permanece oculto hasta el 35% y se apaga al 60% para dar paso a los diseños
-    const opacity = useTransform(scrollYProgress, [0, 0.35, 0.60, 0.65], [0, 1, 1, 0]);
+    // Opacidad suavizada: El video inicia visible y se apaga al 60% para dar paso a los diseños
+    const opacity = useTransform(scrollYProgress, [0, 0.55, 0.60, 0.65], [1, 1, 1, 0]);
 
     // Animaciones para los 3 bloques de texto (Secuencial, compactadas antes del 60%)
     const text1Opacity = useTransform(scrollYProgress, [0.36, 0.40, 0.42, 0.44], [0, 1, 1, 0]);
@@ -52,12 +52,10 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
     const text3Opacity = useTransform(scrollYProgress, [0.53, 0.56, 0.58, 0.60], [0, 1, 1, 0]);
     const text3Y = useTransform(scrollYProgress, [0.53, 0.56], [20, 0]);
 
-    // Cambio automático de video cada 12 segundos
+    // Ciclo automático deshabilitado a petición del usuario para mantener estabilidad visual
     useEffect(() => {
-        const timer = setInterval(() => {
-            setIndex((prev) => (prev + 1) % videos.length);
-        }, 6000);
-        return () => clearInterval(timer);
+        // Mantenemos el primer video (el más premium) fijo
+        setIndex(0);
     }, []);
 
     return (
@@ -83,8 +81,8 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                     >
                         <source src={videos[index].url} type="video/mp4" />
                     </video>
-                    {/* Overlay semi-transparente para legibilidad */}
-                    <div className="absolute inset-0 bg-slate-900/40" />
+                    {/* Overlay semi-transparente para legibilidad de textos blancos */}
+                    <div className="absolute inset-0 bg-slate-950/60" />
                 </motion.div>
             </AnimatePresence>
 

@@ -16,7 +16,7 @@ export default function Home() {
         <main className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
             <VideoBackground targetRef={videoRangeRef} />
             <Navbar />
-            <div className="relative z-40 bg-white dark:bg-slate-950">
+            <div className="relative z-40 bg-transparent transition-colors duration-300">
                 <HeroHeader />
                 <HeroSearch />
             </div>
