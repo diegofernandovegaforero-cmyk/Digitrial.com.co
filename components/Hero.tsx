@@ -40,7 +40,7 @@ export function HeroHeader() {
                     className="flex flex-col items-center text-center"
                 >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) */}
-                    <div className="relative overflow-hidden bg-white group">
+                    <div className="relative overflow-hidden bg-white group rounded-3xl">
                         {/* Video de fondo para las letras */}
                         <div className="absolute inset-0 z-0">
                             <video
@@ -65,14 +65,14 @@ export function HeroHeader() {
                     </div>
 
                     <motion.div variants={itemVariants} className="flex flex-col items-center mt-6">
-                        <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-6 tracking-tight uppercase font-anton">
+                        <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-6 tracking-tight uppercase font-anton text-center">
                             Transforma tus ideas en una realidad{' '}
                             <span className="text-blue-600">digital potente.</span>
                         </h2>
                     </motion.div>
 
                     <motion.p variants={itemVariants}
-                        className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-600">
+                        className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-600 text-center">
                         Creamos tu página web a medida, moderna y altamente funcional impulsada por IA.
                     </motion.p>
 
