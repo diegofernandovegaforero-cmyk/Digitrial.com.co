@@ -40,7 +40,7 @@ REGLAS ESTRICTAS DE SALIDA:
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
 `.trim();
 
-    const modelosFallback = ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'];
+    const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-pro-latest'];
     
     console.log('Starting debug loop...');
     for (const modelName of modelosFallback) {

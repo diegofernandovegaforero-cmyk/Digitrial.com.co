@@ -49,7 +49,7 @@ async function main() {
         return;
     }
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
 
     try {
         const inputUsuario = "DISEÑA UN SITIO WEB SIMILAR A ESTE https://tiendamillonarios.com.co/?srsltid=AfmBOoqCwOe28V7L...";
