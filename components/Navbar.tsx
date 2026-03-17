@@ -32,7 +32,7 @@ export default function Navbar() {
             <header className={`w-full transition-all duration-300 ${
                 isScrolled 
                 ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm' 
-                : 'bg-black/80 backdrop-blur-md border-b border-white/10'
+                : 'bg-[#0B1221]/90 backdrop-blur-md border-b border-white/5'
             }`}>
                 <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
                     {/* Logo */}
