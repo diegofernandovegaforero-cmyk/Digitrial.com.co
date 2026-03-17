@@ -19,7 +19,7 @@ export default function Navbar() {
     return (
         <div className="fixed w-full z-50">
             <AnnouncementBar />
-            <header className="w-full bg-slate-900/95 backdrop-blur-md border-b border-white/10 transition-colors">
+            <header className="w-full bg-white/90 backdrop-blur-md border-b border-slate-200 transition-colors">
                 <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
@@ -27,8 +27,8 @@ export default function Navbar() {
                             <Triangle className="text-white fill-white w-5 h-5" />
                         </div>
                         <div className="flex items-baseline">
-                            <span className="font-extrabold text-xl tracking-tight uppercase text-white transition-colors">
-                                DIGI<span className="text-blue-400">TRIAL</span>
+                            <span className="font-extrabold text-xl tracking-tight uppercase text-slate-900 transition-colors">
+                                DIGI<span className="text-blue-600">TRIAL</span>
                             </span>
                         </div>
                     </Link>
@@ -37,12 +37,12 @@ export default function Navbar() {
                     <div className="flex items-center gap-2 md:gap-8">
                         {/* Desktop Menu Links */}
                         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-                            <Link href="#" className="text-blue-400 font-semibold">Inicio</Link>
-                            <Link href="#templates" className="hover:text-blue-400 transition text-slate-300">Diseños</Link>
-                            <Link href="/login" className="hover:text-blue-400 transition text-slate-300">Iniciar sesión</Link>
-                            <Link href="#contact" className="hover:text-blue-400 transition text-slate-300">Contacto</Link>
+                            <Link href="#" className="text-blue-600 font-semibold">Inicio</Link>
+                            <Link href="#templates" className="hover:text-blue-600 transition text-slate-600">Diseños</Link>
+                            <Link href="/login" className="hover:text-blue-600 transition text-slate-600">Iniciar sesión</Link>
+                            <Link href="#contact" className="hover:text-blue-600 transition text-slate-600">Contacto</Link>
 
-                            <div className="h-4 w-px bg-white/10 mx-2"></div>
+                            <div className="h-4 w-px bg-slate-200 mx-2"></div>
                         </div>
 
                         <motion.div
@@ -60,7 +60,7 @@ export default function Navbar() {
 
                         {/* Mobile Menu Button */}
                         <button
-                            className="md:hidden text-white p-2"
+                            className="md:hidden text-slate-900 p-2"
                             onClick={() => setIsOpen(!isOpen)}
                         >
                             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -70,12 +70,12 @@ export default function Navbar() {
 
                 {/* Mobile Menu Dropdown */}
                 {isOpen && (
-                    <div className="md:hidden bg-slate-900 border-t border-white/10 absolute w-full left-0 top-full shadow-2xl transition-colors">
-                        <div className="flex flex-col p-6 space-y-4 font-medium text-white font-bold">
-                            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-blue-400 transition-colors">Inicio</Link>
-                            <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-400 transition-colors">Diseños</Link>
-                            <Link href="/login" onClick={() => setIsOpen(false)} className="hover:text-blue-400 transition-colors">Iniciar sesión</Link>
-                            <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-400 transition-colors">Contacto</Link>
+                    <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200 absolute w-full left-0 top-full shadow-2xl transition-colors">
+                        <div className="flex flex-col p-6 space-y-4 font-medium text-slate-900 font-bold">
+                            <Link href="#" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Inicio</Link>
+                            <Link href="#templates" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Diseños</Link>
+                            <Link href="/login" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Iniciar sesión</Link>
+                            <Link href="#contact" onClick={() => setIsOpen(false)} className="hover:text-blue-600 transition-colors">Contacto</Link>
                             <motion.div
                                 animate={{ scale: [1, 1.02, 1] }}
                                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
