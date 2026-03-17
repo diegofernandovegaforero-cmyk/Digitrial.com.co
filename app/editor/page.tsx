@@ -143,7 +143,9 @@ function EditorContent() {
                     let currentCode = data.codigo_actual || '';
 
                     if (!currentCode && pastDesigns.length > 0) {
-                        currentCode = pastDesigns[0].codigo_actual;
+                        // Si no hay código actual, lo intentamos sacar del primer elemento del historial
+                        // (Compatible con formato viejo y nuevo)
+                        currentCode = pastDesigns[0].codigo_actual || '';
                         setSelectedDesignId(pastDesigns[0].id);
                     }
 
@@ -169,7 +171,7 @@ function EditorContent() {
                             let currentCode = data.codigo_actual || '';
 
                             if (!currentCode && pastDesigns.length > 0) {
-                                currentCode = pastDesigns[0].codigo_actual;
+                                currentCode = pastDesigns[0].codigo_actual || '';
                                 setSelectedDesignId(pastDesigns[0].id);
                             }
 
@@ -291,6 +293,15 @@ function EditorContent() {
         }
     }, [userData?.codigo_actual]);
 
+    // EFECTO DE AUTOCARGA: Si el documento principal no tiene el código (por tamaño),
+    // pero hay historial, cargamos el más reciente automáticamente.
+    useEffect(() => {
+        if (identificado && userData && !userData.codigo_actual && userData.historial_disenos && userData.historial_disenos.length > 0) {
+            console.log("Autocargando diseño desde historial (código principal ausente)...");
+            loadHistoricalDesign(userData.historial_disenos[0]);
+        }
+    }, [identificado, userData?.codigo_actual, userData?.historial_disenos]);
+
     // Listener para recibir los cambios editados nativamente desde el Iframe
     useEffect(() => {
         const handleMessage = async (event: MessageEvent) => {
@@ -379,11 +390,19 @@ function EditorContent() {
 
             const updatedHistory = [newDesignMetadata, ...(userData.historial_disenos || [])].slice(0, 10);
 
-            await updateDoc(docRef, {
-                codigo_actual: userData.codigo_actual,
+            const updatePayload: any = {
                 historial_disenos: updatedHistory,
                 ultima_generacion: new Date().toISOString()
-            });
+            };
+
+            // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 800KB)
+            if (new Blob([userData.codigo_actual]).size < 800000) {
+                updatePayload.codigo_actual = userData.codigo_actual;
+            } else {
+                console.log('Guardado Manual: El código es muy grande para el doc principal (>800KB).');
+            }
+
+            await updateDoc(docRef, updatePayload);
 
             setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
             setExito('¡Maqueta guardada con éxito!');

@@ -5,6 +5,8 @@ const projectDir = process.cwd();
 loadEnvConfig(projectDir);
 
 const buildPrompt = (input: string) => `
+AGENTE: GEMINI 3.1 PRO
+
 ROL Y MANDATO:
 Actúe como un Maestro Arquitecto Web de Inteligencia Artificial de DIGITRIAL, con la capacidad de diseñar y codificar experiencias web dinámicas premium de alto impacto. Su mandato es procesar la descripción detallada de la idea de un usuario de DIGITRIAL y generar un sitio web completo, funcional y dinámico utilizando un stack de programación moderno y robusto (HTML5, Tailwind CSS, y JavaScript avanzado integrados en un solo archivo).
 
@@ -47,7 +49,7 @@ async function main() {
         return;
     }
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-pro-exp-02-05' });
 
     try {
         const inputUsuario = "DISEÑA UN SITIO WEB SIMILAR A ESTE https://tiendamillonarios.com.co/?srsltid=AfmBOoqCwOe28V7L...";

@@ -7,8 +7,8 @@ export async function GET() {
         if (!apiKey) {
             return NextResponse.json({ error: 'No API Key' }, { status: 500 });
         }
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-pro-exp-02-05' });
 
         const result = await model.generateContent('Dime hola en 5 idiomas');
         return NextResponse.json({ success: true, text: result.response.text() });

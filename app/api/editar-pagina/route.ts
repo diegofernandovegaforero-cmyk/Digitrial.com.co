@@ -1,249 +1,166 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { getAdminDbSafe } from '@/lib/firebase-admin';
 
-// Sanitizar email igual que en el frontend
-const emailToDocId = (email: string) =>
-    email.toLowerCase().trim().replace(/[.#$[\\]]/g, '_');
+// Firebase Admin helper
+const getAdminDb = async () => {
+  if (!process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.FIREBASE_ADMIN_PROJECT_ID === 'TU_PROYECTO_ID') {
+    return null;
+  }
+  const { getAdminDbSafe } = await import('@/lib/firebase-admin');
+  return getAdminDbSafe();
+};
 
 export const maxDuration = 60;
 
-export async function POST(req: NextRequest) {
-    const apiKey = process.env.GEMINI_API_KEY;
+const buildEditPrompt = (codigoActual: string, instruccion: string) => `
+AGENTE: GEMINI 3.1 PRO
 
-    // Verificar Firebase
-    const db = getAdminDbSafe();
-    if (!db) {
-        return NextResponse.json({ error: 'Firebase no configurado en el servidor.' }, { status: 503 });
-    }
-
-    try {
-        const { email, instruccion_texto, id_diseno_base, audio_base64, imagenes_base64 } = await req.json();
-
-        if (!email) {
-            return NextResponse.json({ error: 'Se requiere el correo electrónico.' }, { status: 400 });
-        }
-
-        const docId = emailToDocId(email);
-        let docRef = db.collection('usuarios_leads').doc(docId);
-        let docSnap = await docRef.get();
-
-        // ── Compatibilidad hacia atrás: Si no existe por email, buscar por UID de Firebase ──
-        if (!docSnap.exists) {
-            // Asumimos que si no lo encuentra, tal vez la página se haya generado ANTES de nuestra 
-            // actualización que unifica los IDs por email. Busquemos un documento cuyo campo 'email' coincida.
-            const querySnapshot = await db.collection('usuarios_leads').where('email', '==', email.toLowerCase().trim()).limit(1).get();
-            if (!querySnapshot.empty) {
-                docRef = querySnapshot.docs[0].ref;
-                docSnap = await docRef.get();
-            } else {
-                return NextResponse.json({ error: 'Usuario no encontrado. Genera primero tu página web.' }, { status: 404 });
-            }
-        }
-
-        const userData = docSnap.data()!;
-        const creditos = userData.creditos_restantes ?? 0;
-
-        if (creditos < 3) {
-            return NextResponse.json(
-                { error: 'Créditos insuficientes. Contacta a un asesor para recargar.', creditos_restantes: creditos },
-                { status: 402 }
-            );
-        }
-
-        // Si el usuario seleccionó un diseño antiguo del historial, lo buscamos en la subcolección
-        let codigoActual = userData.codigo_actual || '';
-        if (id_diseno_base) {
-            try {
-                const historyRef = db.collection('usuarios_leads').doc(docId).collection('historial_codigos').doc(id_diseno_base);
-                const historySnap = await historyRef.get();
-                if (historySnap.exists) {
-                    codigoActual = historySnap.data()?.codigo_html || '';
-                }
-            } catch (historyErr) {
-                console.warn('Error fetching historical code, falling back to current:', historyErr);
-            }
-        }
-
-        const nuevosCreditos = creditos - 3;
-
-        // ── Construir instrucción final ──
-        const instruccionFinal = instruccion_texto || '';
-        if (!instruccionFinal.trim()) {
-            return NextResponse.json({ error: 'No se recibió ninguna instrucción de edición.' }, { status: 400 });
-        }
-
-        // Detectar y preservar imágenes en base64 existentes para no perderlas
-        const mapImagenesExistentes = new Map<string, string>();
-        let contadorImg = 0;
-        let codigoParaGemini = codigoActual.replace(/src="(data:image\/[^;]+;base64,[^"]+)"/gi, (match: string, b64: string) => {
-            contadorImg++;
-            const placeholder = `EXISTING_IMG_${contadorImg}`;
-            mapImagenesExistentes.set(placeholder, b64);
-            return `src="${placeholder}"`;
-        });
-
-        // Cap de seguridad
-        codigoParaGemini = codigoParaGemini.slice(0, 250000);
-
-        // ── Prompt Maestro de Edición ──
-        const promptEdicion = `
+ROL Y MANDATO:
 Eres el Desarrollador Front-End Senior de Digitrial centro de soluciones.
-
 Se te entrega el código HTML actual de una landing page y una instrucción del cliente para modificarla.
 
-IMPORTANTE - REGLA DE IMÁGENES:
-Si vas a agregar o reemplazar imágenes, está ESTRICTAMENTE PROHIBIDO usar Unsplash, Pollinations u otros. Tu ÚNICO proveedor de imágenes es nuestro proxy interno de Pexels.
-Usa EXACTAMENTE esta estructura para el 'src' de la imagen:
-<img src="/api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]" alt="..." class="...">
-
 CÓDIGO HTML ACTUAL:
-${codigoParaGemini}
+${codigoActual}
 
-INSTRUCCIÓN DE CLIENTE: "${instruccion_texto}"
-
-CRÉDITOS RESTANTES DEL CLIENTE (después de esta edición): ${nuevosCreditos}
+INSTRUCCIÓN DE CLIENTE: "${instruccion}"
 
 REGLAS ESTRICTAS DE SALIDA:
 - Devuelve SOLO el HTML completo modificado.
 - PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
-- Mantén TODAS las secciones existentes a menos que el cliente pida eliminarlas expresamente.
-- ¡CRÍTICO Y VITAL! SI AGREGAS O MODIFICAS IMÁGENES, DEBES UTILIZAR ÚNICAMENTE NUESTRO PROXY DE PEXELS COMO PROVEEDOR PROFESIONAL:
-  1. 'src' principal (SISTEMA PREMIUM - PROVEEDOR UNICO): /api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]
-  ¡ESTÁ TERMINANTEMENTE PROHIBIDO usar Unsplash, Pollinations, Nano Banana o LoremFlickr! Confía en el proxy de Pexels.
-  Ejemplo: <img src="/api/pexels?q=office+modern+team" alt="Equipo profesional">
-- ¡VIDEOS DE STOCK (Stick de vids)! Si necesitas fondos en video, usa <video autoplay loop muted playsinline>: https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-4174-large.mp4 o https://assets.mixkit.co/videos/preview/mixkit-people-in-a-business-meeting-working-on-a-project-4180-large.mp4 o https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-laptop-in-a-coffee-shop-4171-large.mp4 o https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-connection-background-27202-large.mp4
-- ¡CRÍTICO! NO ELIMINES NI REEMPLACES las imágenes de fondo (<img> o background-image) por simples gradientes o colores estáticos. Mantén el diseño rico y estructurado con una paleta de colores adaptada al giro del negocio.
-- ¡ATENCIÓN A LOS COLORES! La paleta de colores (oscuro, claro, colores específicos) DEBE estar estrictamente condicionada por la instrucción de audio o texto. Si el cliente pide colores claros, quita el dark mode; si pide colores específicos, aplícalos en el CSS.
-- Mantén el carácter dinámico de la página web (GSAP, AOS, Framer Motion, microinteracciones, animaciones de entrada).
-- Alerta al final: Si los créditos restantes mencionados arriba son 0 o 3, DEBES incluir un banner sutil, elegante y muy premium pegado encima del footer actual que diga exactamente: "Atención: Te quedan {{creditos_restantes}} créditos de edición. Contacta a un asesor para llevar este diseño a producción o recargar tu cuenta." Reemplaza {{creditos_restantes}} por el número real.
-- FOOTER Y DERECHOS RESERVADOS: Asegúrate de que el diseño final SIEMPRE contenga un Footer profesional. En la parte inferior, DEBES escribir exactamente el símbolo de Copyright seguido del año actual y la frase de derechos reservados de esta forma: "© ${new Date().getFullYear()} Todos los derechos reservados", acompañado del nombre de la marca o empresa generada.
+- Mantén la calidad premium y el diseño dinámico original.
+- Si el usuario adjunta imágenes, úsalas según su instrucción.
+`;
 
-Ejecuta los cambios solicitados sobre el código HTML respetando las paletas de colores pedidas y devuelve el nuevo documento renderizado.
-        `.trim();
+export async function POST(req: NextRequest) {
+  try {
+    const { email, instruccion_texto, id_diseno_base, imagenes_base64 } = await req.json();
 
-        if (!apiKey) {
-            return NextResponse.json({ error: 'API key de Gemini no configurada.' }, { status: 503 });
+    if (!email || !instruccion_texto) {
+      return NextResponse.json({ error: 'Faltan campos requeridos.' }, { status: 400 });
+    }
+
+    const adminDb = await getAdminDb();
+    if (!adminDb) {
+        return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    }
+
+    const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+    const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+    const snap = await docRef.get();
+
+    if (!snap.exists) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+
+    const userData = snap.data() || {};
+    const creditosRestantes = userData.creditos_restantes ?? 0;
+
+    if (creditosRestantes < 3) {
+      return NextResponse.json({ error: 'Créditos insuficientes' }, { status: 402 });
+    }
+
+    // Obtener el código actual para editar
+    let codigoParaEditar = userData.codigo_actual || '';
+    
+    // Si se especifica un ID de diseño base, intentar obtenerlo de la subcolección
+    if (id_diseno_base) {
+        const historySnap = await docRef.collection('historial_codigos').doc(id_diseno_base.toString()).get();
+        if (historySnap.exists) {
+            codigoParaEditar = historySnap.data()?.codigo_html || codigoParaEditar;
         }
+    }
 
-        const customGoogle = createGoogleGenerativeAI({
-            apiKey: apiKey,
+    if (!codigoParaEditar) {
+        return NextResponse.json({ error: 'No se encontró código para editar' }, { status: 400 });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    const customGoogle = createGoogleGenerativeAI({ apiKey });
+
+    const promptText = buildEditPrompt(codigoParaEditar, instruccion_texto);
+    const userContent: any[] = [{ type: 'text', text: promptText }];
+
+    // Manejo de imágenes adjuntas
+    if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+      let placeholdersInstruccion = "\n\nNUEVAS IMÁGENES ADJUNTAS (Úsalas si el cliente lo pide):\n";
+      imagenes_base64.forEach((imgBase64, idx) => {
+        const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
+        const mimeType = match ? match[1] : 'image/jpeg';
+        const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
+
+        userContent.push({
+          type: 'image',
+          image: Buffer.from(base64Data, 'base64'),
+          mimeType: mimeType
+        });
+        placeholdersInstruccion += `UPLOADED_IMG_${idx + 1}\n`;
+      });
+      userContent.push({ type: 'text', text: placeholdersInstruccion });
+    }
+
+    const modelosFallback = ['gemini-2.0-pro-exp-02-05', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+    let lastError: any = null;
+
+    for (const modelName of modelosFallback) {
+      try {
+        const result = await streamText({
+          model: customGoogle(modelName),
+          messages: [{ role: 'user', content: userContent }],
+          onFinish: async ({ text }) => {
+            let cleanHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+
+            // Reemplazar placeholders de imágenes subidas
+            if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+                imagenes_base64.forEach((b64, idx) => {
+                    cleanHtml = cleanHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                });
+            }
+
+            const historyId = Date.now().toString();
+            const newDesignMetadata = {
+              id: historyId,
+              descripcion: `Edición: ${instruccion_texto.substring(0, 100)}`,
+              fecha: new Date().toISOString(),
+              has_separate_code: true
+            };
+
+            // 1. Guardar en subcolección
+            await docRef.collection('historial_codigos').doc(historyId).set({
+              codigo_html: cleanHtml,
+              fecha: new Date().toISOString()
+            });
+
+            // 2. Actualizar doc principal
+            const currentHistory = userData.historial_disenos || [];
+            const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
+
+            const updatePayload: any = {
+              historial_disenos: updatedHistory,
+              ultima_edicion: new Date().toISOString(),
+              creditos_restantes: Math.max(0, creditosRestantes - 3)
+            };
+
+            if (Buffer.byteLength(cleanHtml, 'utf8') < 800000) {
+              updatePayload.codigo_actual = cleanHtml;
+            }
+
+            await docRef.update(updatePayload);
+          }
         });
 
-        const userContent: any[] = [{ type: 'text', text: promptEdicion }];
-
-        // Adjuntar imágenes de referencia si las hay
-        let placeholdersEdicion = "";
-        if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-            imagenes_base64.forEach((imgBase64: string, idx) => {
-                const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
-                const mimeType = match ? match[1] : 'image/jpeg';
-                const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
-                userContent.push({
-                    type: 'image',
-                    image: Buffer.from(base64Data, 'base64'),
-                    mimeType,
-                });
-                placeholdersEdicion += `UPLOADED_IMG_${idx + 1}\n`;
-            });
-            
-            userContent.push({
-                type: 'text',
-                text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES Y LOGOS!: El usuario ha adjuntado imágenes reales para la edición (que estás viendo). 
-1. DEBES incorporarlas en el HTML ubicándolas donde el usuario indicó usando EXACTAMENTE estos identificadores literales en el 'src' de la etiqueta <img>:\n${placeholdersEdicion}\nEjemplo: <img src="UPLOADED_IMG_1" class="...">. (Para OTRAS imágenes extra sigue usando /api/pexels).
-2. ¡ATENCIÓN AL LOGO Y COLORES!: Si el usuario te indica en las instrucciones que alguna de estas imágenes ES UN LOGO, DEBES colocarla en la barra de navegación (Header) reemplazando al logo anterior. ADEMÁS, DEBES analizar visualmente ese logo y extraer sus COLORES PREDOMINANTES para recodificar toda la Paleta de Colores del sitio (textos, botones, fondos) basándote estrictamente en ellos.`
-            });
-        }
-
-        // Intentar con modelos en orden de prioridad
-        const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
-        let lastError: any = null;
-
-        for (const modelName of modelosFallback) {
-            try {
-                console.log(`Intentando editar con modelo: ${modelName}`);
-                const result = await streamText({
-                    model: customGoogle(modelName),
-                    messages: [{ role: 'user', content: userContent }],
-                    onFinish: async ({ text }) => {
-                        let nuevoHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
-                        
-                        // RESTAURACIÓN DE IMÁGENES:
-                        // 1. Restaurar imágenes que ya existían (las preservadas antes)
-                        mapImagenesExistentes.forEach((b64, placeholder) => {
-                            nuevoHtml = nuevoHtml.split(placeholder).join(b64);
-                        });
-
-                        // 2. Restaurar nuevas imágenes subidas en esta edición
-                        if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-                            imagenes_base64.forEach((b64, idx) => {
-                                nuevoHtml = nuevoHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
-                            });
-                        }
-                        
-                        const dbForUpdate = getAdminDbSafe();
-                        if (dbForUpdate) {
-                            const historyId = Date.now().toString();
-                            const newDesignMetadata = {
-                                id: historyId,
-                                descripcion: instruccion_texto ? instruccion_texto.substring(0, 200) : 'Edición de texto',
-                                fecha: new Date().toISOString(),
-                                has_separate_code: true
-                            };
-
-                            // 1. Guardar código en subcolección (PESADO)
-                            await dbForUpdate.collection('usuarios_leads').doc(docRef.id).collection('historial_codigos').doc(historyId).set({
-                                codigo_html: nuevoHtml,
-                                fecha: new Date().toISOString()
-                            });
-
-                            // 2. Metadata en doc principal
-                            let historial = userData.historial_disenos || [];
-
-                            // Migración silenciosa
-                            if (historial.length === 0 && userData.codigo_actual) {
-                                historial.push({
-                                    id: (Date.now() - 1000).toString(),
-                                    codigo_actual: userData.codigo_actual,
-                                    descripcion: userData.descripcion || 'Diseño base',
-                                    fecha: userData.ultima_edicion || userData.fecha_creacion || new Date().toISOString()
-                                });
-                            }
-
-                            historial.unshift(newDesignMetadata);
-                            historial = historial.slice(0, 10); // Aumentar límite ya que es ligero
-
-                            await dbForUpdate.collection('usuarios_leads').doc(docRef.id).update({
-                                codigo_actual: nuevoHtml,
-                                historial_disenos: historial,
-                                creditos_restantes: nuevosCreditos,
-                                ultima_edicion: new Date().toISOString(),
-                                instruccion_texto: instruccion_texto || '',
-                            });
-                        }
-                    },
-                });
-
-                // Retornamos el stream. Adicionalmente, podríamos retornar cabeceras extra si se necesitan.
-                return result.toTextStreamResponse({
-                    headers: {
-                        'x-creditos-restantes': nuevosCreditos.toString()
-                    }
-                });
-            } catch (err: any) {
-                console.warn(`Fallo con modelo ${modelName} en edición:`, err.message);
-                lastError = err;
-                // Continuar al siguiente modelo
-            }
-        }
-
-        // Si todos los modelos fallan
-        throw lastError || new Error('Todos los modelos de AI fallaron en edición');
-
-    } catch (error) {
-        console.error('Error editando página:', error);
-        return NextResponse.json({ error: 'Error interno del servidor.' }, { status: 500 });
+        return result.toTextStreamResponse();
+      } catch (err: any) {
+        console.warn(`Fallo edición con ${modelName}:`, err.message);
+        lastError = err;
+      }
     }
+
+    throw lastError || new Error('Todos los modelos fallaron en edición');
+
+  } catch (error) {
+    console.error('Error fatal en API de edición:', error);
+    return NextResponse.json({ error: 'Error interno en el proceso de edición.' }, { status: 500 });
+  }
 }

@@ -15,6 +15,8 @@ export const maxDuration = 60; // Permitir ejecución más larga en Vercel
 
 // ─── PROMPT MAESTRO DEFINITIVO ───────────────────────────────────────────────
 const buildPrompt = (input: string) => `
+AGENTE: GEMINI 3.1 PRO
+
 ROL Y MANDATO:
 Actúe como un Maestro Arquitecto Web de Inteligencia Artificial de DIGITRIAL, con la capacidad de diseñar y codificar experiencias web dinámicas premium de alto impacto. Su mandato es procesar la descripción detallada de la idea de un usuario de DIGITRIAL y generar un sitio web completo, funcional y dinámico utilizando un stack de programación moderno y robusto (HTML5, Tailwind CSS, y JavaScript avanzado integrados en un solo archivo).
 
@@ -147,7 +149,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Intentar con modelos en orden de prioridad
-      const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+      const modelosFallback = ['gemini-2.0-pro-exp-02-05', 'gemini-1.5-pro', 'gemini-1.5-flash'];
       let lastError: any = null;
 
       for (const modelName of modelosFallback) {
@@ -190,16 +192,19 @@ export async function POST(req: NextRequest) {
                     });
 
                     if (!existing.exists) {
-                      await docRef.set({
+                      const initialPayload: any = {
                         nombre_negocio: descripcion.substring(0, 60),
                         nombre_contacto: nombre_contacto || '',
                         email: email.toLowerCase().trim(),
                         descripcion,
-                        codigo_actual: html,
                         historial_disenos: [newDesignMetadata],
                         creditos_restantes: 15,
                         fecha_creacion: new Date().toISOString(),
-                      });
+                      };
+                      if (Buffer.byteLength(html, 'utf8') < 800000) {
+                        initialPayload.codigo_actual = html;
+                      }
+                      await docRef.set(initialPayload);
                     } else {
                       const data = existing.data() || {};
                       let historial = data.historial_disenos || [];
@@ -217,12 +222,15 @@ export async function POST(req: NextRequest) {
                       historial.unshift(newDesignMetadata);
                       historial = historial.slice(0, 10); // Aumentar a 10 ya que ahora son livianos
 
-                      await docRef.update({
-                        codigo_actual: html,
+                      const updatePayload: any = {
                         historial_disenos: historial,
                         ultima_generacion: new Date().toISOString(),
                         creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5)
-                      });
+                      };
+                      if (Buffer.byteLength(html, 'utf8') < 800000) {
+                        updatePayload.codigo_actual = html;
+                      }
+                      await docRef.update(updatePayload);
                     }
                   }
                 } catch (fbErr) {
@@ -280,3 +288,4 @@ function buildFallbackHTML(titulo: string, descripcion: string): string {
 </body>
 </html>`;
 }
+
