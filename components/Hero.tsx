@@ -39,12 +39,6 @@ export function HeroHeader() {
                     animate="visible"
                     className="flex flex-col items-center text-center"
                 >
-                    {/* Badge con estilo premium para fondo claro */}
-                    <motion.div variants={itemVariants}
-                        className="inline-flex items-center gap-2 px-6 py-2 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest mb-8 shadow-sm transition-all hover:shadow-md bg-slate-100 border border-slate-200 text-slate-600">
-                        <Sparkles className="w-4 h-4 text-blue-600" />
-                        La plataforma de IA líder en creación web
-                    </motion.div>
 
                     {/* Titular Principal con Efecto Knockout Blanco (Estilo Adjunto 2) */}
                     <div className="relative mix-blend-multiply bg-white">
