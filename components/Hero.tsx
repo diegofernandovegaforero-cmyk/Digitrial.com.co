@@ -20,7 +20,7 @@ const itemVariants: Variants = {
 
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white dark:bg-slate-950 z-30">
+        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-slate-950 z-30">
             {/* Blobs decorativos de fondo */}
             <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
@@ -49,7 +49,7 @@ export function HeroHeader() {
 
                     {/* Titular Principal */}
                     <motion.h1 variants={itemVariants}
-                        className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.15] mb-6 tracking-tight text-[#1A2B4C] dark:text-white">
+                        className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.15] mb-6 tracking-tight text-white">
                         Olvida programar. <br className="hidden md:block" />
                         Construye tu éxito de forma{' '}
                         <span className="relative inline-block">
@@ -73,12 +73,12 @@ export function HeroHeader() {
 
                     {/* Subtítulos */}
                     <motion.p variants={itemVariants}
-                        className="text-xl md:text-2xl font-bold mb-4 text-[#1A2B4C] dark:text-slate-200">
+                        className="text-xl md:text-2xl font-bold mb-4 text-slate-100">
                         ¿No tienes experiencia técnica? No hay problema.
                     </motion.p>
 
                     <motion.p variants={itemVariants}
-                        className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-[#666666] dark:text-slate-400">
+                        className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-400">
                         Diseña, optimiza y publica una web profesional totalmente a tu medida en segundos. Digitrial toma tus ideas y las transforma en una realidad digital potente impulsada por Inteligencia Artificial.
                     </motion.p>
 
@@ -90,7 +90,7 @@ export function HeroHeader() {
                             <Sparkles className="w-6 h-6 animate-pulse" />
                             <span className="relative z-10">INICIA TU DISEÑO CON AGENTE IA</span>
                         </Link>
-                        <p className="mt-4 text-sm font-semibold text-slate-500 dark:text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
+                        <p className="mt-4 text-sm font-semibold text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
                 </motion.div>
             </div>
@@ -132,7 +132,7 @@ export function HeroSearch() {
     };
 
     return (
-        <section className="pb-24 pt-8 px-6 relative z-40 flex flex-col items-center bg-white dark:bg-slate-950">
+        <section className="pb-24 pt-8 px-6 relative z-40 flex flex-col items-center bg-slate-950">
             <div className="container mx-auto max-w-5xl">
                 <motion.div
                     variants={containerVariants}
@@ -145,7 +145,7 @@ export function HeroSearch() {
                         variants={itemVariants}
                         className="w-full max-w-4xl relative mt-0 z-10"
                     >
-                        <div className="bg-white dark:bg-slate-950 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20 relative z-10 transition-all duration-300">
+                        <div className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/10 relative z-10 transition-all duration-300">
                             <motion.div
                                 animate={{
                                     scale: [1, 1.05, 1],
@@ -172,9 +172,9 @@ export function HeroSearch() {
                                             if (domainStatus !== 'IDLE') setDomainStatus('IDLE');
                                         }}
                                         placeholder="Encuentra el nombre perfecto para tu idea (ej. miempresa.com)"
-                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border-2 outline-none transition-all text-lg font-medium text-slate-900 dark:text-white placeholder-slate-400/70 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
+                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-900/50 border-2 outline-none transition-all text-lg font-medium text-white placeholder-slate-400/70 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
                                             domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
-                                                'border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
+                                                'border-slate-700 focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
                                             }`}
                                         required
                                     />
@@ -209,25 +209,25 @@ export function HeroSearch() {
                             )}
 
                             {/* Explicación de Dominio y Hosting Integrado */}
-                            <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-slate-100 pt-6">
-                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                                    <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                            <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-white/5 pt-6">
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-colors text-slate-300">
+                                    <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
                                         <Globe className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-[#1A2B4C] mb-1">¿Qué es un Dominio?</h4>
-                                        <p className="text-sm text-slate-500 leading-relaxed">
+                                        <h4 className="font-bold text-slate-100 mb-1">¿Qué es un Dominio?</h4>
+                                        <p className="text-sm text-slate-400 leading-relaxed">
                                             Es el nombre único de tu negocio en internet (como <strong>digitrial.com.co</strong>). Es lo que escriben tus clientes para encontrarte fácilmente. ¡Elige uno memorable!
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
-                                    <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-colors text-slate-300">
+                                    <div className="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
                                         <Server className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-[#1A2B4C] mb-1">Tu diseño alojado seguro</h4>
-                                        <p className="text-sm text-slate-500 leading-relaxed">
+                                        <h4 className="font-bold text-slate-100 mb-1">Tu diseño alojado seguro</h4>
+                                        <p className="text-sm text-slate-400 leading-relaxed">
                                             Una vez creado tu diseño con IA, nosotros lo guardamos en un <strong>Hosting</strong> de alto rendimiento: el "terreno" donde vive tu web, manteniéndola conectada, veloz y segura 24/7.
                                         </p>
                                     </div>
