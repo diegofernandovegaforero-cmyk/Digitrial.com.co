@@ -1,11 +1,11 @@
 'use client';
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X, ImagePlus } from 'lucide-react';
+import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X, ImagePlus, LogOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
@@ -17,6 +17,7 @@ const emailToDocId = (email: string) =>
     email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
 
 function EditorContent() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const emailFromUrl = searchParams.get('email') || '';
     const instruccionFromUrl = searchParams.get('instruccion') || '';
@@ -70,6 +71,17 @@ function EditorContent() {
     const [transcripcion, setTranscripcion] = useState('');
 
     // Audio recording — REMOVED
+    // Logout logic
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            router.push('/');
+        } catch (err) {
+            console.error("Error signing out:", err);
+            setError('Error al cerrar sesión. Intenta de nuevo.');
+        }
+    };
+
     // Image attachments
     const [editImages, setEditImages] = useState<{ url: string; file: File }[]>([]);
     const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -727,13 +739,24 @@ function EditorContent() {
                     </span>
                 </Link>
 
-                {/* Créditos */}
-                <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold border ${creditosBajos
-                    ? 'bg-red-500/20 border-red-500/40 text-red-300'
-                    : 'bg-blue-500/20 border-blue-500/30 text-blue-300'
-                    }`}>
-                    <Zap className="w-4 h-4" />
-                    {userData?.creditos_restantes ?? 0} créditos
+                {/* Créditos y Logout */}
+                <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold border ${creditosBajos
+                        ? 'bg-red-500/20 border-red-500/40 text-red-300'
+                        : 'bg-blue-500/20 border-blue-500/30 text-blue-300'
+                        }`}>
+                        <Zap className="w-4 h-4" />
+                        {userData?.creditos_restantes ?? 0} créditos
+                    </div>
+                    
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
+                        title="Cerrar Sesión"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        <span className="hidden sm:inline">Cerrar Sesión</span>
+                    </button>
                 </div>
             </nav>
 
