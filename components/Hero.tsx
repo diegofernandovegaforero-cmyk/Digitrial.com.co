@@ -40,7 +40,7 @@ export function HeroHeader() {
                     className="flex flex-col items-center text-center"
                 >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) */}
-                    <div className="relative overflow-hidden bg-white group rounded-3xl">
+                    <div className="relative overflow-hidden group rounded-3xl min-h-[300px] flex items-center justify-center">
                         {/* Video de fondo para las letras */}
                         <div className="absolute inset-0 z-0">
                             <video
