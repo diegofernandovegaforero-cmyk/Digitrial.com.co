@@ -138,20 +138,17 @@ export function HeroSearch() {
                         variants={itemVariants}
                         className="w-full max-w-4xl relative mt-0 z-10"
                     >
-                        <div className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/10 relative z-10 transition-all duration-300">
+                        <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-slate-200 relative z-10 transition-all duration-300">
                             <motion.div
                                 animate={{
                                     scale: [1, 1.05, 1],
-                                    rotate: [3, 4, 3]
+                                    rotate: [-1, 1, -1]
                                 }}
-                                transition={{
-                                    duration: 3,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                                className="absolute -top-4 -right-4 bg-[#A3FF12] text-slate-900 text-[10px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(163,255,18,0.4)] z-20 whitespace-nowrap"
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute -top-6 -right-6 bg-[#ADFF2F] text-black text-[10px] font-black px-4 py-2 rounded-xl shadow-lg border-2 border-white z-20 flex items-center gap-1"
                             >
-                                Diseños Realizados con I.A
+                                <Sparkles className="w-3 h-3" />
+                                DISEÑOS REALIZADOS CON I.A
                             </motion.div>
 
                             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 relative">
@@ -165,9 +162,9 @@ export function HeroSearch() {
                                             if (domainStatus !== 'IDLE') setDomainStatus('IDLE');
                                         }}
                                         placeholder="Encuentra el nombre perfecto para tu idea (ej. miempresa.com)"
-                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-900/50 border-2 outline-none transition-all text-lg font-medium text-white placeholder-slate-400/70 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/30' :
-                                            domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/30' :
-                                                'border-slate-700 focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
+                                        className={`w-full pl-16 pr-6 py-5 rounded-2xl bg-slate-100 border-2 outline-none transition-all text-lg font-medium text-slate-900 placeholder-slate-400 ${domainStatus === 'AVAILABLE' ? 'border-green-400 bg-green-50/50' :
+                                            domainStatus === 'UNAVAILABLE' || domainStatus === 'ERROR' ? 'border-red-400 bg-red-50/50' :
+                                                'border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
                                             }`}
                                         required
                                     />
@@ -201,26 +198,26 @@ export function HeroSearch() {
                                 </motion.div>
                             )}
 
-                            {/* Explicación de Dominio y Hosting Integrado */}
-                            <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-white/5 pt-6">
-                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-colors text-slate-300">
-                                    <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
+                            {/* Explicación de Dominio y Hosting Integrado en Modo Claro */}
+                            <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-slate-100 pt-6">
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
                                         <Globe className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-100 mb-1">¿Qué es un Dominio?</h4>
-                                        <p className="text-sm text-slate-400 leading-relaxed">
+                                        <h4 className="font-bold text-slate-900 mb-1">¿Qué es un Dominio?</h4>
+                                        <p className="text-sm text-slate-600 leading-relaxed">
                                             Es el nombre único de tu negocio en internet (como <strong>digitrial.com.co</strong>). Es lo que escriben tus clientes para encontrarte fácilmente. ¡Elige uno memorable!
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-colors text-slate-300">
-                                    <div className="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
+                                <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
                                         <Server className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-100 mb-1">Tu diseño alojado seguro</h4>
-                                        <p className="text-sm text-slate-400 leading-relaxed">
+                                        <h4 className="font-bold text-slate-900 mb-1">Tu diseño alojado seguro</h4>
+                                        <p className="text-sm text-slate-600 leading-relaxed">
                                             Una vez creado tu diseño con IA, nosotros lo guardamos en un <strong>Hosting</strong> de alto rendimiento: el "terreno" donde vive tu web, manteniéndola conectada, veloz y segura 24/7.
                                         </p>
                                     </div>
