@@ -20,12 +20,12 @@ const itemVariants: Variants = {
 
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-transparent z-30">
-            {/* Blobs decorativos de fondo */}
-            <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"
+        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white z-20">
+            {/* Blobs decorativos de fondo suavizados para fondo blanco */}
+            <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-10 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
                 animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }} />
-            <motion.div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full -z-10 opacity-20 blur-3xl"
+            <motion.div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full -z-10 opacity-10 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #2ED573 0%, transparent 60%)' }}
                 animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
 
@@ -39,46 +39,39 @@ export function HeroHeader() {
                     animate="visible"
                     className="flex flex-col items-center text-center"
                 >
-                    {/* Badge */}
+                    {/* Badge con estilo premium para fondo claro */}
                     <motion.div variants={itemVariants}
-                        className="inline-flex items-center gap-2 px-6 py-2 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest mb-8 shadow-sm transition-all hover:shadow-md"
-                        style={{ background: 'rgba(46,213,115,0.1)', color: '#10b981', border: '1px solid rgba(46,213,115,0.2)' }}>
-                        <Sparkles className="w-4 h-4" />
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest mb-8 shadow-sm transition-all hover:shadow-md bg-slate-100 border border-slate-200 text-slate-600">
+                        <Sparkles className="w-4 h-4 text-blue-600" />
                         La plataforma de IA líder en creación web
                     </motion.div>
 
-                    {/* Titular Principal con Efecto Knockout Animado */}
-                    <motion.h1 
-                        variants={itemVariants}
-                        className="text-6xl md:text-8xl lg:text-[10rem] font-black leading-[0.9] mb-8 tracking-tighter text-transparent select-none font-anton"
-                        style={{
-                            backgroundImage: 'url("/videos/RESTAURANTE.mp4")', // Fallback o referencia si es posible
-                            WebkitBackgroundClip: 'text',
-                            backgroundClip: 'text',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            backgroundColor: '#FFFFFF', // Color base si el video falla
-                        }}
-                    >
-                        <span className="block">OLVIDA</span>
-                        <span className="block">PROGRAMAR.</span>
-                    </motion.h1>
+                    {/* Titular Principal con Efecto Knockout Blanco (Estilo Adjunto 2) */}
+                    <div className="relative mix-blend-multiply bg-white">
+                        <motion.h1 
+                            variants={itemVariants}
+                            className="text-7xl md:text-9xl lg:text-[14rem] font-black leading-[0.8] mb-4 tracking-[-0.05em] text-black bg-white font-anton uppercase select-none"
+                        >
+                            <span className="block">OLVIDA</span>
+                            <span className="block">PROGRAMAR.</span>
+                        </motion.h1>
+                    </div>
 
-                    <motion.div variants={itemVariants} className="flex flex-col items-center">
-                        <h2 className="text-2xl md:text-4xl font-black text-white mb-6 tracking-tight uppercase font-anton">
+                    <motion.div variants={itemVariants} className="flex flex-col items-center mt-6">
+                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-6 tracking-tight uppercase font-anton">
                             Construye tu éxito de forma{' '}
-                            <span className="text-blue-400">brillante.</span>
+                            <span className="text-blue-600">brillante.</span>
                         </h2>
                     </motion.div>
 
                     {/* Subtítulos */}
                     <motion.p variants={itemVariants}
-                        className="text-xl md:text-2xl font-bold mb-4 text-slate-100">
+                        className="text-xl md:text-2xl font-bold mb-4 text-slate-800">
                         ¿No tienes experiencia técnica? No hay problema.
                     </motion.p>
 
                     <motion.p variants={itemVariants}
-                        className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-400">
+                        className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-600">
                         Diseña, optimiza y publica una web profesional totalmente a tu medida en segundos. Digitrial toma tus ideas y las transforma en una realidad digital potente impulsada por Inteligencia Artificial.
                     </motion.p>
 
@@ -90,7 +83,7 @@ export function HeroHeader() {
                             <Sparkles className="w-6 h-6 animate-pulse" />
                             <span className="relative z-10">INICIA TU DISEÑO CON AGENTE IA</span>
                         </Link>
-                        <p className="mt-4 text-sm font-semibold text-slate-400">Sin tarjeta de crédito. Resultados al instante.</p>
+                        <p className="mt-4 text-sm font-semibold text-slate-500">Sin tarjeta de crédito. Resultados al instante.</p>
                     </motion.div>
                 </motion.div>
             </div>
@@ -132,7 +125,7 @@ export function HeroSearch() {
     };
 
     return (
-        <section className="pb-24 pt-8 px-6 relative z-40 flex flex-col items-center bg-transparent">
+        <section className="pb-24 pt-8 px-6 relative z-40 flex flex-col items-center bg-white transition-colors duration-500">
             <div className="container mx-auto max-w-5xl">
                 <motion.div
                     variants={containerVariants}

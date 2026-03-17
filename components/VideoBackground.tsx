@@ -81,8 +81,8 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                     >
                         <source src={videos[index].url} type="video/mp4" />
                     </video>
-                    {/* Overlay semi-transparente para legibilidad de textos blancos */}
-                    <div className="absolute inset-0 bg-slate-950/60" />
+                    {/* Overlay muy sutil para que el video brille a través de las letras en fondo blanco */}
+                    <div className="absolute inset-0 bg-slate-950/20" />
                 </motion.div>
             </AnimatePresence>
 
