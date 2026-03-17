@@ -20,12 +20,12 @@ const itemVariants: Variants = {
 
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white z-20">
-            {/* Blobs decorativos de fondo suavizados para fondo blanco */}
-            <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-10 blur-3xl"
+        <section className="pt-32 pb-16 px-6 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-[#0B1221] z-20">
+            {/* Blobs decorativos de fondo suavizados */}
+            <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-20 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
                 animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }} />
-            <motion.div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full -z-10 opacity-10 blur-3xl"
+            <motion.div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full -z-10 opacity-20 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #2ED573 0%, transparent 60%)' }}
                 animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
 
@@ -40,28 +40,41 @@ export function HeroHeader() {
                     className="flex flex-col items-center text-center"
                 >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) */}
-                    <div className="relative overflow-hidden group rounded-3xl min-h-[300px] flex items-center justify-center">
-                        {/* Video de fondo para las letras */}
-                        <div className="absolute inset-0 z-0">
-                            <video
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
-                            >
-                                <source src="/videos/COMPILADOVIDEOS.mp4" type="video/mp4" />
-                            </video>
-                        </div>
-                        
-                        {/* Texto con blend mode para actuar como máscara */}
+                    <div className="relative overflow-hidden group min-h-[250px] md:min-h-[350px] flex flex-col items-center justify-center">
+                        {/* Linea 1: Texto Blanco Sólido */}
                         <motion.h1 
                             variants={itemVariants}
-                            className="relative z-10 text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
+                            className="text-4xl md:text-6xl lg:text-8xl font-black text-white uppercase font-anton tracking-tight mb-2"
                         >
-                            <span className="block">CREA TU WEB</span>
-                            <span className="block">EN MINUTOS.</span>
+                            Crea Tu Web
                         </motion.h1>
+
+                        {/* Linea 2: Efecto Video-Text */}
+                        <div className="relative overflow-hidden">
+                            {/* Video de fondo para las letras */}
+                            <div className="absolute inset-0 z-0">
+                                <video
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-cover scale-110"
+                                >
+                                    <source src="/videos/COMPILADOVIDEOS.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                            
+                            {/* Texto con blend mode para actuar como máscara sobre fondo blanco */}
+                            {/* NOTA: Para que mix-blend-screen funcione en fondo Navy, necesitamos un contenedor blanco para el texto */}
+                            <motion.div 
+                                variants={itemVariants}
+                                className="relative z-10 bg-white mix-blend-screen"
+                            >
+                                <h1 className="text-4xl md:text-6xl lg:text-[7rem] font-black leading-none py-2 px-4 tracking-tighter text-black font-anton uppercase select-none whitespace-nowrap">
+                                    Hoy Mismo en Minutos.
+                                </h1>
+                            </motion.div>
+                        </div>
                     </div>
 
                     <motion.div variants={itemVariants} className="flex flex-col items-center mt-6">
