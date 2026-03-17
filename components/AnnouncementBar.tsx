@@ -41,32 +41,44 @@ export default function AnnouncementBar() {
     const countdownText = `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`;
 
     return (
-        <div className="w-full bg-purple-600 py-1.5 px-4 z-[60] select-none border-b border-purple-500/30">
-            <div className="container mx-auto flex flex-wrap justify-center items-center gap-x-6 md:gap-x-12 text-[10px] md:text-[11px] font-bold text-white uppercase tracking-wider text-center">
-                <div className="flex items-center gap-2">
-                    <span className="text-purple-200">⚡</span>
-                    <span>Sin plantillas prefabricadas</span>
+        <div className="w-full bg-[#0B1221] py-2 px-4 z-[60] select-none border-b border-white/5 relative overflow-hidden group">
+            {/* Efecto de Rejilla Profesional (Grid Pattern) */}
+            <div className="absolute inset-0 opacity-20" 
+                style={{ 
+                    backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
+                    backgroundSize: '24px 24px' 
+                }} 
+            />
+            
+            {/* Efecto Shimmer (Brillo Animado) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+
+            <div className="container mx-auto relative z-10">
+                <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-8 text-[11px] md:text-xs font-bold text-white uppercase tracking-[0.15em] text-center">
+                    
+                    <div className="flex items-center gap-3">
+                        <span className="text-blue-400 animate-pulse">🔥</span>
+                        <span className="text-slate-100">
+                            ¡No dejes pasar esta oferta! <span className="text-blue-400">50% de descuento</span> — Solo <span className="text-green-400">7 cupos</span> disponibles hoy
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-white/5 px-4 py-1 rounded-full border border-white/10 backdrop-blur-md shadow-inner">
+                        <span className="text-slate-300">Tiempo restante:</span>
+                        <span className="font-mono text-blue-400 tabular-nums">{countdownText}</span>
+                    </div>
                 </div>
-
-                <div className="hidden sm:flex items-center gap-2">
-                    <span className="text-purple-200">⚡</span>
-                    <span>Diseños únicos en 15s con I.A</span>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/10 px-3 py-0.5 rounded-full border border-white/20">
-                    <span className="animate-pulse text-red-400">🚀</span>
-                    <span>50% Descuento</span>
-                    <span className="mx-1 text-purple-300">|</span>
-                    <span className="text-purple-100">{countdownText}</span>
-                </div>
-
-                <div className="hidden lg:flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span>8 Cupos disponibles hoy</span>
-                </div>
-
-
             </div>
+
+            <style jsx>{`
+                @keyframes shimmer {
+                    from { transform: translateX(-100%); }
+                    to { transform: translateX(100%); }
+                }
+                .animate-shimmer {
+                    animation: shimmer 3s infinite;
+                }
+            `}</style>
         </div>
     );
 }
