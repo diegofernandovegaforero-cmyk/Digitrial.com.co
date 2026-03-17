@@ -47,29 +47,29 @@ export function HeroHeader() {
                         La plataforma de IA líder en creación web
                     </motion.div>
 
-                    {/* Titular Principal */}
-                    <motion.h1 variants={itemVariants}
-                        className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.15] mb-6 tracking-tight text-white">
-                        Olvida programar. <br className="hidden md:block" />
-                        Construye tu éxito de forma{' '}
-                        <span className="relative inline-block">
-                            <span style={{
-                                background: 'linear-gradient(90deg, #6C5CE7 0%, #9f32ac 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                            }}>
-                                brillante.
-                            </span>
-                            <motion.span
-                                className="absolute -bottom-2 left-0 w-full h-[6px] rounded-full"
-                                style={{ background: 'linear-gradient(90deg, #6C5CE7 0%, #2ED573 100%)', opacity: 0.4 }}
-                                initial={{ scaleX: 0 }}
-                                animate={{ scaleX: 1 }}
-                                transition={{ delay: 1, duration: 1 }}
-                            />
-                        </span>
+                    {/* Titular Principal con Efecto Knockout Animado */}
+                    <motion.h1 
+                        variants={itemVariants}
+                        className="text-6xl md:text-8xl lg:text-[10rem] font-black leading-[0.9] mb-8 tracking-tighter text-transparent select-none font-anton"
+                        style={{
+                            backgroundImage: 'url("/videos/RESTAURANTE.mp4")', // Fallback o referencia si es posible
+                            WebkitBackgroundClip: 'text',
+                            backgroundClip: 'text',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundColor: '#FFFFFF', // Color base si el video falla
+                        }}
+                    >
+                        <span className="block">OLVIDA</span>
+                        <span className="block">PROGRAMAR.</span>
                     </motion.h1>
+
+                    <motion.div variants={itemVariants} className="flex flex-col items-center">
+                        <h2 className="text-2xl md:text-4xl font-black text-white mb-6 tracking-tight uppercase font-anton">
+                            Construye tu éxito de forma{' '}
+                            <span className="text-blue-400">brillante.</span>
+                        </h2>
+                    </motion.div>
 
                     {/* Subtítulos */}
                     <motion.p variants={itemVariants}

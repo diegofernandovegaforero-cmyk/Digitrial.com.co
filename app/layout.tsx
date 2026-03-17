@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Anton } from "next/font/google";
 import "./globals.css";
 import ScrollThemeProvider from "@/components/ScrollThemeProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" });
 
 export const metadata: Metadata = {
     title: "Digitrial - ¡Diseña Tu Web Gratis Con I.A!",
@@ -23,7 +24,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es">
-            <body className={`${inter.variable} ${outfit.variable} font-sans`} style={{ position: 'relative' }}>
+            <body className={`${inter.variable} ${outfit.variable} ${anton.variable} font-sans`} style={{ position: 'relative' }}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="light"
