@@ -30,7 +30,7 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 
 2. DISEÑO DINÁMICO Y MOVIMIENTO (CRÍTICO):
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
-31. Layout Profesional y Estético (SISTEMA DE DISEÑO PREMIUM): Diseñe con un Sistema de Diseño Coherente. Use tipografías modernas (Google Fonts via CDN) y una paleta de colores sofisticada.
+3. Layout Profesional y Estético (SISTEMA DE DISEÑO PREMIUM): Diseñe con un Sistema de Diseño Coherente. Use tipografías modernas (Google Fonts via CDN) y una paleta de colores sofisticada.
    - **COLORES:** No se limite a fondos blancos o negros simples. Use degradados sutiles (mesh gradients), card backgrounds con desenfoque (glassmorphism), y acentos vibrantes que contrasten. El estilo visual debe ser "High-Tech Corporate" o "Creative Portfolio" según la descripción.
    - **ESTILO:** Priorice layouts modernos, limpios y espaciados generosamente. Incorpore siempre secciones de "Social proof" (logos de clientes, testimonios) al estilo del diseño premium.
 
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Intentar con modelos en orden de prioridad
-      const modelosFallback = ['gemini-2.0-pro-exp-02-05', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+      const modelosFallback = ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'];
       let lastError: any = null;
 
       for (const modelName of modelosFallback) {
