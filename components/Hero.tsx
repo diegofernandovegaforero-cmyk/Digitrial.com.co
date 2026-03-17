@@ -33,6 +33,12 @@ export function HeroHeader() {
             <WavesBackground />
 
             <div className="container mx-auto max-w-5xl relative z-10">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="flex flex-col items-center text-center"
+                >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) */}
                     <div className="relative overflow-hidden bg-white group">
                         {/* Video de fondo para las letras */}
