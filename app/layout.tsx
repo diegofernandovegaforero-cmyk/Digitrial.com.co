@@ -9,7 +9,7 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" });
 
 export const metadata: Metadata = {
-    title: "Digitrial - ¡Diseña Tu Web Gratis Con I.A!",
+    title: "Digitrial - Crea Tu Web En Minutos",
     description: "Transformamos desafíos complejos en oportunidades de crecimiento medibles a través de tecnología y estrategia.",
     icons: {
         icon: '/favicon.svg',
