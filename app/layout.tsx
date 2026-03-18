@@ -10,7 +10,7 @@ const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton
 
 export const metadata: Metadata = {
     title: "Digitrial - Crea Tu Web En Minutos",
-    description: "Transformamos desafíos complejos en oportunidades de crecimiento medibles a través de tecnología y estrategia.",
+    description: "Webs modernas con IA en minutos · E-commerce Shopify a medida · Diseño ágil sin barreras · Multiplica. tus. ventas. hoy.",
     icons: {
         icon: '/favicon.svg',
         apple: '/icon.png',
