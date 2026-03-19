@@ -10,7 +10,7 @@ import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc } from 'firebase
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
 
-const CREDITOS_POR_EDICION = 3;
+const CREDITOS_POR_EDICION = 5;
 const MAX_TEXTO_CHARS = 500;
 
 // Sanitizar email para usarlo como Firestore doc ID (igual que en el backend)
@@ -54,7 +54,7 @@ function EditorContent() {
     } | null>(sessionHtml ? {
         nombre_negocio: 'Tu negocio',
         nombre_contacto: '',
-        creditos_restantes: 15,
+        creditos_restantes: 10,
         codigo_actual: sessionHtml,
         historial_disenos: [],
     } : null);
