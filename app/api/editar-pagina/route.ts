@@ -30,6 +30,8 @@ REGLAS ESTRICTAS DE SALIDA:
 - PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
 - Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
 - Mantén la calidad premium y el diseño dinámico original.
+- **TÍTULOS Y TEXTO (REGLA CRÍTICA):** Está TERMINANTEMENTE PROHIBIDO usar "background-clip: text" o efectos de recorte de imagen dentro de las letras de los títulos. Los títulos deben tener colores sólidos o degradados de color legibles.
+- **FONDO HERO/SECCIÓN:** El fondo de la sección principal (Hero) debe ser preferiblemente el color sólido o degradado suave basado en el tono **#ebedef**.
 - Si el usuario adjunta imágenes, úsalas según su instrucción.
 `;
 

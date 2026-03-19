@@ -31,7 +31,9 @@ Procese la descripción del usuario. Infiere la actividad económica, los produc
 2. DISEÑO DINÁMICO Y MOVIMIENTO (CRÍTICO):
 Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
 3. Layout Profesional y Estético (SISTEMA DE DISEÑO PREMIUM): Diseñe con un Sistema de Diseño Coherente. Use tipografías modernas (Google Fonts via CDN) y una paleta de colores sofisticada.
-   - **COLORES:** No se limite a fondos blancos o negros simples. Use degradados sutiles (mesh gradients), card backgrounds con desenfoque (glassmorphism), y acentos vibrantes que contrasten. El estilo visual debe ser "High-Tech Corporate" o "Creative Portfolio" según la descripción.
+   - **COLORES:** No se limite a fondos blancos o negros simples. Use degradados sutiles (mesh gradients), card backgrounds con desenfoque (glassmorphism), y acentos vibrantes que contrasten. 
+   - **FONDO HERO/SECCIÓN:** Como directriz de marca, el fondo de la sección principal (Hero) o del segmento destacado debe ser preferiblemente el color sólido o degradado muy suave basado en el tono **#ebedef** (un gris azulado muy claro y elegante).
+   - **TÍTULOS Y TEXTO (REGLA CRÍTICA):** Está TERMINANTEMENTE PROHIBIDO usar "background-clip: text" o efectos de recorte de imagen dentro de las letras de los títulos. Los títulos deben ser legibles, con colores sólidos (negro, gris oscuro, blanco o colores de acento) o degradados de color simples (linear-gradient de colores), pero NUNCA con fondos de imagen recortados que dificulten la lectura y causen "recortes" visuales molestos.
    - **ESTILO:** Priorice layouts modernos, limpios y espaciados generosamente. Incorpore siempre secciones de "Social proof" (logos de clientes, testimonios) al estilo del diseño premium.
 
 3. IMÁGENES PROFESIONALES (PEXELS - PROVEEDOR ÚNICO):
