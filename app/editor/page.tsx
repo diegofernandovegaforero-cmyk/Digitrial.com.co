@@ -334,7 +334,7 @@ function EditorContent() {
                         updateData.codigo_actual = event.data.html;
                     }
 
-                    await updateDoc(docRef, updateData);
+                    await setDoc(docRef, updateData, { merge: true });
                     setExito('Cambios sincronizados.');
                     setTimeout(() => setExito(''), 3000);
                 } catch (err: any) {
@@ -394,7 +394,7 @@ function EditorContent() {
                 console.warn(`Guardado Manual: El código (${(codeSize/1024).toFixed(1)}KB) es muy grande para el doc principal. Solo se guardó en el historial.`);
             }
 
-            await updateDoc(docRef, updatePayload);
+            await setDoc(docRef, updatePayload, { merge: true });
 
             setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
             setExito('¡Maqueta guardada con éxito (en el historial)!');

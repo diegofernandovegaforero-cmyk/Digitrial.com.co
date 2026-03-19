@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 
 const emailToDocId = (email: string) => email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
@@ -448,7 +448,7 @@ function DisenaPageContent() {
                 try {
                     const docId = emailToDocId(userEmail);
                     const docRef = doc(db, 'maquetasweb_usuarios', docId);
-                    await updateDoc(docRef, { codigo_actual: event.data.html });
+                    await setDoc(docRef, { codigo_actual: event.data.html }, { merge: true });
                     setExitoGuardado('¡Texto modificado nativamente y guardado con éxito!');
                     setTimeout(() => setExitoGuardado(''), 4000);
                 } catch (err) {
