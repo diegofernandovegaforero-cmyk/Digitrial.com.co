@@ -34,16 +34,20 @@ export const uploadImageToStorage = async (data: string | Blob, path: string): P
  */
 export const optimizeHtmlImages = async (html: string, userEmail: string): Promise<string> => {
     let optimizedHtml = html;
-    const base64Regex = /src="data:image\/[a-zA-Z]+;base64,[^"]+"/g;
-    const matches = html.match(base64Regex);
+    const base64Regex = /src=["'](data:image\/[a-zA-Z+]+;base64,[^"']+)["']/g;
+    let match;
+    const matches: { full: string, data: string }[] = [];
+    
+    while ((match = base64Regex.exec(html)) !== null) {
+        matches.push({ full: match[0], data: match[1] });
+    }
 
-    if (!matches) return html;
+    if (matches.length === 0) return html;
 
     console.log(`Optimizando ${matches.length} imágenes en el HTML...`);
 
     for (let i = 0; i < matches.length; i++) {
-        const match = matches[i];
-        const base64Data = match.substring(5, match.length - 1); // Extraer solo el contenido de src
+        const { data: base64Data } = matches[i];
         
         try {
             const fileName = `img_${Date.now()}_${i}.webp`;

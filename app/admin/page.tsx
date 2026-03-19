@@ -26,6 +26,7 @@ export default function AdminPage() {
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [statusMsg, setStatusMsg] = useState<string>('Iniciando...');
+    const [viewMode, setViewMode] = useState<'visual' | 'code'>('visual');
 
     useEffect(() => {
         console.log('ADMIN_AUTH: Initializing Auth Listener...');
@@ -338,10 +339,37 @@ export default function AdminPage() {
                                 </button>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-auto bg-black/50 p-6 font-mono text-[11px] leading-relaxed scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                            <pre className="text-slate-300 whitespace-pre-wrap selection:bg-blue-500/30">
-                                {previewDesign.codigo_actual}
-                            </pre>
+                        <div className="flex-1 flex flex-col overflow-hidden">
+                            <div className="flex bg-[#18181b] border-b border-white/5">
+                                <button 
+                                    onClick={() => setViewMode('visual')} 
+                                    className={`px-6 py-2 text-xs font-bold transition-all ${viewMode === 'visual' ? 'text-blue-400 border-b-2 border-blue-400 bg-white/5' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Vista Previa
+                                </button>
+                                <button 
+                                    onClick={() => setViewMode('code')} 
+                                    className={`px-6 py-2 text-xs font-bold transition-all ${viewMode === 'code' ? 'text-blue-400 border-b-2 border-blue-400 bg-white/5' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Código Fuente
+                                </button>
+                            </div>
+                            
+                            <div className="flex-1 overflow-auto bg-black/50 relative">
+                                {viewMode === 'visual' ? (
+                                    <iframe 
+                                        srcDoc={previewDesign.codigo_actual}
+                                        className="w-full h-full border-none bg-white"
+                                        title="Preview"
+                                    />
+                                ) : (
+                                    <div className="p-6 font-mono text-[11px] leading-relaxed">
+                                        <pre className="text-slate-300 whitespace-pre-wrap selection:bg-blue-500/30">
+                                            {previewDesign.codigo_actual}
+                                        </pre>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
