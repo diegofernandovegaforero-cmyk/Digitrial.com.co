@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
             - 🔘 E-commerce / Tienda: Para vender productos con pagos en línea y control de inventario.
             - 🔘 Sitio Corporativo: Para mostrar servicios, historia y líneas de producción de una empresa.
             - 🔘 Catálogo Digital: Para mostrar productos y cerrar ventas por WhatsApp.
+            - ⌨️ O escribe tu duda aquí... (Menciona que también pueden simplemente escribir su pregunta).
 
             Fase 2: Profundización (Scope). Dependiendo de la elección, solicita detalles:
             - E-commerce: Pregunta cuántos productos y si tiene fotos.

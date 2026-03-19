@@ -17,7 +17,7 @@ export default function DigitChat() {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: '¡Hola! Soy DIGIT. Para asesorarte, cuéntame: ¿Qué tipo de sitio web necesitas?\n\n🔘 Landing Page\n🔘 E-commerce / Tienda\n🔘 Sitio Corporativo\n🔘 Catálogo Digital',
+            text: '¡Hola! Soy DIGIT. Para asesorarte, cuéntame: ¿Qué tipo de sitio web necesitas?\n\n🔘 Landing Page\n🔘 E-commerce / Tienda\n🔘 Sitio Corporativo\n🔘 Catálogo Digital\n\n⌨️ O escribe tu duda aquí...',
             sender: 'bot',
             timestamp: new Date(),
         },
