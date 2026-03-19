@@ -77,7 +77,7 @@ Todos los scripts y estilos deben ir dentro.
 
 export async function POST(req: NextRequest) {
   try {
-    const { descripcion, nombre_contacto, email, imagenes_base64 } = await req.json();
+    const { descripcion, nombre_contacto, email, imagenes_base64, rid } = await req.json();
 
     if (!descripcion || descripcion.trim().length < 10) {
       return NextResponse.json({ error: 'Faltan campos requeridos o descripción muy corta' }, { status: 400 });
@@ -227,8 +227,22 @@ export async function POST(req: NextRequest) {
                       const updatePayload: any = {
                         historial_disenos: historial,
                         ultima_generacion: new Date().toISOString(),
-                        creditos_restantes: Math.max(0, (data.creditos_restantes ?? 15) - 5)
                       };
+
+                      // OPTIMIZACIÓN: Refrescar snap para evitar colisiones de RID y usar FieldValue
+                      const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+                      const FieldValue = getAdminFieldValue();
+                      const freshSnap = await docRef.get();
+                      const freshData = freshSnap.data() || {};
+
+                      if (rid && freshData.last_rid === rid) {
+                        console.log(`IDEMPOTENCIA: Petición ${rid} ya procesada. Saltando cargos.`);
+                        return;
+                      }
+
+                      // Cobro atómico
+                      updatePayload.creditos_restantes = FieldValue.increment(-5);
+                      updatePayload.last_rid = rid || null;
                       if (Buffer.byteLength(html, 'utf8') < 800000) {
                         updatePayload.codigo_actual = html;
                       }

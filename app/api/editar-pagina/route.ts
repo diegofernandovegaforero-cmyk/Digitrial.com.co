@@ -37,7 +37,7 @@ REGLAS ESTRICTAS DE SALIDA:
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, instruccion_texto, id_diseno_base, imagenes_base64 } = await req.json();
+    const { email, instruccion_texto, id_diseno_base, imagenes_base64, rid } = await req.json();
 
     if (!email || !instruccion_texto) {
       return NextResponse.json({ error: 'Faltan campos requeridos.' }, { status: 400 });
@@ -134,14 +134,25 @@ export async function POST(req: NextRequest) {
               fecha: new Date().toISOString()
             });
 
-            // 2. Actualizar doc principal
             const currentHistory = userData.historial_disenos || [];
             const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
+
+            // OPTIMIZACIÓN: Refrescar snap para evitar colisiones de RID y usar FieldValue
+            const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+            const FieldValue = getAdminFieldValue();
+            const freshSnap = await docRef.get();
+            const freshData = freshSnap.data() || {};
+
+            if (rid && freshData.last_rid === rid) {
+                console.log(`IDEMPOTENCIA: Petición ${rid} ya procesada. Saltando cargos.`);
+                return;
+            }
 
             const updatePayload: any = {
               historial_disenos: updatedHistory,
               ultima_edicion: new Date().toISOString(),
-              creditos_restantes: Math.max(0, creditosRestantes - 3)
+              creditos_restantes: FieldValue.increment(-3),
+              last_rid: rid || null
             };
 
             if (Buffer.byteLength(cleanHtml, 'utf8') < 800000) {

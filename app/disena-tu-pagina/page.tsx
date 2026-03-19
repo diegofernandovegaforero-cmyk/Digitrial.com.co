@@ -268,7 +268,8 @@ function DisenaPageContent() {
                     descripcion,
                     imagenes_base64: base64Images,
                     email: authUser.email,
-                    nombre_contacto: authUser.displayName || ''
+                    nombre_contacto: authUser.displayName || '',
+                    rid: `gen_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
                 }),
             });
 

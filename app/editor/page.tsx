@@ -502,6 +502,7 @@ function EditorContent() {
                     audio_base64: '',
                     id_diseno_base: selectedDesignId,
                     imagenes_base64,
+                    rid: `edit_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
                 }),
             });
 

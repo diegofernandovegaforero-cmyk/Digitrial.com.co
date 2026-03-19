@@ -53,3 +53,11 @@ export const adminDb = {
         return db.collection(name);
     }
 };
+
+/**
+ * Retorna FieldValue para operaciones atómicas (como increment)
+ */
+export const getAdminFieldValue = () => {
+    const admin = require('firebase-admin');
+    return admin.firestore.FieldValue;
+};
