@@ -26,27 +26,48 @@ export function getAdminDbSafe() {
     if (!admin.apps.length) {
         let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY || '';
         
-        // Robust cleanup: Replace escaped newlines, handle quotes, and trim
+        // 1. Detect if the user pasted the entire JSON by mistake
+        if (privateKey.trim().startsWith('{')) {
+            try {
+                const json = JSON.parse(privateKey.trim());
+                if (json.private_key) {
+                    privateKey = json.private_key;
+                }
+            } catch (e) {
+                console.error('FIREBASE_ADMIN: Failed to parse private key as JSON even though it starts with {');
+            }
+        }
+
+        // 2. Standardize newlines (handle both literal \n and real newlines)
         privateKey = privateKey.replace(/\\n/g, '\n');
         
-        // Remove surrounding quotes if present (standard or escaped)
-        if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-            privateKey = privateKey.substring(1, privateKey.length - 1);
-        }
-        if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
-            privateKey = privateKey.substring(1, privateKey.length - 1);
+        // 3. Remove all types of surrounding quotes (escaped or literal)
+        privateKey = privateKey.trim().replace(/^['"]+|['"]+$/g, '');
+
+        // 4. Final safety check: ensure headers exist if it's a PEM
+        if (privateKey && !privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+            // If it looks like base64 but missing headers, wrap it (rare but possible)
+            if (privateKey.length > 500) {
+                 privateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----\n`;
+            }
         }
 
-        // Final trim to remove any accidental trailing/leading whitespace
+        // Final trim
         privateKey = privateKey.trim();
 
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-                privateKey: privateKey,
-            }),
-        });
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+                    privateKey: privateKey,
+                }),
+            });
+            console.log('FIREBASE_ADMIN: Initialized successfully');
+        } catch (initErr: any) {
+            console.error('FIREBASE_ADMIN: Critical initialization error:', initErr.message);
+            throw initErr; // Re-throw to be caught by the API route
+        }
     }
 
     _adminDb = admin.firestore();
