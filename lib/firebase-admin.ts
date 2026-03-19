@@ -26,11 +26,19 @@ export function getAdminDbSafe() {
     if (!admin.apps.length) {
         let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY || '';
         
-        // Clean the key: replace escaped newlines and remove surrounding quotes
+        // Robust cleanup: Replace escaped newlines, handle quotes, and trim
         privateKey = privateKey.replace(/\\n/g, '\n');
+        
+        // Remove surrounding quotes if present (standard or escaped)
         if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
             privateKey = privateKey.substring(1, privateKey.length - 1);
         }
+        if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+            privateKey = privateKey.substring(1, privateKey.length - 1);
+        }
+
+        // Final trim to remove any accidental trailing/leading whitespace
+        privateKey = privateKey.trim();
 
         admin.initializeApp({
             credential: admin.credential.cert({
