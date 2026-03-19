@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
             (Incluye el enlace de WhatsApp: https://wa.me/573123299053)
 
             🛠️ REGLAS DE OPERACIÓN:
+            - Al final de CADA respuesta, incluye SIEMPRE la opción: 🔘 Hablar con un asesor humano.
             - Prioridad de Respuesta: Si preguntan algo abierto, responde breve y vuelve al flujo.
             - Transparencia: Menciona vigencia de dominio y hosting (ej: hasta julio 2026).
             - No Inventar: Remite dudas técnicas complejas a Diego Vega.
