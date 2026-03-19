@@ -24,7 +24,7 @@ async function testFirebase() {
         const db = getFirestore(app);
 
         console.log("Intentando leer documento aleatorio...");
-        const docRef = doc(db, 'usuarios_leads', 'test_123');
+        const docRef = doc(db, 'maquetasweb_usuarios', 'test_123');
         await getDoc(docRef);
         console.log("¡Conexión exitosa a Firestore!");
     } catch (error) {

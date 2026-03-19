@@ -136,7 +136,7 @@ function EditorContent() {
 
         let isSubscribed = true;
         const docId = emailToDocId(email);
-        const docRef = doc(db, 'usuarios_leads', docId);
+        const docRef = doc(db, 'maquetasweb_usuarios', docId);
 
         // Limit the retry mechanism logic so it doesn't infinite loop with React state
         let currentRetries = 0;
@@ -174,7 +174,7 @@ function EditorContent() {
                     // Compatibilidad hacia atrás: buscar por campo 'email'
                     try {
                         const { collection, query, where, getDocs } = await import('firebase/firestore');
-                        const q = query(collection(db, 'usuarios_leads'), where('email', '==', email.toLowerCase().trim()));
+                        const q = query(collection(db, 'maquetasweb_usuarios'), where('email', '==', email.toLowerCase().trim()));
                         const querySnapshot = await getDocs(q);
 
                         if (!querySnapshot.empty) {
@@ -320,7 +320,7 @@ function EditorContent() {
             if (event.data?.type === 'SAVE_HTML' && event.data?.html && email) {
                 try {
                     const docId = emailToDocId(email);
-                    const docRef = doc(db, 'usuarios_leads', docId);
+                    const docRef = doc(db, 'maquetasweb_usuarios', docId);
                     
                     const now = Date.now();
                     const shouldPushHistory = now - lastHistoryPushRef.current > 5 * 60 * 1000; // Cada 5 minutos
@@ -334,7 +334,7 @@ function EditorContent() {
                         const historyId = now.toString();
                         
                         // 1. Guardar código en subcolección (PESADO)
-                        const codeRef = doc(db, 'usuarios_leads', docId, 'historial_codigos', historyId);
+                        const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
                         await setDoc(codeRef, { 
                             codigo_html: event.data.html,
                             fecha: new Date().toISOString()
@@ -382,11 +382,11 @@ function EditorContent() {
         setExito('');
         try {
             const docId = emailToDocId(email);
-            const docRef = doc(db, 'usuarios_leads', docId);
+            const docRef = doc(db, 'maquetasweb_usuarios', docId);
             const historyId = Date.now().toString();
             
             // 1. Guardar código en subcolección (PESADO)
-            const codeRef = doc(db, 'usuarios_leads', docId, 'historial_codigos', historyId);
+            const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
             await setDoc(codeRef, { 
                 codigo_html: userData.codigo_actual,
                 fecha: new Date().toISOString()

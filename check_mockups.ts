@@ -17,13 +17,13 @@ const db = admin.firestore();
 async function checkUser(email: string) {
     const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
     console.log(`Searching for: ${emailKey}`);
-    const docRef = db.collection('usuarios_leads').doc(emailKey);
+    const docRef = db.collection('maquetasweb_usuarios').doc(emailKey);
     const doc = await docRef.get();
     
     if (!doc.exists) {
         // Fallback backward search via query
         console.log(`Direct lookup failed. Trying query by email field...`);
-        const snapshot = await db.collection('usuarios_leads').where('email', '==', email.toLowerCase().trim()).get();
+        const snapshot = await db.collection('maquetasweb_usuarios').where('email', '==', email.toLowerCase().trim()).get();
         if (snapshot.empty) {
              console.log(`No user found for email: ${email}`);
              process.exit(0);

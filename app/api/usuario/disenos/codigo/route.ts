@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     try {
         const docId = emailToDocId(email);
-        const codeRef = db.collection('usuarios_leads').doc(docId).collection('historial_codigos').doc(id);
+        const codeRef = db.collection('maquetasweb_usuarios').doc(docId).collection('historial_codigos').doc(id);
         const snap = await codeRef.get();
 
         if (!snap.exists) {

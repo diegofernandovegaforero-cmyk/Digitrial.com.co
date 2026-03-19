@@ -13,7 +13,7 @@ admin.initializeApp({
 const db = admin.firestore();
 
 async function checkAllUsers() {
-    const sr = await db.collection('usuarios_leads').get();
+    const sr = await db.collection('maquetasweb_usuarios').get();
     console.log(`Total users in DB: ${sr.size}`);
     sr.forEach(doc => {
         const data = doc.data();

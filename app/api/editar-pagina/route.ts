@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     }
 
     const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-    const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+    const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
     const snap = await docRef.get();
 
     if (!snap.exists) {

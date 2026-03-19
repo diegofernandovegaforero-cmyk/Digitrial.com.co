@@ -37,7 +37,7 @@ const emailToDocId = (email: string) =>
 async function saveUserToFirestore(user: { uid: string; email: string | null; displayName: string | null; photoURL: string | null }) {
     if (!user.email) return;
     const docId = emailToDocId(user.email);
-    const ref = doc(db, 'usuarios_leads', docId);
+    const ref = doc(db, 'maquetasweb_usuarios', docId);
     const snap = await getDoc(ref);
     if (!snap.exists()) {
         await setDoc(ref, {
@@ -87,7 +87,7 @@ function LoginContent() {
         
         try {
             const docId = emailToDocId(user.email);
-            const ref = doc(db, 'usuarios_leads', docId);
+            const ref = doc(db, 'maquetasweb_usuarios', docId);
             const snap = await getDoc(ref);
             
             if (snap.exists()) {

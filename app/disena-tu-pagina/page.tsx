@@ -447,7 +447,7 @@ function DisenaPageContent() {
             if (event.data?.type === 'SAVE_HTML' && event.data?.html && userEmail) {
                 try {
                     const docId = emailToDocId(userEmail);
-                    const docRef = doc(db, 'usuarios_leads', docId);
+                    const docRef = doc(db, 'maquetasweb_usuarios', docId);
                     await updateDoc(docRef, { codigo_actual: event.data.html });
                     setExitoGuardado('¡Texto modificado nativamente y guardado con éxito!');
                     setTimeout(() => setExitoGuardado(''), 4000);

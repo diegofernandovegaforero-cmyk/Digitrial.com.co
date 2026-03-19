@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         const adminDb = await getAdminDb();
         if (adminDb) {
           const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-          const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+          const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
           const existing = await docRef.get();
           
           if (existing.exists) {
@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
                   const adminDb = await getAdminDb();
                   if (adminDb) {
                     const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-                    const docRef = adminDb.collection('usuarios_leads').doc(emailKey);
+          const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
                     const existing = await docRef.get();
 
                     const historyId = Date.now().toString();

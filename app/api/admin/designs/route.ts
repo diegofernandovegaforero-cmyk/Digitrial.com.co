@@ -25,8 +25,8 @@ export async function GET(req: NextRequest) {
     }
 
     console.log('ADMIN_FETCH: Querying snapshot...');
-    const snapshot = await adminDb.collection('usuarios_leads').get();
-    console.log(`ADMIN_FETCH: Found ${snapshot.size} documents in usuarios_leads`);
+    const snapshot = await adminDb.collection('maquetasweb_usuarios').get();
+    console.log(`ADMIN_FETCH: Found ${snapshot.size} documents in maquetasweb_usuarios`);
     
     interface Design {
         id: string;

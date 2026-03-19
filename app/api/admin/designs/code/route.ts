@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     // 1. Si tenemos el email del dueño, vamos directamente al grano (MÁS RÁPIDO)
     if (targetEmail) {
         const emailKey = targetEmail.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-        const userRef = adminDb.collection('usuarios_leads').doc(emailKey);
+        const userRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
         const userSnap = await userRef.get();
 
         if (userSnap.exists) {
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
 
     // 2. Si no lo encontramos o no hay targetEmail, buscamos en todos (BÚSQUEDA EXHAUSTIVA LEGACY)
     if (!foundCode) {
-        const snapshot = await adminDb.collection('usuarios_leads').get();
+        const snapshot = await adminDb.collection('maquetasweb_usuarios').get();
         for (const doc of snapshot.docs) {
             const data = doc.data();
             if (data.codigo_actual && (data.ultima_generacion || data.fecha_creacion || "").toString().includes(designId)) {
