@@ -85,6 +85,17 @@ export default function DigitChat() {
         }
     };
 
+    const getWhatsAppLink = () => {
+        const baseUrl = "https://wa.me/573123299053";
+        const historyText = messages
+            .filter(m => m.sender !== 'bot' || !m.text.includes('🔘')) // Filter out bot buttons for cleaner log
+            .map(m => `${m.sender === 'user' ? 'Cliente' : 'DIGIT'}: ${m.text}`)
+            .join('\n');
+            
+        const fullMessage = `Hola Diego, vengo del chat de Digitrial. Este es el resumen de mi consulta:\n\n${historyText}\n\n¡Espero tu asesoría!`;
+        return `${baseUrl}?text=${encodeURIComponent(fullMessage)}`;
+    };
+
     return (
         <>
             {/* Floating Button */}
@@ -186,7 +197,7 @@ export default function DigitChat() {
                                                                 return (
                                                                     <a 
                                                                         key={i}
-                                                                        href="https://wa.me/573123299053"
+                                                                        href={getWhatsAppLink()}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         className="block w-full text-center p-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold transition-all shadow-xl shadow-green-500/20 flex items-center justify-center gap-2 group"
@@ -230,7 +241,7 @@ export default function DigitChat() {
                                                             return (
                                                                 <a 
                                                                     key={i}
-                                                                    href="https://wa.me/573123299053"
+                                                                    href={getWhatsAppLink()}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="block w-full text-center p-4 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all"
