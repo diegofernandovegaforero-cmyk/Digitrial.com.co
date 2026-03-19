@@ -42,8 +42,10 @@ export async function GET(req: NextRequest) {
     snapshot.forEach(doc => {
       try {
         const data = doc.data();
+        console.log(`ADMIN_FETCH: ID=${doc.id}, has_codigo=${!!data.codigo_actual}, has_historial=${!!data.historial_disenos}`);
+        
         const userName = data.nombre_contacto || data.nombre_negocio || 'Usuario';
-        const userEmail = data.email || 'Sin correo';
+        const userEmail = data.email || doc.id; // Use Doc ID (email) as fallback
         const historial = data.historial_disenos || [];
 
         // Add the current code (metadata only for list)
@@ -51,19 +53,21 @@ export async function GET(req: NextRequest) {
             allDesigns.push({
                 id: (data.ultima_generacion || data.fecha_creacion || doc.id).toString(),
                 codigo_actual: "[CODE_AVAILABLE]", 
-                descripcion: "🌐 " + (data.descripcion || 'Diseño actual') + " (VIVO)",
+                descripcion: "🌐 " + (data.descripcion?.substring(0, 100) || 'Diseño actual') + " (VIVO)",
                 fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString(),
                 userName,
                 userEmail
             });
         }
 
-        historial.forEach((design: any) => {
+        historial.forEach((design: any, idx: number) => {
           allDesigns.push({
             ...design,
+            id: design.id || `${doc.id}_h_${idx}`,
             codigo_actual: "[CODE_AVAILABLE]", 
             userName,
-            userEmail
+            userEmail,
+            fecha: design.fecha || data.ultima_generacion || new Date().toISOString()
           });
         });
       } catch (e) {
@@ -71,7 +75,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    console.log(`ADMIN_FETCH: Total designs processed: ${allDesigns.length}`);
+    console.log(`ADMIN_FETCH: Total designs accumulated: ${allDesigns.length}`);
 
     // Sort by date descending
     allDesigns.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
