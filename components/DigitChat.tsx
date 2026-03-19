@@ -30,6 +30,8 @@ export default function DigitChat() {
         }
     }, [messages, isLoading]);
 
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const handleSend = async (overrideMessage?: string) => {
         if ((!overrideMessage && !message.trim()) || isLoading) return;
 
@@ -209,6 +211,20 @@ export default function DigitChat() {
                                                             );
                                                         }
                                                         
+                                                        // Handle "escribe tu duda" manual trigger
+                                                        if (trimmedLine.startsWith('⌨️')) {
+                                                            return (
+                                                                <button
+                                                                    key={i}
+                                                                    onClick={() => inputRef.current?.focus()}
+                                                                    className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 group"
+                                                                >
+                                                                    <span className="group-hover:scale-110 transition-transform">⌨️</span>
+                                                                    <span className="underline underline-offset-4 decoration-slate-200 dark:decoration-slate-700 group-hover:decoration-blue-400">{trimmedLine.replace('⌨️', '').trim()}</span>
+                                                                </button>
+                                                            );
+                                                        }
+
                                                         // Fallback for raw wa.me links not in button format
                                                         if (trimmedLine.includes('wa.me') && !trimmedLine.startsWith('🔘')) {
                                                             return (
@@ -258,6 +274,7 @@ export default function DigitChat() {
                         <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                             <div className="relative flex items-center">
                                 <input
+                                    ref={inputRef}
                                     type="text"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
