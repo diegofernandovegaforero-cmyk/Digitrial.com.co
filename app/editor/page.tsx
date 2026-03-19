@@ -8,6 +8,7 @@ import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
+import RecargaCreditos from '@/components/RecargaCreditos';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
 
 const CREDITOS_POR_EDICION = 5;
@@ -70,6 +71,7 @@ function EditorContent() {
     const [editando, setEditando] = useState(false);
     const [exito, setExito] = useState('');
     const [transcripcion, setTranscripcion] = useState('');
+    const [showRecarga, setShowRecarga] = useState(false);
 
     // Audio recording — REMOVED
     // Logout logic
@@ -213,7 +215,7 @@ function EditorContent() {
                                     setUserData({
                                         nombre_negocio: 'Tu negocio',
                                         nombre_contacto: '',
-                                        creditos_restantes: 15,
+                                        creditos_restantes: 10,
                                         codigo_actual: '',
                                         historial_disenos: [],
                                     });
@@ -461,11 +463,17 @@ function EditorContent() {
     // ── Enviar edición ──
     const handleEditar = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (sinCreditos) {
+            setShowRecarga(true);
+            return;
+        }
+
         if (!instruccion.trim() && editImages.length === 0) {
             setError('Escribe una instrucción o adjunta al menos una imagen de referencia.');
             return;
         }
-        if ((userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION) return;
+        if (editando) return;
 
         setEditando(true);
         setError('');
@@ -507,7 +515,7 @@ function EditorContent() {
             });
 
             if (res.status === 402) {
-                setError('¡Créditos insuficientes! Habla con nosotros para recargar.');
+                setShowRecarga(true);
                 setEditando(false);
                 return;
             }
@@ -568,7 +576,7 @@ function EditorContent() {
         }
     };
 
-    const creditosBajos = (userData?.creditos_restantes ?? 0) <= 3;
+    const creditosBajos = (userData?.creditos_restantes ?? 0) <= 5;
     const sinCreditos = (userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION;
 
     // ── UI: Pantalla de identificación por email ──
@@ -995,7 +1003,7 @@ function EditorContent() {
 
             {/* ── Módulo de Precios y Lanzamiento ── */}
             <PlanesDigitrial />
-
+            <RecargaCreditos isOpen={showRecarga} onClose={() => setShowRecarga(false)} />
         </div>
     );
 }
