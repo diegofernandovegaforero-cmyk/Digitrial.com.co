@@ -17,7 +17,7 @@ export default function DigitChat() {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: '¡Hola! Soy DIGIT, tu asistente de diseño web. ¿En qué puedo ayudarte hoy?',
+            text: '¡Hola! Soy DIGIT. Para asesorarte, cuéntame: ¿Qué tipo de sitio web necesitas?\n\n🔘 Landing Page\n🔘 E-commerce / Tienda\n🔘 Sitio Corporativo\n🔘 Catálogo Digital',
             sender: 'bot',
             timestamp: new Date(),
         },
@@ -30,10 +30,10 @@ export default function DigitChat() {
         }
     }, [messages, isLoading]);
 
-    const handleSend = async () => {
-        if (!message.trim() || isLoading) return;
+    const handleSend = async (overrideMessage?: string) => {
+        if ((!overrideMessage && !message.trim()) || isLoading) return;
 
-        const userText = message.trim();
+        const userText = overrideMessage ? overrideMessage.trim() : message.trim();
         const newUserMessage: Message = {
             id: Date.now().toString(),
             text: userText,
@@ -168,7 +168,68 @@ export default function DigitChat() {
                                                 ? 'bg-blue-600 text-white rounded-tr-none'
                                                 : 'bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-100 dark:border-slate-700'
                                             }`}>
-                                            {msg.text}
+                                            {msg.sender === 'bot' ? (
+                                                <div className="space-y-3">
+                                                    {msg.text.split('\n').map((line, i) => {
+                                                        const trimmedLine = line.trim();
+                                                        if (trimmedLine.startsWith('🔘')) {
+                                                            // Handle [Text] format or simple Text
+                                                            const match = trimmedLine.match(/🔘\s*\[(.*?)\]/) || trimmedLine.match(/🔘\s*(.*)/);
+                                                            const buttonText = match ? match[1].trim() : trimmedLine.replace('🔘', '').trim();
+                                                            
+                                                            // Special case for WhatsApp
+                                                            const isWhatsApp = buttonText.toLowerCase().includes('whatsapp') || trimmedLine.includes('wa.me');
+                                                            
+                                                            if (isWhatsApp) {
+                                                                return (
+                                                                    <a 
+                                                                        key={i}
+                                                                        href="https://wa.me/573123299053"
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="block w-full text-center p-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold transition-all shadow-xl shadow-green-500/20 flex items-center justify-center gap-2 group"
+                                                                    >
+                                                                        <span className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">📱</span>
+                                                                        {buttonText}
+                                                                    </a>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <button
+                                                                    key={i}
+                                                                    onClick={() => handleSend(buttonText)}
+                                                                    className="block w-full text-left p-3.5 rounded-2xl bg-white dark:bg-slate-700 border border-blue-100 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-slate-600 transition-all text-blue-600 dark:text-blue-400 font-semibold group shadow-sm hover:shadow-md"
+                                                                >
+                                                                    <span className="flex items-center gap-3">
+                                                                        <span className="w-6 h-6 flex items-center justify-center bg-blue-100 dark:bg-blue-900/40 rounded-xl group-hover:scale-110 transition-transform text-[10px]">🔘</span>
+                                                                        {buttonText}
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        }
+                                                        
+                                                        // Fallback for raw wa.me links not in button format
+                                                        if (trimmedLine.includes('wa.me') && !trimmedLine.startsWith('🔘')) {
+                                                            return (
+                                                                <a 
+                                                                    key={i}
+                                                                    href="https://wa.me/573123299053"
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="block w-full text-center p-4 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all"
+                                                                >
+                                                                    Hablar con Diego en WhatsApp
+                                                                </a>
+                                                            );
+                                                        }
+
+                                                        return trimmedLine ? <p key={i} className="leading-relaxed">{trimmedLine}</p> : <div key={i} className="h-2" />;
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                msg.text
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -206,7 +267,7 @@ export default function DigitChat() {
                                     disabled={isLoading}
                                 />
                                 <button
-                                    onClick={handleSend}
+                                    onClick={() => handleSend()}
                                     className="absolute right-2 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50"
                                     disabled={isLoading || !message.trim()}
                                 >
