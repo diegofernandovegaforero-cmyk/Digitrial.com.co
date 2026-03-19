@@ -326,44 +326,23 @@ function EditorContent() {
                     const shouldPushHistory = now - lastHistoryPushRef.current > 5 * 60 * 1000; // Cada 5 minutos
 
                     const updateData: any = { 
-                        codigo_actual: event.data.html, // Seguimos guardando el actual para vista rápida
                         ultima_edicion: new Date().toISOString()
                     };
 
-                    if (shouldPushHistory) {
-                        const historyId = now.toString();
-                        
-                        // 1. Guardar código en subcolección (PESADO)
-                        const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
-                        await setDoc(codeRef, { 
-                            codigo_html: event.data.html,
-                            fecha: new Date().toISOString()
-                        });
-
-                        // 2. Guardar metadata en doc principal (LIGERO)
-                        const newDesignMetadata = {
-                            id: historyId,
-                            descripcion: "Autoguardado: Edición de texto nativa",
-                            fecha: new Date().toISOString(),
-                            has_separate_code: true
-                        };
-                        
-                        const snap = await getDoc(docRef);
-                        const data = snap.data();
-                        const currentHistory = data?.historial_disenos || [];
-                        const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
-                        
-                        updateData.historial_disenos = updatedHistory;
-                        lastHistoryPushRef.current = now;
-                        
-                        setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
+                    // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 900KB)
+                    if (new Blob([event.data.html]).size < 900000) {
+                        updateData.codigo_actual = event.data.html;
                     }
 
                     await updateDoc(docRef, updateData);
                     setExito('Cambios sincronizados.');
                     setTimeout(() => setExito(''), 3000);
-                } catch (err) {
+                } catch (err: any) {
                     console.error('Error guardando HTML editado nativamente:', err);
+                    // No mostramos error invasivo en auto-save para no interrumpir el flujo
+                    if (err.code === 'resource-exhausted') {
+                        console.warn('Auto-save: El documento principal llegó al límite de tamaño de Firestore.');
+                    }
                 }
             }
         };
@@ -385,7 +364,7 @@ function EditorContent() {
             const docRef = doc(db, 'maquetasweb_usuarios', docId);
             const historyId = Date.now().toString();
             
-            // 1. Guardar código en subcolección (PESADO)
+            // 1. Guardar código en subcolección (PESADO - Evita el límite de 1MB del doc principal)
             const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
             await setDoc(codeRef, { 
                 codigo_html: userData.codigo_actual,
@@ -407,21 +386,30 @@ function EditorContent() {
                 ultima_generacion: new Date().toISOString()
             };
 
-            // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 800KB)
-            if (new Blob([userData.codigo_actual]).size < 800000) {
+            // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 900KB)
+            const codeSize = new Blob([userData.codigo_actual]).size;
+            if (codeSize < 900000) {
                 updatePayload.codigo_actual = userData.codigo_actual;
             } else {
-                console.log('Guardado Manual: El código es muy grande para el doc principal (>800KB).');
+                console.warn(`Guardado Manual: El código (${(codeSize/1024).toFixed(1)}KB) es muy grande para el doc principal. Solo se guardó en el historial.`);
             }
 
             await updateDoc(docRef, updatePayload);
 
             setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
-            setExito('¡Maqueta guardada con éxito!');
+            setExito('¡Maqueta guardada con éxito (en el historial)!');
             setInstruccion('');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error in manual save:', err);
-            setError('Error al guardar la maqueta. El archivo es muy grande.');
+            let msg = 'Error al guardar la maqueta.';
+            if (err.code === 'resource-exhausted' || err.message?.includes('too large')) {
+                msg += ' El archivo es muy grande para el límite de Firestore.';
+            } else if (err.code === 'permission-denied') {
+                msg += ' Permiso denegado. Revisa las reglas de seguridad de Firebase.';
+            } else {
+                msg += ` Detalle: ${err.message || 'Error desconocido'}`;
+            }
+            setError(msg);
         } finally {
             setEditando(false);
         }
