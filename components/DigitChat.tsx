@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Triangle, Send, X, User, Bot, Sparkles } from 'lucide-react';
+import { Triangle, Send, X, User, Bot, Sparkles, Loader2 } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -13,6 +13,7 @@ interface Message {
 export default function DigitChat() {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
@@ -27,31 +28,59 @@ export default function DigitChat() {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages, isLoading]);
 
-    const handleSend = () => {
-        if (!message.trim()) return;
+    const handleSend = async () => {
+        if (!message.trim() || isLoading) return;
 
+        const userText = message.trim();
         const newUserMessage: Message = {
             id: Date.now().toString(),
-            text: message,
+            text: userText,
             sender: 'user',
             timestamp: new Date(),
         };
 
         setMessages((prev) => [...prev, newUserMessage]);
         setMessage('');
+        setIsLoading(true);
 
-        // Respuesta simulada (Próximamente integrada con Gemini)
-        setTimeout(() => {
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: userText,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+
+            const data = await response.json();
+            
             const botResponse: Message = {
                 id: (Date.now() + 1).toString(),
-                text: 'Entiendo tu consulta sobre diseño web. Por ahora estoy en fase de aprendizaje, pero pronto podré procesar tus ideas con inteligencia real. ¿Te gustaría saber más sobre nuestros diseños?',
+                text: data.text || 'Lamento no haber podido procesar tu respuesta en este momento.',
                 sender: 'bot',
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, botResponse]);
-        }, 1000);
+        } catch (error) {
+            console.error('Error al enviar mensaje:', error);
+            const errorMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                text: '¡Vaya! Parece que tengo un pequeño problema de conexión técnica. Por favor, intenta de nuevo en unos minutos.',
+                sender: 'bot',
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -144,6 +173,24 @@ export default function DigitChat() {
                                     </div>
                                 </motion.div>
                             ))}
+                            
+                            {/* Thinking state */}
+                            {isLoading && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="flex justify-start"
+                                >
+                                    <div className="flex gap-3 max-w-[85%]">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center animate-pulse">
+                                            <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-slate-400 text-sm rounded-tl-none border border-slate-100 dark:border-slate-700 flex items-center gap-2 italic">
+                                            <Loader2 className="w-3 h-3 animate-spin" /> Digit está pensando...
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
 
                         {/* Input Area */}
@@ -155,13 +202,15 @@ export default function DigitChat() {
                                     onChange={(e) => setMessage(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                                     placeholder="Escribe tu pregunta sobre diseño..."
-                                    className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white pl-6 pr-14 py-4 rounded-2xl shadow-inner border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                                    className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white pl-6 pr-14 py-4 rounded-2xl shadow-inner border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400 disabled:opacity-50"
+                                    disabled={isLoading}
                                 />
                                 <button
                                     onClick={handleSend}
-                                    className="absolute right-2 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-lg shadow-blue-500/20"
+                                    className="absolute right-2 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                                    disabled={isLoading || !message.trim()}
                                 >
-                                    <Send className="w-4 h-4" />
+                                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                                 </button>
                             </div>
                             <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-[0.2em] font-bold opacity-50">
