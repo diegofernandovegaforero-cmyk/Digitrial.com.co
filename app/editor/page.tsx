@@ -750,6 +750,12 @@ function EditorContent() {
                         }`}>
                         <Zap className="w-4 h-4" />
                         {userData?.creditos_restantes ?? 0} créditos
+                        <button 
+                            onClick={() => setShowRecarga(true)} 
+                            className="ml-2 bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter transition-all"
+                        >
+                            Recargar
+                        </button>
                     </div>
                     
                     <button
@@ -811,9 +817,9 @@ function EditorContent() {
                                         {creditosBajos && (
                                             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
                                                 ⚠️ Te quedan <strong>{userData?.creditos_restantes ?? 0}</strong> créditos.{' '}
-                                                <a href="https://wa.me/573123299053" target="_blank" className="underline text-red-200 hover:text-white">
-                                                    Contáctanos
-                                                </a>{' '}para recargar.
+                                                <button onClick={() => setShowRecarga(true)} className="underline text-red-100 hover:text-white font-bold transition-all">
+                                                    Recarga ahora
+                                                </button>{' '}para seguir editando.
                                             </div>
                                         )}
 
