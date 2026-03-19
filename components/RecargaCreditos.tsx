@@ -29,7 +29,7 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
                         className="fixed inset-0 m-auto w-full max-w-2xl h-fit z-[101] p-6"
                     >
-                        <div className="bg-[#18181b] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
+                        <div className="bg-zinc-900/40 backdrop-blur-3xl border border-white/20 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] relative">
                             {/* Close */}
                             <button
                                 onClick={onClose}
