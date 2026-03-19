@@ -8,6 +8,7 @@ import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
+import { optimizeHtmlImages } from '@/lib/storage-utils';
 
 const CREDITOS_POR_EDICION = 3;
 const MAX_TEXTO_CHARS = 500;
@@ -364,10 +365,15 @@ function EditorContent() {
             const docRef = doc(db, 'maquetasweb_usuarios', docId);
             const historyId = Date.now().toString();
             
+            // OPTIMIZACIÓN: Subir imágenes de Base64 a Storage para ahorrar espacio y mejorar capacidad
+            setExito('Optimizando imágenes...');
+            const htmlOptimizado = await optimizeHtmlImages(userData.codigo_actual, email);
+            setExito('');
+
             // 1. Guardar código en subcolección (PESADO - Evita el límite de 1MB del doc principal)
             const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
             await setDoc(codeRef, { 
-                codigo_html: userData.codigo_actual,
+                codigo_html: htmlOptimizado,
                 fecha: new Date().toISOString()
             });
 
@@ -387,9 +393,9 @@ function EditorContent() {
             };
 
             // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 900KB)
-            const codeSize = new Blob([userData.codigo_actual]).size;
+            const codeSize = new Blob([htmlOptimizado]).size;
             if (codeSize < 900000) {
-                updatePayload.codigo_actual = userData.codigo_actual;
+                updatePayload.codigo_actual = htmlOptimizado;
             } else {
                 console.warn(`Guardado Manual: El código (${(codeSize/1024).toFixed(1)}KB) es muy grande para el doc principal. Solo se guardó en el historial.`);
             }

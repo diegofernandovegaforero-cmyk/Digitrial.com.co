@@ -8,6 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
+import { optimizeHtmlImages } from '@/lib/storage-utils';
 
 const emailToDocId = (email: string) => email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
 
@@ -448,7 +449,8 @@ function DisenaPageContent() {
                 try {
                     const docId = emailToDocId(userEmail);
                     const docRef = doc(db, 'maquetasweb_usuarios', docId);
-                    await setDoc(docRef, { codigo_actual: event.data.html }, { merge: true });
+                    const optimizedHtml = await optimizeHtmlImages(event.data.html, userEmail);
+                    await setDoc(docRef, { codigo_actual: optimizedHtml }, { merge: true });
                     setExitoGuardado('¡Texto modificado nativamente y guardado con éxito!');
                     setTimeout(() => setExitoGuardado(''), 4000);
                 } catch (err) {
