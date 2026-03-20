@@ -32,7 +32,7 @@ export default function Navbar() {
             <header className={`w-full transition-all duration-300 ${
                 isScrolled 
                 ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm' 
-                : 'bg-[#0B1221]/90 backdrop-blur-md border-b border-white/5'
+                : 'bg-transparent border-b border-transparent'
             }`}>
                 <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
                     {/* Logo */}
@@ -42,9 +42,9 @@ export default function Navbar() {
                         </div>
                         <div className="flex items-baseline">
                             <span className={`font-extrabold text-xl tracking-tight uppercase transition-colors duration-300 ${
-                                isScrolled ? 'text-slate-500' : 'text-white'
+                                isScrolled ? 'text-slate-500' : 'text-slate-600'
                             }`}>
-                                DIGI<span className={isScrolled ? 'text-blue-600' : 'text-blue-400'}>TRIAL</span>
+                                DIGI<span className={isScrolled ? 'text-blue-600' : 'text-blue-500'}>TRIAL</span>
                             </span>
                         </div>
                     </Link>
@@ -53,15 +53,15 @@ export default function Navbar() {
                     <div className="flex items-center gap-2 md:gap-8">
                         {/* Desktop Menu Links */}
                         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-                            <Link href="#" className={`${isScrolled ? 'text-blue-600' : 'text-blue-400'} font-semibold transition-colors duration-300`}>Inicio</Link>
+                            <Link href="#" className={`${isScrolled ? 'text-blue-600' : 'text-blue-600'} font-semibold transition-colors duration-300`}>Inicio</Link>
                             <Link href="#templates" className={`transition-colors duration-300 ${
-                                isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
+                                isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-600 hover:text-blue-600'
                             }`}>Diseños</Link>
                             <Link href="#contact" className={`transition-colors duration-300 ${
-                                isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
+                                isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-600 hover:text-blue-600'
                             }`}>Contacto</Link>
 
-                            <div className={`h-4 w-px transition-colors duration-300 ${isScrolled ? 'bg-slate-200' : 'bg-white/10'} mx-2`}></div>
+                            <div className={`h-4 w-px transition-colors duration-300 ${isScrolled ? 'bg-slate-200' : 'bg-slate-200'} mx-2`}></div>
                         </div>
 
                         <motion.div
@@ -79,7 +79,7 @@ export default function Navbar() {
 
                         {/* Mobile Menu Button */}
                         <button
-                            className={`md:hidden p-2 transition-colors duration-300 ${isScrolled ? 'text-slate-900' : 'text-white'}`}
+                            className={`md:hidden p-2 transition-colors duration-300 ${isScrolled ? 'text-slate-900' : 'text-slate-900'}`}
                             onClick={() => setIsOpen(!isOpen)}
                         >
                             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

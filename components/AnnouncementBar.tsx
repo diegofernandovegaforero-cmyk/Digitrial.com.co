@@ -41,31 +41,20 @@ export default function AnnouncementBar() {
     const countdownText = `${timeLeft.days}d ${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`;
 
     return (
-        <div className="w-full bg-[#0B1221] py-2 px-4 z-[60] select-none border-b border-white/5 relative overflow-hidden group">
-            {/* Efecto de Rejilla Profesional (Grid Pattern) */}
-            <div className="absolute inset-0 opacity-20" 
-                style={{ 
-                    backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-                    backgroundSize: '24px 24px' 
-                }} 
-            />
-            
-            {/* Efecto Shimmer (Brillo Animado) */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-
+        <div className="w-full bg-transparent py-2 px-4 z-[60] select-none relative overflow-hidden group">
             <div className="container mx-auto relative z-10">
-                <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-8 text-[11px] md:text-xs font-bold text-white uppercase tracking-[0.15em] text-center">
+                <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-8 text-[11px] md:text-xs font-bold text-slate-700 uppercase tracking-[0.15em] text-center">
                     
                     <div className="flex items-center gap-3">
-                        <span className="text-blue-400 animate-pulse">🔥</span>
-                        <span className="text-slate-100">
-                            ¡No dejes pasar esta oferta! <span className="text-blue-400">50% de descuento</span> — Solo <span className="text-green-400">7 cupos</span> disponibles hoy
+                        <span className="text-blue-600 animate-pulse">🔥</span>
+                        <span className="text-slate-600">
+                            ¡No dejes pasar esta oferta! <span className="text-blue-600">50% de descuento</span> — Solo <span className="text-green-600">7 cupos</span> disponibles hoy
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-white/5 px-4 py-1 rounded-full border border-white/10 backdrop-blur-md shadow-inner">
-                        <span className="text-slate-300">Tiempo restante:</span>
-                        <span className="font-mono text-blue-400 tabular-nums">{countdownText}</span>
+                    <div className="flex items-center gap-3 bg-slate-100/50 px-4 py-1 rounded-full border border-slate-200 backdrop-blur-md shadow-inner">
+                        <span className="text-slate-500">Tiempo restante:</span>
+                        <span className="font-mono text-blue-600 tabular-nums">{countdownText}</span>
                     </div>
                 </div>
             </div>
