@@ -29,7 +29,7 @@ export function HeroHeader() {
                     className="flex flex-col items-center text-center"
                 >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) - AHORA FULL WIDTH */}
-                    <div className="relative overflow-hidden group w-full min-h-[300px] flex items-center justify-center">
+                    <div className="relative overflow-hidden group w-full aspect-video md:aspect-auto md:min-h-[300px] flex items-center justify-center">
                         {/* Video de fondo para las letras */}
                         <div className="absolute inset-0 z-0">
                             <video
@@ -46,7 +46,7 @@ export function HeroHeader() {
                         {/* Texto con blend mode para actuar como máscara */}
                         <motion.h1
                             variants={itemVariants}
-                            className="relative z-10 w-full text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
+                            className="relative z-10 w-full text-[13vw] sm:text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
                         >
                             <span className="block">CREA TU WEB</span>
                             <span className="block">EN MINUTOS.</span>
