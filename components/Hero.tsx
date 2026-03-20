@@ -21,6 +21,17 @@ const itemVariants: Variants = {
 export function HeroHeader() {
     return (
         <section className="pt-32 pb-16 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-[#f8f7ff] z-20">
+            {/* Blobs decorativos de fondo suavizados para fondo blanco */}
+            <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-10 blur-3xl"
+                style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
+                animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }} />
+            <motion.div className="absolute bottom-10 left-10 w-[500px] h-[500px] rounded-full -z-10 opacity-10 blur-3xl"
+                style={{ background: 'radial-gradient(circle, #2ED573 0%, transparent 60%)' }}
+                animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
+
+            {/* Ondas sutiles animadas */}
+            <WavesBackground />
+
             <div className="w-full relative z-10">
                 <motion.div
                     variants={containerVariants}
