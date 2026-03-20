@@ -20,7 +20,7 @@ const itemVariants: Variants = {
 
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white z-20">
+        <section className="pt-32 pb-16 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-[#F0F9FF] z-20">
             {/* Blobs decorativos de fondo suavizados para fondo blanco */}
             <motion.div className="absolute top-0 right-10 w-[600px] h-[600px] rounded-full -z-10 opacity-10 blur-3xl"
                 style={{ background: 'radial-gradient(circle, #6C5CE7 0%, transparent 60%)' }}
@@ -57,7 +57,7 @@ export function HeroHeader() {
                         {/* Texto con blend mode para actuar como máscara */}
                         <motion.h1 
                             variants={itemVariants}
-                            className="relative z-10 w-full text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
+                            className="relative z-10 w-full text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-[#F0F9FF] mix-blend-screen font-anton uppercase select-none"
                         >
                             <span className="block">CREA TU WEB</span>
                             <span className="block">EN MINUTOS.</span>
