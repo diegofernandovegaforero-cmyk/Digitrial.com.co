@@ -59,26 +59,45 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                                         <div className="w-14 h-14 bg-slate-700/30 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500">
                                             <Sparkles className="w-7 h-7 text-emerald-400" />
                                         </div>
-                                        <h3 className="text-xl font-black text-white mb-1 tracking-tight">Recarga Básica</h3>
+                                        <h3 className="text-xl font-black text-white mb-1 tracking-tight">⚡ Recarga Rápida</h3>
+                                        <p className="text-[10px] text-slate-400 mb-4 px-2 leading-tight">
+                                            Todo lo que necesitas para diseñar y perfeccionar la web de tu negocio, con acceso total a nuestro motor gráfico.
+                                        </p>
                                         <div className="text-3xl font-black text-white mb-6 flex items-baseline gap-1">
-                                            $15.000 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP</span>
+                                            $19.900 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP</span>
                                         </div>
                                         
-                                        <ul className="space-y-4 mb-8 w-full">
-                                            <li className="flex items-center justify-center gap-3 text-sm text-slate-300">
-                                                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                                                <span className="font-medium">15 Créditos (3 Cambios)</span>
+                                        <ul className="space-y-3 mb-6 w-full text-left">
+                                            <li className="flex items-start gap-2 text-xs text-slate-300">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">30 Créditos de IA (30 cambios exactos).</span>
                                             </li>
-                                            <li className="flex items-center justify-center gap-3 text-sm text-slate-300">
-                                                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                                                <span className="font-medium">Vigencia por 1 mes</span>
+                                            <li className="flex items-start gap-2 text-xs text-slate-300">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Hasta 5 Proyectos: Diferentes ideas de negocio.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-300">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Edición Total con IA: Un solo clic.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-300">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Imágenes de Stock IA Digitrial.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-400 italic mt-2 border-t border-white/5 pt-2">
+                                                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                                                <span>Válido por 30 días.</span>
                                             </li>
                                         </ul>
+
+                                        <div className="text-[9px] text-slate-500 mb-4 leading-tight italic">
+                                            🔒 Nota: Publicación y dominio por separado.
+                                        </div>
 
                                         <a href="https://checkout.wompi.co/l/RECARGA_BASICA_PLACEHOLDER" target="_blank" className="relative group w-full py-3.5 rounded-xl font-extrabold text-white text-center shadow-lg transition-all duration-300 overflow-hidden bg-slate-700 hover:bg-slate-600 block text-xs uppercase tracking-widest flex items-center justify-center gap-2">
                                             <div className="absolute inset-0 w-full h-full bg-white/10 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                                             <CreditCard className="w-4 h-4 relative z-10" />
-                                            <span className="relative z-10">Comprar 15 Créditos</span>
+                                            <span className="relative z-10">Comprar 30 Créditos</span>
                                         </a>
                                     </div>
 
@@ -87,33 +106,56 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                                         {/* Badge Mejor Valor */}
                                         <div className="absolute top-0 right-0">
                                             <div className="bg-gradient-to-r from-blue-500 to-violet-500 text-[9px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-tighter italic text-white shadow-lg">
-                                                Mejor Valor
+                                                Más Vendido
                                             </div>
                                         </div>
 
                                         <div className="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                                             <Zap className="w-7 h-7 text-blue-400" />
                                         </div>
-                                        <h3 className="text-xl font-black text-white mb-1 tracking-tight uppercase">RECARGA PRO</h3>
+                                        <h3 className="text-xl font-black text-white mb-1 tracking-tight uppercase">⭐ Recarga Pro</h3>
+                                        <p className="text-[10px] text-blue-200/80 mb-4 px-2 leading-tight">
+                                            Capacidad masiva para iterar, crear múltiples páginas y tener el control absoluto del diseño antes de publicar.
+                                        </p>
                                         <div className="text-3xl font-black text-white mb-6 flex items-baseline gap-1">
-                                            $25.000 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP</span>
+                                            $39.900 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP</span>
                                         </div>
                                         
-                                        <ul className="space-y-4 mb-8 w-full">
-                                            <li className="flex items-center justify-center gap-3 text-sm text-slate-100">
-                                                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
-                                                <span className="font-bold">30 Créditos (6 Cambios)</span>
+                                        <ul className="space-y-2.5 mb-6 w-full text-left">
+                                            <li className="flex items-start gap-2 text-xs text-slate-100">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                                                <span className="font-bold">80 Créditos de IA (Máxima capacidad).</span>
                                             </li>
-                                            <li className="flex items-center justify-center gap-3 text-sm text-slate-300">
-                                                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
-                                                <span className="font-medium">Vigencia por 1 mes</span>
+                                            <li className="flex items-start gap-2 text-xs text-slate-200">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Hasta 30 Proyectos: Ideal para agencias.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-200">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Edición Total con IA.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-200">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Imágenes de Stock IA Alta Gama.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-200">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                                                <span className="font-medium">Soporte Humano por WhatsApp.</span>
+                                            </li>
+                                            <li className="flex items-start gap-2 text-xs text-slate-300 italic mt-1 border-t border-white/10 pt-2">
+                                                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                                                <span>Válido por 30 días.</span>
                                             </li>
                                         </ul>
+
+                                        <div className="text-[9px] text-slate-500 mb-4 leading-tight italic">
+                                            🔒 Nota: Publicación y dominio por separado.
+                                        </div>
 
                                         <a href="https://checkout.wompi.co/l/RECARGA_PRO_PLACEHOLDER" target="_blank" className="relative group w-full py-3.5 rounded-xl font-extrabold text-white text-center shadow-xl transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-blue-500/30 block text-xs uppercase tracking-widest flex items-center justify-center gap-2">
                                             <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                                             <CreditCard className="w-4 h-4 relative z-10" />
-                                            <span className="relative z-10">Comprar 30 Créditos</span>
+                                            <span className="relative z-10">Comprar 80 Créditos</span>
                                         </a>
                                     </div>
 
