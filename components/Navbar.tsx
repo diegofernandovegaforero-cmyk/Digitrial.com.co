@@ -70,7 +70,7 @@ export default function Navbar() {
                         >
                             <Link
                                 href="/login"
-                                className="group relative hidden sm:flex items-center justify-center gap-2 px-8 py-2.5 rounded-2xl font-black text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-blue-900/20 hover:shadow-blue-600/40 hover:-translate-y-0.5 overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-800"
+                                className="group relative hidden sm:flex items-center justify-center gap-2 px-8 py-2.5 rounded-2xl font-black text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 overflow-hidden bg-blue-600"
                             >
                                 <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                                 <span className="relative z-10 text-xs md:text-sm">Iniciar Sesión</span>
@@ -103,7 +103,7 @@ export default function Navbar() {
                                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                             >
                                 <Link href="/login" onClick={() => setIsOpen(false)}
-                                    className="group relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-black shadow-xl overflow-hidden bg-gradient-to-r from-blue-700 to-indigo-800"
+                                    className="group relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-black shadow-xl overflow-hidden bg-blue-600 shadow-blue-600/20"
                                 >
                                     <div className="absolute inset-0 w-full h-full bg-white/20 -skew-x-12 -translate-x-full animate-[shimmer_3s_infinite]" />
                                     <span className="relative z-10 text-xs uppercase tracking-wider font-bold">Iniciar Sesión</span>
