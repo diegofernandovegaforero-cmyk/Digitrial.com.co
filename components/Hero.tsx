@@ -54,14 +54,16 @@ export function HeroHeader() {
                             </video>
                         </div>
                         
-                        {/* Texto con blend mode para actuar como máscara */}
-                        <motion.h1 
-                            variants={itemVariants}
-                            className="relative z-10 text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
-                        >
-                            <span className="block">CREA TU WEB</span>
-                            <span className="block">EN MINUTOS.</span>
-                        </motion.h1>
+                        <Link href="/disena-tu-pagina" className="inline-block hover:scale-[1.02] transition-transform duration-300">
+                            {/* Texto con blend mode para actuar como máscara */}
+                            <motion.h1 
+                                variants={itemVariants}
+                                className="relative z-10 text-5xl md:text-7xl lg:text-[10rem] font-black leading-[0.85] py-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none cursor-pointer"
+                            >
+                                <span className="block">CREA TU WEB</span>
+                                <span className="block">EN MINUTOS.</span>
+                            </motion.h1>
+                        </Link>
                     </div>
 
                     <motion.div variants={itemVariants} className="flex flex-col items-center mt-6">
