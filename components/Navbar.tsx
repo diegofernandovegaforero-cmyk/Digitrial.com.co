@@ -52,7 +52,7 @@ export default function Navbar() {
                             </Link>
                             <Link href="/ia" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
-                            }`}>Ai</Link>
+                            }`}>IA</Link>
                             <Link href="#contact" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Contacto</Link>
@@ -101,7 +101,7 @@ export default function Navbar() {
                             isScrolled ? 'text-slate-900' : 'text-white'
                         }`}>
                             <Link href="#" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
-                            <Link href="/ia" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Ai</Link>
+                            <Link href="/ia" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>IA</Link>
                             <Link href="#contact" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
                             <Link
                                 href="/login"
