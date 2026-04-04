@@ -66,7 +66,7 @@ export function HeroHeader() {
 
                         <motion.p variants={itemVariants}
                             className="text-lg md:text-xl mb-12 max-w-3xl leading-relaxed text-slate-600 text-center">
-                            Creamos tu página web a medida, moderna y altamente funcional impulsada por IA.
+                            Construye la confianza sólida para tu empresa con el respaldo de manos expertas.
                         </motion.p>
 
                         {/* CTA Principal */}
