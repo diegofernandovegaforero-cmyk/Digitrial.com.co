@@ -29,7 +29,7 @@ export function HeroHeader() {
                     className="flex flex-col items-center text-center"
                 >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) - AHORA FULL WIDTH */}
-                    <div className="relative overflow-hidden group w-full aspect-video md:aspect-auto md:min-h-[300px] flex items-center justify-center">
+                    <div className="relative overflow-hidden group w-full min-h-[clamp(180px,35vw,380px)] flex items-center justify-center">
                         {/* Video de fondo para las letras */}
                         <div className="absolute inset-0 z-0">
                             <video
@@ -146,7 +146,7 @@ export function HeroSearch() {
                                 DISEÑOS REALIZADOS CON I.A
                             </motion.div>
 
-                            <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 relative">
+                            <form onSubmit={handleSearch} className="flex flex-row items-center gap-3 relative flex-wrap sm:flex-nowrap">
                                 <div className="relative flex-1 w-full">
                                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
                                     <input
@@ -167,9 +167,9 @@ export function HeroSearch() {
                                 <button
                                     type="submit"
                                     disabled={isChecking}
-                                    className="w-full md:w-auto px-10 py-5 rounded-2xl font-bold text-white text-lg hover:-translate-y-1 transition-transform shadow-lg whitespace-nowrap disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center min-w-[200px]"
+                                    className="shrink-0 px-6 py-5 rounded-2xl font-bold text-white text-base hover:-translate-y-1 transition-transform shadow-lg whitespace-nowrap disabled:opacity-70 disabled:hover:translate-y-0 flex items-center justify-center"
                                     style={{ backgroundColor: '#1A2B4C' }}>
-                                    {isChecking ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Buscar Dominios'}
+                                    {isChecking ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Buscar'}
                                 </button>
                             </form>
 
@@ -194,7 +194,7 @@ export function HeroSearch() {
                             )}
 
                             {/* Explicación de Dominio y Hosting Integrado en Modo Claro */}
-                            <div className="mt-8 grid md:grid-cols-2 gap-6 text-left border-t border-slate-100 pt-6">
+                            <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 text-left border-t border-slate-100 pt-6">
                                 <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors">
                                     <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
                                         <Globe className="w-6 h-6" />

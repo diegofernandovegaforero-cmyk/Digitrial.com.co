@@ -93,7 +93,7 @@ export default function Templates() {
             <div className="container mx-auto px-6 relative z-10">
 
 
-                <div className="relative max-w-5xl mx-auto h-[500px] flex items-center justify-center">
+                <div className="relative max-w-5xl mx-auto h-[clamp(320px,55vw,500px)] flex items-center justify-center">
                     <AnimatePresence initial={false} custom={direction}>
                         <motion.div
                             key={currentIndex}
@@ -118,7 +118,7 @@ export default function Templates() {
                                 </div>
                             </div>
                             {/* Imagen del Template */}
-                            <div className="relative w-full md:w-3/5 h-64 md:h-auto overflow-hidden">
+                            <div className="relative w-full md:w-3/5 h-[180px] md:h-auto md:min-h-full overflow-hidden">
                                 <Image
                                     src={templates[currentIndex].image}
                                     alt={templates[currentIndex].title}

@@ -13,7 +13,13 @@ body {
   background: transparent;
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
   transition: background 0.6s ease;
+  overflow-x: hidden;
 }
+
+img, video {
+  max-width: 100%;
+}
+
 
 /* Fondo oscuro activado por ThemeProvider al usar la clase .dark */
 .dark body {

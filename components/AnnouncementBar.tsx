@@ -54,17 +54,17 @@ export default function AnnouncementBar() {
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
 
             <div className="container mx-auto relative z-10">
-                <div className="flex flex-col md:flex-row justify-center items-center gap-3 md:gap-8 text-[11px] md:text-xs font-bold text-white uppercase tracking-[0.15em] text-center">
-                    
-                    <div className="flex items-center gap-3">
+                <div className="flex flex-row flex-wrap justify-center items-center gap-x-4 gap-y-1 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-[0.12em] text-center">
+
+                    <div className="flex items-center gap-2">
                         <span className="text-blue-400 animate-pulse">🔥</span>
                         <span className="text-slate-100">
-                            ¡No dejes pasar esta oferta! <span className="text-blue-400">50% de descuento</span> — Solo <span className="text-green-400">7 cupos</span> disponibles hoy
+                            <span className="text-blue-400">50% OFF</span> — Solo <span className="text-green-400">7 cupos</span>
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-white/5 px-4 py-1 rounded-full border border-white/10 backdrop-blur-md shadow-inner">
-                        <span className="text-slate-300">Tiempo restante:</span>
+                    <div className="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+                        <span className="text-slate-300">Termina en:</span>
                         <span className="font-mono text-blue-400 tabular-nums">{countdownText}</span>
                     </div>
                 </div>

@@ -119,13 +119,13 @@ export default function Footer() {
                                 <Phone className="w-5 h-5 text-slate-600" />
                                 <span>+57 312 329 9053</span>
                             </li>
-                            <li className="flex items-center gap-3">
+                            <li className="flex items-start gap-3">
                                 <a
                                     href="mailto:digitrialcentrodesoluciones@gmail.com"
-                                    className="flex items-center gap-3 hover:text-blue-400 transition-colors"
+                                    className="flex items-start gap-3 hover:text-blue-400 transition-colors"
                                 >
-                                    <Mail className="w-5 h-5 text-slate-600" />
-                                    <span>digitrialcentrodesoluciones@gmail.com</span>
+                                    <Mail className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+                                    <span className="break-all">digitrialcentrodesoluciones@gmail.com</span>
                                 </a>
                             </li>
                         </ul>

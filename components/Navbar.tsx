@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Menu, X, Triangle, ShoppingCart } from 'lucide-react';
+import { Triangle } from 'lucide-react';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function Navbar() {
@@ -10,19 +10,13 @@ export default function Navbar() {
     const [mounted, setMounted] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
-    // Manejar el scroll para cambiar el tema
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
-        };
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Evitar errores de hidratación
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    useEffect(() => { setMounted(true); }, []);
 
     if (!mounted) return null;
 
@@ -30,83 +24,91 @@ export default function Navbar() {
         <div className="fixed w-full z-50">
             <AnnouncementBar />
             <header className={`w-full transition-all duration-300 ${
-                isScrolled 
-                ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm' 
-                : 'bg-[#0B1221]/90 backdrop-blur-md border-b border-white/5'
+                isScrolled
+                    ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm'
+                    : 'bg-[#0B1221]/90 backdrop-blur-md border-b border-white/5'
             }`}>
-                <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+                <nav className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
-                            <Triangle className="text-white fill-white w-5 h-5" />
+                    <Link href="/" className="flex items-center gap-2 shrink-0">
+                        <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
+                            <Triangle className="text-white fill-white w-4 h-4" />
                         </div>
-                        <div className="flex items-baseline">
-                            <span className={`font-extrabold text-xl tracking-tight uppercase transition-colors duration-300 ${
-                                isScrolled ? 'text-slate-500' : 'text-white'
-                            }`}>
-                                DIGI<span className={isScrolled ? 'text-blue-600' : 'text-blue-400'}>TRIAL</span>
-                            </span>
-                        </div>
+                        <span className={`font-extrabold text-[clamp(14px,3vw,20px)] tracking-tight uppercase transition-colors duration-300 ${
+                            isScrolled ? 'text-slate-500' : 'text-white'
+                        }`}>
+                            DIGI<span className={isScrolled ? 'text-blue-600' : 'text-blue-400'}>TRIAL</span>
+                        </span>
                     </Link>
 
-                    {/* Right side actions */}
-                    <div className="flex items-center gap-2 md:gap-8">
-                        {/* Desktop Menu Links */}
-                        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-                            <Link href="#" className={`${isScrolled ? 'text-blue-600' : 'text-blue-400'} font-semibold transition-colors duration-300`}>Inicio</Link>
+                    {/* Right side */}
+                    <div className="flex items-center gap-3 sm:gap-6">
+
+                        {/* Desktop links — ocultos en móvil pequeño */}
+                        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+                            <Link href="#" className={`${isScrolled ? 'text-blue-600' : 'text-blue-400'} font-semibold transition-colors duration-300`}>
+                                Inicio
+                            </Link>
                             <Link href="#templates" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Diseños</Link>
                             <Link href="#contact" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Contacto</Link>
-
-                            <div className={`h-4 w-px transition-colors duration-300 ${isScrolled ? 'bg-slate-200' : 'bg-white/10'} mx-2`}></div>
+                            <div className={`h-4 w-px ${isScrolled ? 'bg-slate-200' : 'bg-white/10'}`} />
                         </div>
 
+                        {/* Botón Iniciar Sesión — visible en sm+ */}
                         <motion.div
                             animate={{ scale: [1, 1.02, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                            className="hidden sm:block"
                         >
                             <Link
                                 href="/login"
-                                className="relative hidden sm:flex items-center justify-center gap-2 px-8 py-2.5 rounded-2xl font-black text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:bg-blue-700 hover:-translate-y-0.5 bg-blue-600"
+                                className="flex items-center justify-center px-5 py-2 rounded-2xl font-black text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:bg-blue-700 hover:-translate-y-0.5 bg-blue-600 whitespace-nowrap"
                             >
-                                <span className="relative z-10 text-xs md:text-sm">Iniciar Sesión</span>
+                                Iniciar Sesión
                             </Link>
                         </motion.div>
 
-                        {/* Mobile Menu Button */}
+                        {/* Botón "Menú" estilo Nu bank — solo en móvil */}
                         <button
-                            className={`md:hidden p-2 transition-colors duration-300 ${isScrolled ? 'text-slate-900' : 'text-white'}`}
+                            className={`md:hidden flex items-center gap-1.5 text-sm font-bold tracking-wide transition-colors duration-300 ${
+                                isScrolled ? 'text-slate-900' : 'text-white'
+                            }`}
                             onClick={() => setIsOpen(!isOpen)}
+                            aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
                         >
-                            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            <span>Menú</span>
+                            {/* Línea / X animada */}
+                            <span className="flex flex-col gap-[4px] w-5 justify-center h-4 overflow-hidden">
+                                <span className={`block h-[2px] w-full rounded-full transition-all duration-300 ${isScrolled ? 'bg-slate-900' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-[6px]' : ''}`} />
+                                <span className={`block h-[2px] w-full rounded-full transition-all duration-300 ${isScrolled ? 'bg-slate-900' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`} />
+                            </span>
                         </button>
                     </div>
                 </nav>
 
-                {/* Mobile Menu Dropdown */}
+                {/* Mobile Dropdown */}
                 {isOpen && (
-                    <div className={`md:hidden backdrop-blur-xl border-t absolute w-full left-0 top-full shadow-2xl transition-all duration-300 ${
+                    <div className={`md:hidden backdrop-blur-xl border-t absolute w-full left-0 top-full shadow-2xl ${
                         isScrolled ? 'bg-white/95 border-slate-200' : 'bg-slate-900 border-white/10'
                     }`}>
-                        <div className={`flex flex-col p-6 space-y-4 font-medium font-bold ${
+                        <div className={`flex flex-col p-6 space-y-5 font-bold ${
                             isScrolled ? 'text-slate-900' : 'text-white'
                         }`}>
-                            <Link href="#" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
-                            <Link href="#templates" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Diseños</Link>
-                            <Link href="#contact" onClick={() => setIsOpen(false)} className={`transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
-                            <motion.div
-                                animate={{ scale: [1, 1.02, 1] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            <Link href="#" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
+                            <Link href="#templates" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Diseños</Link>
+                            <Link href="#contact" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
+                            <Link
+                                href="/login"
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-black shadow-xl bg-blue-600 shadow-blue-600/20 active:bg-blue-700 transition-colors duration-300 text-xs uppercase tracking-wider"
                             >
-                                <Link href="/login" onClick={() => setIsOpen(false)}
-                                    className="relative flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-black shadow-xl bg-blue-600 shadow-blue-600/20 active:bg-blue-700 transition-colors duration-300"
-                                >
-                                    <span className="relative z-10 text-xs uppercase tracking-wider font-bold">Iniciar Sesión</span>
-                                </Link>
-                            </motion.div>
+                                Iniciar Sesión
+                            </Link>
                         </div>
                     </div>
                 )}
