@@ -162,7 +162,7 @@ function DisenaPageContent() {
 
     // Hero CTA → go to /login
     const handleStartDesigning = () => {
-        router.push('/login?redirect=' + encodeURIComponent('/ia/?form=true'));
+        router.push('/login');
     };
 
     const [loadingMsg, setLoadingMsg] = useState(0);
