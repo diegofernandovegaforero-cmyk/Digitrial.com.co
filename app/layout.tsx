@@ -9,7 +9,7 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" });
 
 export const metadata: Metadata = {
-    metadataBase: new URL('https://www.digitrial.com.co'),
+    metadataBase: new URL('https://digitrial.com.co'),
     title: "Digitrial - Crea Tu Web En Minutos",
     description: "Construye la confianza sólida para tu empresa con el respaldo de manos expertas.",
     alternates: {
