@@ -82,10 +82,11 @@ export default function Navbar() {
                             aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
                         >
                             <span>Menú</span>
-                            {/* Línea / X animada */}
-                            <span className="flex flex-col gap-[4px] w-5 justify-center h-4 overflow-hidden">
+                            {/* 3 Líneas / X animada */}
+                            <span className="flex flex-col gap-[4px] w-5 justify-center h-4 relative">
                                 <span className={`block h-[2px] w-full rounded-full transition-all duration-300 ${isScrolled ? 'bg-slate-900' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-[6px]' : ''}`} />
                                 <span className={`block h-[2px] w-full rounded-full transition-all duration-300 ${isScrolled ? 'bg-slate-900' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`} />
+                                <span className={`block h-[2px] w-full rounded-full transition-all duration-300 ${isScrolled ? 'bg-slate-900' : 'bg-white'} ${isOpen ? '-rotate-45 -translate-y-[6px]' : ''}`} />
                             </span>
                         </button>
                     </div>
