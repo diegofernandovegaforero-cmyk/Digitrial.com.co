@@ -20,7 +20,7 @@ const itemVariants: Variants = {
 
 export function HeroHeader() {
     return (
-        <section className="pt-32 pb-16 lg:pt-40 relative overflow-hidden flex flex-col items-center justify-center bg-white z-20">
+        <section className="pt-32 pb-16 lg:pt-40 relative flex flex-col items-center justify-center bg-white z-40" style={{ isolation: 'isolate' }}>
             <div className="w-full relative z-10">
                 <motion.div
                     variants={containerVariants}
@@ -30,8 +30,8 @@ export function HeroHeader() {
                 >
                     {/* Titular Principal con Efecto Video-Text (COMPILADOVIDEOS.mp4) - AHORA FULL WIDTH */}
                     {/* Contenedor del efecto Video-Text: bg-white OBLIGATORIO para el knockout */}
-                    <div className="relative overflow-hidden group w-full bg-white min-h-[clamp(180px,35vw,380px)] flex items-center justify-center">
-                        {/* Video de fondo — rellena exactamente el contenedor */}
+                    <div className="relative overflow-hidden group w-full bg-white flex items-center justify-center">
+                        {/* Video de fondo — rellena exactamente el contenedor absolute */}
                         <div className="absolute inset-0 z-0 bg-white">
                             <video
                                 autoPlay
@@ -45,15 +45,14 @@ export function HeroHeader() {
                         </div>
 
                         {/* El h1 con mix-blend-mode:screen actúa como máscara sobre el video.
-                            bg-white aquí es imprescindible: hace que los píxeles blancos
-                            neutralicen el video (screen: blanco + color = blanco).
-                            Solo donde hay texto negro el video se ve. */}
+                            Al tener el min-h-[clamp(...)] el h1 determina la altura del contenedor padre
+                            y así el fondo blanco del h1 cubre exactamente el 100% del video sin dejar bandas visibles. */}
                         <motion.h1
                             variants={itemVariants}
-                            className="relative z-10 w-full text-[13vw] sm:text-[10vw] md:text-7xl lg:text-[10rem] font-black leading-[0.9] py-6 px-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
+                            className="relative z-10 w-full min-h-[clamp(180px,35vw,380px)] flex flex-col items-center justify-center text-[13vw] sm:text-[10vw] md:text-7xl lg:text-[10rem] font-black leading-[0.9] px-4 tracking-[-0.05em] text-black bg-white mix-blend-screen font-anton uppercase select-none"
                         >
-                            <span className="block">CREA TU WEB</span>
-                            <span className="block">EN MINUTOS.</span>
+                            <span className="block w-full text-center">CREA TU WEB</span>
+                            <span className="block w-full text-center">EN MINUTOS.</span>
                         </motion.h1>
                     </div>
 
