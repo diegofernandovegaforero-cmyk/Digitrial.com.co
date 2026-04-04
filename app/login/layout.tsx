@@ -4,7 +4,7 @@ export const metadata: Metadata = {
     title: "Iniciar Sesión | Digitrial",
     description: "Webs modernas con IA en minutos · E-commerce Shopify a medida · Diseño ágil sin barreras · Multiplica. tus. ventas. hoy.",
     alternates: {
-        canonical: '/login',
+        canonical: '/login/',
     },
 };
 
