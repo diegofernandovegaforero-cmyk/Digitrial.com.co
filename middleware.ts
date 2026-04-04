@@ -3,34 +3,12 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
-    const hostname = req.headers.get('host') || '';
-
-    // Si el usuario entra al subdominio IA
-    if (hostname === 'ia.digitrial.com.co' || hostname.startsWith('ia.digitrial')) {
-        // No tocar rutas de admin ni API de admin
-        if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin')) {
-            return NextResponse.next();
-        }
-
-        // Y están yendo a la raíz (ia.digitrial.com.co/)
-        if (url.pathname === '/') {
-            // Reescribimos silenciosamente a nuestra ruta real de la herramienta
-            url.pathname = '/disena-tu-pagina';
-            return NextResponse.rewrite(url);
-        }
-        // Si intentan ir a /disena-tu-pagina dentro del subdominio, los mandamos a la raiz limpia del subdominio
-        if (url.pathname === '/disena-tu-pagina') {
-            url.pathname = '/';
-            return NextResponse.redirect(url);
-        }
-    }
 
     // REDIRECCIÓN 301 DE RUTAS ANTIGUAS
-    // Si la persona entra a la página web normal (www.digitrial.com.co/disena-tu-pagina)
-    // la enviamos hacia el subdominio nuevo: https://ia.digitrial.com.co
-    if (url.pathname === '/disena-tu-pagina' && !hostname.startsWith('ia.digitrial')) {
-        const subdomainUrl = new URL('https://ia.digitrial.com.co');
-        return NextResponse.redirect(subdomainUrl);
+    // Si la persona usa un link viejo a /disena-tu-pagina, mándalo a la nueva /ia
+    if (url.pathname === '/disena-tu-pagina') {
+        url.pathname = '/ia';
+        return NextResponse.redirect(url);
     }
 
     return NextResponse.next();

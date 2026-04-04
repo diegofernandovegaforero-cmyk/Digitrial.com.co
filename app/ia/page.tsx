@@ -162,7 +162,7 @@ function DisenaPageContent() {
 
     // Hero CTA → go to /login
     const handleStartDesigning = () => {
-        router.push('/login?redirect=' + encodeURIComponent('https://ia.digitrial.com.co/?form=true'));
+        router.push('/login?redirect=' + encodeURIComponent('/ia/?form=true'));
     };
 
     const [loadingMsg, setLoadingMsg] = useState(0);

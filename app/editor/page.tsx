@@ -592,7 +592,7 @@ function EditorContent() {
                             DIGI<span className="text-blue-400">TRIAL</span>
                         </span>
                     </Link>
-                    <Link href="https://ia.digitrial.com.co" className="text-sm text-slate-400 hover:text-white transition-colors">
+                    <Link href="/ia" className="text-sm text-slate-400 hover:text-white transition-colors">
                         ← Generar nueva página
                     </Link>
                 </nav>
@@ -625,7 +625,7 @@ function EditorContent() {
                         </form>
                         <p className="text-xs text-slate-600 mt-4">
                             ¿No tienes cuenta?{' '}
-                            <Link href="https://ia.digitrial.com.co" className="text-blue-400 hover:text-blue-300 underline">
+                            <Link href="/ia" className="text-blue-400 hover:text-blue-300 underline">
                                 Genera tu página gratis aquí
                             </Link>
                         </p>
@@ -665,7 +665,7 @@ function EditorContent() {
                         >
                             <RefreshCw className="w-4 h-4" /> Reintentar
                         </button>
-                        <Link href="https://ia.digitrial.com.co"
+                        <Link href="/ia"
                             className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition-colors inline-block">
                             Generar mi página gratis
                         </Link>
@@ -799,7 +799,7 @@ function EditorContent() {
                                             Aún no tienes ningún diseño para editar. Genera tu primera página web con inteligencia artificial y luego podrás personalizarla aquí.
                                         </p>
                                         <Link 
-                                            href="/disena-tu-pagina?form=true" 
+                                            href="/ia?form=true" 
                                             className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-blue-600/20 w-full"
                                         >
                                             Generar mi página web

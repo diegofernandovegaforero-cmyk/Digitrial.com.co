@@ -95,14 +95,14 @@ function LoginContent() {
                 if (data.codigo_actual || (data.historial_disenos && data.historial_disenos.length > 0)) {
                     router.replace(`/editor?email=${encodeURIComponent(user.email)}`);
                 } else {
-                    router.replace('https://ia.digitrial.com.co/?form=true');
+                    router.replace('/ia/?form=true');
                 }
             } else {
-                router.replace('https://ia.digitrial.com.co/?form=true');
+                router.replace('/ia/?form=true');
             }
         } catch (e) {
             console.error(e);
-            router.replace('https://ia.digitrial.com.co/?form=true');
+            router.replace('/ia/?form=true');
         }
     };
 

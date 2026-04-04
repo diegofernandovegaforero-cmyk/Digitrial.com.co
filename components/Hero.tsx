@@ -74,7 +74,7 @@ export function HeroHeader() {
                             <p className="mb-4 text-sm font-bold text-blue-600 uppercase tracking-wider">
                                 Rápido, sencillo y 100% profesional.
                             </p>
-                            <Link href="/disena-tu-pagina"
+                            <Link href="/ia"
                                 className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:shadow-blue-600/40 dark:hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 uppercase">
                                 <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                                 <Sparkles className="w-6 h-6 animate-pulse" />
@@ -189,7 +189,7 @@ export function HeroSearch() {
                                         <span className="font-semibold">{statusMessage}</span>
                                     </div>
                                     {domainStatus === 'AVAILABLE' && (
-                                        <Link href="/disena-tu-pagina" className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors">
+                                        <Link href="/ia" className="px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors">
                                             ¡Reclámalo Ahora!
                                         </Link>
                                     )}
