@@ -187,7 +187,7 @@ function LoginContent() {
                     <p className="text-slate-500 text-sm mb-8">
                         {isRegister
                             ? 'Regístrate gratis y obtén 15 créditos para diseñar tu web.'
-                            : 'Inicia sesión para continuar diseñando tu página web.'}
+                            : 'Accede a tu panel de Digitrial. Inicia sesión de forma segura con tu correo electrónico o tu cuenta de Google y continúa escalando tu negocio digital.'}
                     </p>
 
                     {/* Google Button */}
