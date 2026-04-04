@@ -94,8 +94,8 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                         style={{ opacity: text1Opacity, y: text1Y }}
                         className="absolute inset-0 flex items-center justify-center px-6"
                     >
-                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
-                            Tu negocio es excepcional; <br className="hidden md:block" />
+                        <h2 className="text-[clamp(1.75rem,5vw,4rem)] font-extrabold text-white tracking-tight drop-shadow-2xl leading-[1.1] max-w-[90vw]">
+                            Tu negocio es excepcional;
                             tu presencia online también debe serlo.
                         </h2>
                     </motion.div>
@@ -105,8 +105,8 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                         style={{ opacity: text2Opacity, y: text2Y }}
                         className="absolute inset-0 flex items-center justify-center px-6"
                     >
-                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
-                            Diseñamos ecosistemas web dinámicos y premium <br className="hidden md:block" />
+                        <h2 className="text-[clamp(1.75rem,5vw,4rem)] font-extrabold text-white tracking-tight drop-shadow-2xl leading-[1.1] max-w-[90vw]">
+                            Diseñamos ecosistemas web dinámicos y premium
                             que te posicionan como el líder de tu sector.
                         </h2>
                     </motion.div>
@@ -117,11 +117,11 @@ export default function VideoBackground({ targetRef }: { targetRef?: React.RefOb
                         className="absolute inset-0 flex items-center justify-center px-6"
                     >
                         <div className="flex flex-col items-center gap-6">
-                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
-                                La visibilidad no se negocia. <br className="hidden md:block" />
+                            <h2 className="text-[clamp(1.75rem,5vw,4rem)] font-extrabold text-white tracking-tight drop-shadow-2xl leading-[1.1] max-w-[90vw]">
+                                La visibilidad no se negocia.
                                 Dale a tu industria el nivel digital que merece.
                             </h2>
-                            <span className="text-xl md:text-3xl font-bold bg-white text-slate-950 px-8 py-3 rounded-2xl shadow-xl">
+                            <span className="text-[clamp(1.125rem,3vw,1.875rem)] font-bold bg-white text-slate-950 px-6 md:px-8 py-3 rounded-2xl shadow-xl leading-tight text-center max-w-[90vw]">
                                 🚀 Diseña tu web en tiempo real ahora.
                             </span>
                         </div>
