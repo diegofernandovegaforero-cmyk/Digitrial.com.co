@@ -612,9 +612,7 @@ function DisenaPageContent() {
                             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
                             className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed"
                         >
-                            Crea la página web profesional para tu negocio simplemente
-                            describiendo tu idea. La IA de Digitrial la diseña en tiempo real,
-                            sin código, lista para atraer clientes.
+                            Nuestra IA en Digitrial lo crea al instante, sin programar, lista para más ventas. Inicia sesión de forma segura con Google o correo y empieza hoy.
                         </motion.p>
 
                         <motion.div
