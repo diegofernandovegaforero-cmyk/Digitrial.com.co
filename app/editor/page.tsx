@@ -320,6 +320,10 @@ function EditorContent() {
     // Listener para recibir los cambios editados nativamente desde el Iframe
     useEffect(() => {
         const handleMessage = async (event: MessageEvent) => {
+            if (event.data?.type === 'SHOW_RECARGA_MODAL') {
+                setShowRecarga(true);
+                return;
+            }
             if (event.data?.type === 'SAVE_HTML' && event.data?.html && email) {
                 try {
                     const docId = emailToDocId(email);
@@ -995,7 +999,7 @@ function EditorContent() {
                     )}
                     {userData?.codigo_actual ? (
                         <iframe
-                            srcDoc={injectEditorScript(userData.codigo_actual)}
+                            srcDoc={injectEditorScript(userData.codigo_actual, sinCreditos)}
                             className="w-full h-full border-none"
                             title="Vista previa en tiempo real"
                         />
@@ -1015,46 +1019,70 @@ function EditorContent() {
 }
 
 // Inyección del Script de Edición en el Iframe Web
-function injectEditorScript(html: string): string {
+function injectEditorScript(html: string, sinCreditos: boolean = false): string {
     const scriptToInject = `
         <script>
             (function() {
+                const isSinCreditos = \${sinCreditos};
                 // Hacer todos los textos editables por defecto
                 const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a');
+                let firstH1 = document.querySelector('h1');
+                
                 textElements.forEach(el => {
                     // Ignoramos elementos que sean puramente iconos
                     if(el.children.length === 0 || el.textContent.trim().length > 0) {
-                        el.setAttribute('contenteditable', 'true');
-                        el.style.outline = 'none';
-                        el.style.transition = 'outline 0.2s, background-color 0.2s';
+                        const isMainTitle = (el === firstH1);
                         
-                        el.addEventListener('focus', function() {
-                            this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
-                            this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
-                        });
-                        
-                        el.addEventListener('blur', function() {
-                            this.style.outline = 'none';
-                            this.style.backgroundColor = 'transparent';
+                        if (isMainTitle || !isSinCreditos) {
+                            el.setAttribute('contenteditable', 'true');
+                            el.style.outline = 'none';
+                            el.style.transition = 'outline 0.2s, background-color 0.2s';
                             
-                            // Remover las selecciones y clases temporales de enfoque para limpiar el HTML
-                            const clone = document.documentElement.cloneNode(true);
-                            
-                            // Limpiar atributos inyectados en el clon para guardar un DOM limpio
-                            const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
-                            clonedNodes.forEach(n => {
-                                // Dejamos el contenteditable pero quitamos el CSS en-linea inyectado
-                                n.style.outline = '';
-                                n.style.backgroundColor = '';
-                                if(n.getAttribute('style') === '') n.removeAttribute('style');
+                            el.addEventListener('focus', function() {
+                                this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
+                                this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
                             });
                             
-                            // Enviar el HTML limpio de vuelta a Next.js
-                            window.parent.postMessage({
-                                type: 'SAVE_HTML',
-                                html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
-                            }, '*');
-                        });
+                            el.addEventListener('blur', function() {
+                                this.style.outline = 'none';
+                                this.style.backgroundColor = 'transparent';
+                                
+                                // Remover las selecciones y clases temporales de enfoque para limpiar el HTML
+                                const clone = document.documentElement.cloneNode(true);
+                                
+                                // Limpiar atributos inyectados en el clon para guardar un DOM limpio
+                                const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
+                                clonedNodes.forEach(n => {
+                                    // Dejamos el contenteditable pero quitamos el CSS en-linea inyectado
+                                    n.style.outline = '';
+                                    n.style.backgroundColor = '';
+                                    if(n.getAttribute('style') === '') n.removeAttribute('style');
+                                });
+                                
+                                // Enviar el HTML limpio de vuelta a Next.js
+                                window.parent.postMessage({
+                                    type: 'SAVE_HTML',
+                                    html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
+                                }, '*');
+                            });
+                        } else {
+                            // Si no es el título principal y no tiene créditos, mostramos alerta
+                            el.style.cursor = 'pointer';
+                            el.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.parent.postMessage({
+                                    type: 'SHOW_RECARGA_MODAL'
+                                }, '*');
+                            });
+                            el.addEventListener('mouseover', function() {
+                               this.title = 'Requiere recargar créditos para editar este texto';
+                               this.style.outline = '1px dashed rgba(239, 68, 68, 0.3)';
+                            });
+                            el.addEventListener('mouseout', function() {
+                               this.style.outline = 'none';
+                            });
+                        }
                     }
                 });
             })();
