@@ -50,9 +50,9 @@ export default function Navbar() {
                             <Link href="#" className={`${isScrolled ? 'text-blue-600' : 'text-blue-400'} font-semibold transition-colors duration-300`}>
                                 Inicio
                             </Link>
-                            <Link href="#templates" className={`transition-colors duration-300 ${
+                            <Link href="/ia" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
-                            }`}>Diseños</Link>
+                            }`}>I.A</Link>
                             <Link href="#contact" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Contacto</Link>
@@ -101,7 +101,7 @@ export default function Navbar() {
                             isScrolled ? 'text-slate-900' : 'text-white'
                         }`}>
                             <Link href="#" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
-                            <Link href="#templates" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Diseños</Link>
+                            <Link href="/ia" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>I.A</Link>
                             <Link href="#contact" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
                             <Link
                                 href="/login"
