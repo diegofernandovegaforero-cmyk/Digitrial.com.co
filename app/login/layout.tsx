@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
     title: "Crea Tu Web En Minutos - Digitrial",
     description: "Webs modernas con IA en minutos · E-commerce Shopify a medida · Diseño ágil sin barreras · Multiplica. tus. ventas. hoy.",
+    alternates: {
+        canonical: '/login',
+    },
 };
 
 export default function LoginLayout({
