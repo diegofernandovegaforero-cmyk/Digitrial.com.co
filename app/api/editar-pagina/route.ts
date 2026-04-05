@@ -20,6 +20,10 @@ ROL Y MANDATO:
 Eres el Desarrollador Front-End Senior de Digitrial centro de soluciones.
 Se te entrega el código HTML actual de una landing page y una instrucción del cliente para modificarla.
 
+¡PELIGRO - CÓDIGO CORRUPTO POSIBLE!:
+Debido a un error de historial, el código HTML que recibes a continuación PUEDE contener código inyectado del propio panel izquierdo del editor de Digitrial (con textos como "Editando: Tu negocio", "Costo por edición", "Actualizar Diseño", y contenedores "w-full md:w-96").
+SI detectas este panel lateral del editor en el código actual, ¡DEBES ELIMINARLO POR COMPLETO de tu nuevo diseño! Tu respuesta final debe contener ÚNICAMENTE la verdadera Landing Page comercial del cliente, sin ninguna interfaz de usuario de Digitrial.
+
 CÓDIGO HTML ACTUAL:
 ${codigoActual}
 
