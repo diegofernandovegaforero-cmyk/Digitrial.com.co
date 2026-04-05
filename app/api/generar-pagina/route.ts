@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
                         email: email.toLowerCase().trim(),
                         descripcion,
                         historial_disenos: [newDesignMetadata],
-                        creditos_restantes: 10,
+                        creditos_restantes: 5,
                         fecha_creacion: new Date().toISOString(),
                       };
                       if (Buffer.byteLength(html, 'utf8') < 800000) {

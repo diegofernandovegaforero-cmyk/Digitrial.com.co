@@ -55,7 +55,7 @@ function EditorContent() {
     } | null>(sessionHtml ? {
         nombre_negocio: 'Tu negocio',
         nombre_contacto: '',
-        creditos_restantes: 10,
+        creditos_restantes: 5,
         codigo_actual: sessionHtml,
         historial_disenos: [],
     } : null);
@@ -167,7 +167,7 @@ function EditorContent() {
                     setUserData({
                         nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                         nombre_contacto: data.nombre_contacto || '',
-                        creditos_restantes: data.creditos_restantes ?? 10,
+                        creditos_restantes: data.creditos_restantes ?? 5,
                         codigo_actual: currentCode,
                         historial_disenos: pastDesigns,
                     });
@@ -193,7 +193,7 @@ function EditorContent() {
                             setUserData({
                                 nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                                 nombre_contacto: data.nombre_contacto || '',
-                                creditos_restantes: data.creditos_restantes ?? 10,
+                                creditos_restantes: data.creditos_restantes ?? 5,
                                 codigo_actual: currentCode,
                                 historial_disenos: pastDesigns,
                             });
@@ -215,7 +215,7 @@ function EditorContent() {
                                     setUserData({
                                         nombre_negocio: 'Tu negocio',
                                         nombre_contacto: '',
-                                        creditos_restantes: 10,
+                                        creditos_restantes: 5,
                                         codigo_actual: '',
                                         historial_disenos: [],
                                     });
@@ -585,7 +585,7 @@ function EditorContent() {
         }
     };
 
-    const creditosBajos = (userData?.creditos_restantes ?? 0) <= 5;
+    const creditosBajos = (userData?.creditos_restantes ?? 0) <= 2;
     const sinCreditos = (userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION;
 
     // ── UI: Pantalla de identificación por email ──
@@ -753,8 +753,8 @@ function EditorContent() {
 
                 {/* Créditos y Logout */}
                 <div className="flex items-center gap-3">
-                    <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold border ${creditosBajos
-                        ? 'bg-red-500/20 border-red-500/40 text-red-300'
+                    <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold border transition-all duration-500 ${creditosBajos
+                        ? 'bg-red-500/30 border-red-500/50 text-red-100 shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse'
                         : 'bg-blue-500/20 border-blue-500/30 text-blue-300'
                         }`}>
                         <Zap className="w-4 h-4" />
