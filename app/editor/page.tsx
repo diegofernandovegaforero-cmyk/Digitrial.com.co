@@ -324,6 +324,11 @@ function EditorContent() {
                 setShowRecarga(true);
                 return;
             }
+            if (event.data?.type === 'SHOW_AI_ALERT') {
+                setError('Para modificar este texto, o adjuntar fotos y diseño, por favor usa el panel de instrucciones de IA a tu izquierda.');
+                setTimeout(() => setError(''), 5000);
+                return;
+            }
             if (event.data?.type === 'SAVE_HTML' && event.data?.html && email) {
                 try {
                     const docId = emailToDocId(email);
@@ -1033,7 +1038,7 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                     if(el.children.length === 0 || el.textContent.trim().length > 0) {
                         const isFreeTitle = el.tagName.match(/^H[1-6]$/i) !== null;
                         
-                        if (isFreeTitle || !isSinCreditos) {
+                        if (isFreeTitle) {
                             el.setAttribute('contenteditable', 'true');
                             el.style.outline = 'none';
                             el.style.transition = 'outline 0.2s, background-color 0.2s';
@@ -1068,17 +1073,19 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                         } else {
                             // Limpiamos los permisos de edición activos si provienen de diseños anteriores
                             el.removeAttribute('contenteditable');
-                            // Si no es el título principal y no tiene créditos, mostramos alerta
+                            // Si no es un título mostramos alerta
                             el.style.cursor = 'pointer';
                             el.addEventListener('click', function(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                window.parent.postMessage({
-                                    type: 'SHOW_RECARGA_MODAL'
-                                }, '*');
+                                if (isSinCreditos) {
+                                    window.parent.postMessage({ type: 'SHOW_RECARGA_MODAL' }, '*');
+                                } else {
+                                    window.parent.postMessage({ type: 'SHOW_AI_ALERT' }, '*');
+                                }
                             });
                             el.addEventListener('mouseover', function() {
-                               this.title = 'Requiere recargar créditos para editar este texto';
+                               this.title = isSinCreditos ? 'Requiere recargar créditos para modificar esto' : 'Usa el panel de Inteligencia Artificial para modificar esto.';
                                this.style.outline = '1px dashed rgba(239, 68, 68, 0.3)';
                             });
                             el.addEventListener('mouseout', function() {
