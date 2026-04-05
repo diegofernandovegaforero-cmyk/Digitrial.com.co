@@ -167,7 +167,7 @@ function EditorContent() {
                     setUserData({
                         nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                         nombre_contacto: data.nombre_contacto || '',
-                        creditos_restantes: data.creditos_restantes ?? 0,
+                        creditos_restantes: data.creditos_restantes ?? 10,
                         codigo_actual: currentCode,
                         historial_disenos: pastDesigns,
                     });
@@ -193,7 +193,7 @@ function EditorContent() {
                             setUserData({
                                 nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                                 nombre_contacto: data.nombre_contacto || '',
-                                creditos_restantes: data.creditos_restantes ?? 0,
+                                creditos_restantes: data.creditos_restantes ?? 10,
                                 codigo_actual: currentCode,
                                 historial_disenos: pastDesigns,
                             });
@@ -1066,6 +1066,8 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                                 }, '*');
                             });
                         } else {
+                            // Limpiamos los permisos de edición activos si provienen de diseños anteriores
+                            el.removeAttribute('contenteditable');
                             // Si no es el título principal y no tiene créditos, mostramos alerta
                             el.style.cursor = 'pointer';
                             el.addEventListener('click', function(e) {
