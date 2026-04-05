@@ -64,7 +64,7 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                                             Todo lo que necesitas para diseñar y perfeccionar la web de tu negocio, con acceso total a nuestro motor gráfico.
                                         </p>
                                         <div className="text-3xl font-black text-white mb-6 flex items-baseline gap-1">
-                                            $19.900 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP</span>
+                                            $19.900 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP / MES</span>
                                         </div>
                                         
                                         <ul className="space-y-3 mb-6 w-full text-left">
@@ -118,13 +118,13 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                                             Capacidad masiva para iterar, crear múltiples páginas y tener el control absoluto del diseño antes de publicar.
                                         </p>
                                         <div className="text-3xl font-black text-white mb-6 flex items-baseline gap-1">
-                                            $39.900 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP</span>
+                                            $39.900 <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">COP / MES</span>
                                         </div>
                                         
                                         <ul className="space-y-2.5 mb-6 w-full text-left">
                                             <li className="flex items-start gap-2 text-xs text-slate-100">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                                                <span className="font-bold">80 Créditos de IA (Máxima capacidad).</span>
+                                                <span className="font-bold">80 Créditos de IA (80 cambios exactos).</span>
                                             </li>
                                             <li className="flex items-start gap-2 text-xs text-slate-200">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />

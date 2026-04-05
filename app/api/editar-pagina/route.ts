@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
     const userData = snap.data() || {};
     const creditosRestantes = userData.creditos_restantes ?? 10;
 
-    if (creditosRestantes < 5) {
-      return NextResponse.json({ error: 'Créditos insuficientes (5 créditos por edición).' }, { status: 402 });
+    if (creditosRestantes < 1) {
+      return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por edición).' }, { status: 402 });
     }
 
     // Obtener el código actual para editar
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
             const updatePayload: any = {
               historial_disenos: updatedHistory,
               ultima_edicion: new Date().toISOString(),
-              creditos_restantes: FieldValue.increment(-5),
+              creditos_restantes: FieldValue.increment(-1),
               last_rid: rid || null
             };
 

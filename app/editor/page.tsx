@@ -11,7 +11,7 @@ import PlanesDigitrial from '@/components/PlanesDigitrial';
 import RecargaCreditos from '@/components/RecargaCreditos';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
 
-const CREDITOS_POR_EDICION = 5;
+const CREDITOS_POR_EDICION = 1;
 const MAX_TEXTO_CHARS = 500;
 
 // Sanitizar email para usarlo como Firestore doc ID (igual que en el backend)
