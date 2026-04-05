@@ -1031,9 +1031,9 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                 textElements.forEach(el => {
                     // Ignoramos elementos que sean puramente iconos
                     if(el.children.length === 0 || el.textContent.trim().length > 0) {
-                        const isMainTitle = (el === firstH1);
+                        const isFreeTitle = el.tagName.match(/^H[1-6]$/i) !== null;
                         
-                        if (isMainTitle || !isSinCreditos) {
+                        if (isFreeTitle || !isSinCreditos) {
                             el.setAttribute('contenteditable', 'true');
                             el.style.outline = 'none';
                             el.style.transition = 'outline 0.2s, background-color 0.2s';

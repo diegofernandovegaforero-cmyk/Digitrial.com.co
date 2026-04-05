@@ -86,7 +86,10 @@ export async function POST(req: NextRequest) {
 
     // Manejo de imágenes adjuntas
     if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-      let placeholdersInstruccion = "\n\nNUEVAS IMÁGENES ADJUNTAS (Úsalas si el cliente lo pide):\n";
+      let placeholdersInstruccion = `\n\nNUEVAS IMÁGENES ADJUNTAS (Úsalas si el cliente lo pide):
+¡IMPORTANTE SOBRE IMÁGENES!: 
+1. Si el usuario adjunta capturas de pantalla, IGNORA Y NO RECREES ninguna interfaz de usuario, menús o barras laterales oscuras del editor de la plataforma (como paneles con botones de 'Actualizar Diseño', 'Guardar', 'Costo por edición', etc). ESTÁ ESTRICTAMENTE PROHIBIDO RECREAR EL PANEL DE EDICIÓN DEL LADO IZQUIERDO. Las imágenes son solo para referencia del diseño de la Landing Page principal.
+2. ¡ATENCIÓN AL LOGO Y COLORES!: Si el usuario te indica que alguna de estas imágenes anexas ES UN LOGO, DEBES colocarla obligatoriamente en la barra de navegación (Header/Nav) como logo destacado.\n`;
       imagenes_base64.forEach((imgBase64, idx) => {
         const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
         const mimeType = match ? match[1] : 'image/jpeg';
