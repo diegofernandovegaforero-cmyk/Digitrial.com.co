@@ -2,13 +2,23 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Triangle } from 'lucide-react';
+import { Triangle, Layout } from 'lucide-react';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -53,6 +63,14 @@ export default function Navbar() {
                             <Link href="/ia" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>IA</Link>
+                            {user && (
+                                <Link href="/proyectos" className={`transition-colors duration-300 ${
+                                    isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
+                                } flex items-center gap-1.5`}>
+                                    <Layout className="w-3.5 h-3.5" />
+                                    Mis Proyectos
+                                </Link>
+                            )}
                             <Link href="#contact" className={`transition-colors duration-300 ${
                                 isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
                             }`}>Contacto</Link>
@@ -66,10 +84,10 @@ export default function Navbar() {
                             className="hidden sm:block"
                         >
                             <Link
-                                href="/login"
+                                href={user ? "/proyectos" : "/login"}
                                 className="flex items-center justify-center px-5 py-2 rounded-2xl font-black text-white text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:bg-blue-700 hover:-translate-y-0.5 bg-blue-600 whitespace-nowrap"
                             >
-                                Iniciar Sesión
+                                {user ? "Mi Panel" : "Iniciar Sesión"}
                             </Link>
                         </motion.div>
 
@@ -102,13 +120,14 @@ export default function Navbar() {
                         }`}>
                             <Link href="#" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
                             <Link href="/ia" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>IA</Link>
+                            {user && <Link href="/proyectos" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Mis Proyectos</Link>}
                             <Link href="#contact" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
                             <Link
-                                href="/login"
+                                href={user ? "/proyectos" : "/login"}
                                 onClick={() => setIsOpen(false)}
                                 className="flex items-center justify-center text-white px-6 py-4 rounded-2xl text-center font-black shadow-xl bg-blue-600 shadow-blue-600/20 active:bg-blue-700 transition-colors duration-300 text-xs uppercase tracking-wider"
                             >
-                                Iniciar Sesión
+                                {user ? "Mi Panel" : "Iniciar Sesión"}
                             </Link>
                         </div>
                     </div>

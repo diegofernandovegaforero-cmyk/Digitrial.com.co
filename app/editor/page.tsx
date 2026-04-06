@@ -2,7 +2,7 @@
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X, ImagePlus, LogOut } from 'lucide-react';
+import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw, Zap, Mail, History, Eye, Code, Type, Download, X, ImagePlus, LogOut, Layout } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -750,6 +750,10 @@ function EditorContent() {
                     <Link href="/ia" className="text-sm text-slate-400 hover:text-white transition-colors">
                         ← Generar nueva página
                     </Link>
+                    <Link href="/proyectos" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                        <Layout className="w-3 h-3" />
+                         Mis Proyectos
+                    </Link>
                 </nav>
 
                 <main className="flex-1 flex items-center justify-center px-6">
@@ -895,6 +899,11 @@ function EditorContent() {
                     <span className="font-extrabold text-base tracking-tight uppercase text-slate-300">
                         DIGI<span className="text-blue-400">TRIAL</span>
                     </span>
+                </Link>
+
+                <Link href="/proyectos" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+                    <Layout className="w-3 h-3" />
+                    Panel
                 </Link>
 
                 {/* Créditos y Logout */}

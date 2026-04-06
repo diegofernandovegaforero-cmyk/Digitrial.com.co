@@ -74,7 +74,7 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                                             </li>
                                             <li className="flex items-start gap-2 text-xs text-slate-300">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                                                <span className="font-medium">Hasta 5 Proyectos: Diferentes ideas de negocio.</span>
+                                                <span className="font-medium">Hasta 3 Proyectos: Diferentes ideas de negocio.</span>
                                             </li>
                                             <li className="flex items-start gap-2 text-xs text-slate-300">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
@@ -128,7 +128,7 @@ export default function RecargaCreditos({ isOpen, onClose }: RecargaCreditosProp
                                             </li>
                                             <li className="flex items-start gap-2 text-xs text-slate-200">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                                                <span className="font-medium">Hasta 30 Proyectos: Ideal para agencias.</span>
+                                                <span className="font-medium">Hasta 25 Proyectos: Ideal para agencias.</span>
                                             </li>
                                             <li className="flex items-start gap-2 text-xs text-slate-200">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />

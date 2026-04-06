@@ -93,7 +93,7 @@ function LoginContent() {
             if (snap.exists()) {
                 const data = snap.data();
                 if (data.codigo_actual || (data.historial_disenos && data.historial_disenos.length > 0)) {
-                    router.replace(`/editor?email=${encodeURIComponent(user.email)}`);
+                    router.push('/proyectos');
                 } else {
                     router.replace('/ia/?form=true');
                 }
