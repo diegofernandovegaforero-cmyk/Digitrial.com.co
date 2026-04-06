@@ -18,6 +18,110 @@ const MAX_TEXTO_CHARS = 500;
 const emailToDocId = (email: string) =>
     email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
 
+// Inyección del Script de Edición en el Iframe Web
+function injectEditorScript(html: string, sinCreditos: boolean = false): string {
+    const scriptToInject = `
+        <script>
+            (function() {
+                const isSinCreditos = ${sinCreditos};
+
+                // BLOQUEO TOTAL DE NAVEGACIÓN: Atrapa todos los clics en fase de captura e impide cualquier redirección
+                document.addEventListener('click', function(e) {
+                    const target = e.target.closest('a') || e.target.closest('button');
+                    if (target) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }, true);
+
+                // Regla CSS de emergencia para ocultar cualquier rastro de la barra lateral
+                const style = document.createElement('style');
+                style.textContent = '.md\\\\:w-96, .w-96 { display: none !important; } .fixed.top-0.left-0.z-50 { display: none !important; }';
+                document.head.appendChild(style);
+
+                // FUNCIÓN DE LIMPIEZA REFORZADA: Elimina cualquier rastro de la interfaz del editor o navbars de la plataforma
+                const cleanupUI = () => {
+                    // Selectores comunes de la interfaz de Digitrial
+                    const selectors = ['.md\\\\:w-96', '.w-96', 'nav', 'div', 'button', 'span', 'a'];
+                    document.querySelectorAll(selectors.join(',')).forEach(el => {
+                        const text = el.innerText || '';
+                        const hasEditorText = text.includes('Editando:') || text.includes('Costo por edición') || text.includes('Actualizar Diseño') || text.includes('Guardar esta Maqueta') || text.includes('INICIAR SESIÓN') || (text.includes('DIGITRIAL') && el.tagName === 'NAV');
+                        const isDigitrialHeader = el.tagName === 'NAV' && (text.includes('Inicio') && text.includes('IA') && text.includes('Contacto'));
+                        
+                        if (hasEditorText || isDigitrialHeader) {
+                            el.remove();
+                        }
+                    });
+                };
+
+                // Ejecutar limpieza inicial y periódica
+                cleanupUI();
+                const cleanupInterval = setInterval(cleanupUI, 500);
+                setTimeout(() => clearInterval(cleanupInterval), 5000);
+
+                // Hacer los textos principales editables
+                const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a');
+                
+                textElements.forEach(el => {
+                    if(el.children.length === 0 || el.textContent.trim().length > 0) {
+                        // TODO es editable ahora
+                        el.setAttribute('contenteditable', 'true');
+                        el.style.outline = 'none';
+                        el.style.cursor = 'text';
+                        
+                        el.addEventListener('focus', function() {
+                            this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
+                            this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                        });
+                        
+                        el.addEventListener('blur', function() {
+                            this.style.outline = 'none';
+                            this.style.backgroundColor = 'transparent';
+                            
+                            cleanupUI();
+                            
+                            const clone = document.documentElement.cloneNode(true);
+                            const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
+                            clonedNodes.forEach(n => {
+                                n.style.outline = '';
+                                n.style.backgroundColor = '';
+                                if(n.getAttribute('style') === '') n.removeAttribute('style');
+                            });
+
+                            clone.querySelectorAll('script').forEach(s => {
+                                if (s.innerHTML.includes('isSinCreditos')) s.remove();
+                            });
+                            
+                            window.parent.postMessage({
+                                type: 'SAVE_HTML',
+                                html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
+                            }, '*');
+                        });
+
+                        // Efecto visual al pasar el ratón
+                        el.addEventListener('mouseover', function() {
+                            if (document.activeElement !== this) {
+                                this.style.outline = '1px dashed rgba(59, 130, 246, 0.3)';
+                            }
+                        });
+                        
+                        el.addEventListener('mouseout', function() {
+                            if (document.activeElement !== this) {
+                                this.style.outline = 'none';
+                            }
+                        });
+                    }
+                });
+            })();
+        </script>
+    `;
+
+    if (html.includes('</body>')) {
+        return html.replace('</body>', scriptToInject + '</body>');
+    }
+    return html + scriptToInject;
+}
+
 function EditorContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -110,11 +214,41 @@ function EditorContent() {
     const [logoLoading, setLogoLoading] = useState(false);
     const hasShownModalRef = useRef(false);
     const lastHistoryPushRef = useRef<number>(0);
+    // Ref al iframe para controlar navegación
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     // Pre-fill instruction from URL param
     useEffect(() => {
         if (instruccionFromUrl) setInstruccion(instruccionFromUrl);
     }, [instruccionFromUrl]);
+
+
+    // HANDLER DE MENSAJES: Recibe mensajes del iframe (guardar HTML, modales)
+    useEffect(() => {
+        const handleMessage = async (event: MessageEvent) => {
+            if (!event.data || typeof event.data !== 'object') return;
+            const { type, html } = event.data;
+
+            if (type === 'SAVE_HTML' && html && email) {
+                // Guardar el HTML limpio en Firestore
+                try {
+                    const docId = emailToDocId(email);
+                    const ref = doc(db, 'maquetasweb_usuarios', docId);
+                    await updateDoc(ref, { codigo_actual: html });
+                    setUserData(prev => prev ? { ...prev, codigo_actual: html } : null);
+                } catch (err) {
+                    console.error('[Editor] Error guardando SAVE_HTML:', err);
+                }
+            } else if (type === 'SHOW_RECARGA_MODAL') {
+                setShowRecarga(true);
+            } else if (type === 'SHOW_AI_ALERT') {
+                setExito('Usa el panel de Inteligencia Artificial para modificar este elemento.');
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [email]);
 
     // Auto-identify user if they are logged in via Firebase Auth
     useEffect(() => {
@@ -588,6 +722,23 @@ function EditorContent() {
     const creditosBajos = (userData?.creditos_restantes ?? 0) <= 2;
     const sinCreditos = (userData?.creditos_restantes ?? 0) < CREDITOS_POR_EDICION;
 
+    // GUARDIAN DEL IFRAME: Si el iframe navega, lo reseteamos de vuelta al diseño correcto
+    const handleIframeLoad = useCallback(() => {
+        const iframe = iframeRef.current;
+        if (!iframe || !userData?.codigo_actual) return;
+        try {
+            const loc = iframe.contentWindow?.location.href;
+            if (loc && loc !== 'about:srcdoc' && loc !== 'about:blank') {
+                console.warn('[Editor] Iframe navegó fuera del srcdoc:', loc, '→ Reseteando...');
+                iframe.srcdoc = injectEditorScript(userData.codigo_actual, sinCreditos);
+            }
+        } catch {
+            if (userData?.codigo_actual) {
+                iframe.srcdoc = injectEditorScript(userData.codigo_actual, sinCreditos);
+            }
+        }
+    }, [userData?.codigo_actual, sinCreditos]);
+
     // ── UI: Pantalla de identificación por email ──
     if (!identificado) {
         return (
@@ -1004,9 +1155,12 @@ function EditorContent() {
                     )}
                     {userData?.codigo_actual ? (
                         <iframe
+                            ref={iframeRef}
                             srcDoc={injectEditorScript(userData.codigo_actual, sinCreditos)}
                             className="w-full h-full border-none"
                             title="Vista previa en tiempo real"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                            onLoad={handleIframeLoad}
                         />
                     ) : (
                         <div className="flex items-center justify-center h-full text-slate-600">
@@ -1021,88 +1175,6 @@ function EditorContent() {
             <RecargaCreditos isOpen={showRecarga} onClose={() => setShowRecarga(false)} />
         </div>
     );
-}
-
-// Inyección del Script de Edición en el Iframe Web
-function injectEditorScript(html: string, sinCreditos: boolean = false): string {
-    const scriptToInject = `
-        <script>
-            (function() {
-                const isSinCreditos = \${sinCreditos};
-                // Hacer todos los textos editables por defecto
-                const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a');
-                let firstH1 = document.querySelector('h1');
-                
-                textElements.forEach(el => {
-                    // Ignoramos elementos que sean puramente iconos
-                    if(el.children.length === 0 || el.textContent.trim().length > 0) {
-                        const isFreeTitle = el.tagName.match(/^H[1-6]$/i) !== null;
-                        
-                        if (isFreeTitle) {
-                            el.setAttribute('contenteditable', 'true');
-                            el.style.outline = 'none';
-                            el.style.transition = 'outline 0.2s, background-color 0.2s';
-                            
-                            el.addEventListener('focus', function() {
-                                this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
-                                this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
-                            });
-                            
-                            el.addEventListener('blur', function() {
-                                this.style.outline = 'none';
-                                this.style.backgroundColor = 'transparent';
-                                
-                                // Remover las selecciones y clases temporales de enfoque para limpiar el HTML
-                                const clone = document.documentElement.cloneNode(true);
-                                
-                                // Limpiar atributos inyectados en el clon para guardar un DOM limpio
-                                const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
-                                clonedNodes.forEach(n => {
-                                    // Dejamos el contenteditable pero quitamos el CSS en-linea inyectado
-                                    n.style.outline = '';
-                                    n.style.backgroundColor = '';
-                                    if(n.getAttribute('style') === '') n.removeAttribute('style');
-                                });
-                                
-                                // Enviar el HTML limpio de vuelta a Next.js
-                                window.parent.postMessage({
-                                    type: 'SAVE_HTML',
-                                    html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
-                                }, '*');
-                            });
-                        } else {
-                            // Limpiamos los permisos de edición activos si provienen de diseños anteriores
-                            el.removeAttribute('contenteditable');
-                            // Si no es un título mostramos alerta
-                            el.style.cursor = 'pointer';
-                            el.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (isSinCreditos) {
-                                    window.parent.postMessage({ type: 'SHOW_RECARGA_MODAL' }, '*');
-                                } else {
-                                    window.parent.postMessage({ type: 'SHOW_AI_ALERT' }, '*');
-                                }
-                            });
-                            el.addEventListener('mouseover', function() {
-                               this.title = isSinCreditos ? 'Requiere recargar créditos para modificar esto' : 'Usa el panel de Inteligencia Artificial para modificar esto.';
-                               this.style.outline = '1px dashed rgba(239, 68, 68, 0.3)';
-                            });
-                            el.addEventListener('mouseout', function() {
-                               this.style.outline = 'none';
-                            });
-                        }
-                    }
-                });
-            })();
-        </script>
-    `;
-
-    // Lo insertamos justo antes de cerrar el body, o al final si no hay body
-    if (html.includes('</body>')) {
-        return html.replace('</body>', scriptToInject + '</body>');
-    }
-    return html + scriptToInject;
 }
 
 export default function EditorPage() {

@@ -14,15 +14,15 @@ const getAdminDb = async () => {
 export const maxDuration = 60;
 
 const buildEditPrompt = (codigoActual: string, instruccion: string) => `
-AGENTE: GEMINI 3.1 PRO
-
+AGENTE: GEMINI 3.5 FLASH
 ROL Y MANDATO:
-Eres el Desarrollador Front-End Senior de Digitrial centro de soluciones.
-Se te entrega el código HTML actual de una landing page y una instrucción del cliente para modificarla.
+Eres el Desarrollador Front-End Senior de Digitrial.
+Se te entrega el código HTML actual de una landing page comercial y una instrucción para modificarla.
 
-¡PELIGRO - CÓDIGO CORRUPTO POSIBLE!:
-Debido a un error de historial, el código HTML que recibes a continuación PUEDE contener código inyectado del propio panel izquierdo del editor de Digitrial (con textos como "Editando: Tu negocio", "Costo por edición", "Actualizar Diseño", y contenedores "w-full md:w-96").
-SI detectas este panel lateral del editor en el código actual, ¡DEBES ELIMINARLO POR COMPLETO de tu nuevo diseño! Tu respuesta final debe contener ÚNICAMENTE la verdadera Landing Page comercial del cliente, sin ninguna interfaz de usuario de Digitrial.
+¡REGLA DE ORO DE SEGURIDAD!:
+Tu respuesta debe contener ÚNICAMENTE el código de la landing page (Sección Hero, Servicios, Contacto, etc.). 
+Está TERMINANTEMENTE PROHIBIDO incluir cualquier tipo de interfaz de administración, paneles de edición, barras laterales de herramientas, menús de configuración o botones de "Guardar/Actualizar". 
+Si el código actual contiene este tipo de elementos ajenos a la web del cliente, ELIMÍNALOS inmediatamente.
 
 CÓDIGO HTML ACTUAL:
 ${codigoActual}
@@ -30,13 +30,12 @@ ${codigoActual}
 INSTRUCCIÓN DE CLIENTE: "${instruccion}"
 
 REGLAS ESTRICTAS DE SALIDA:
-- Devuelve SOLO el HTML completo modificado.
-- PROHIBIDO usar Markdown. NO uses \`\`\`html ni \`\`\`.
-- Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar con </html>.
-- Mantén la calidad premium y el diseño dinámico original.
-- **TÍTULOS Y TEXTO (REGLA CRÍTICA):** Está TERMINANTEMENTE PROHIBIDO usar "background-clip: text" o efectos de recorte de imagen dentro de las letras de los títulos. Los títulos deben tener colores sólidos o degradados de color legibles.
-- **FONDO HERO/SECCIÓN:** El fondo de la sección principal (Hero) debe ser preferiblemente el color sólido o degradado suave basado en el tono **#ebedef**.
-- Si el usuario adjunta imágenes, úsalas según su instrucción.
+- Devuelve SOLO el HTML completo y funcional.
+- PROHIBIDO usar bloques de Markdown (\`\`\`html).
+- Tu respuesta debe comenzar con <!DOCTYPE html> y terminar con </html>.
+- Mantén la calidad premium y el diseño dinámico.
+- NO uses "background-clip: text" en los títulos.
+- El fondo del Hero debe ser preferiblemente un tono suave como #ebedef si no se indica otro.
 `;
 
 export async function POST(req: NextRequest) {
@@ -61,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userData = snap.data() || {};
-    const creditosRestantes = userData.creditos_restantes ?? 10;
+    const creditosRestantes = userData.creditos_restantes ?? 5;
 
     if (creditosRestantes < 1) {
       return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por edición).' }, { status: 402 });
@@ -92,8 +91,8 @@ export async function POST(req: NextRequest) {
     if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
       let placeholdersInstruccion = `\n\nNUEVAS IMÁGENES ADJUNTAS (Úsalas si el cliente lo pide):
 ¡IMPORTANTE SOBRE IMÁGENES!: 
-1. Si el usuario adjunta capturas de pantalla, IGNORA Y NO RECREES ninguna interfaz de usuario, menús o barras laterales oscuras del editor de la plataforma (como paneles con botones de 'Actualizar Diseño', 'Guardar', 'Costo por edición', etc). ESTÁ ESTRICTAMENTE PROHIBIDO RECREAR EL PANEL DE EDICIÓN DEL LADO IZQUIERDO. Las imágenes son solo para referencia del diseño de la Landing Page principal.
-2. ¡ATENCIÓN AL LOGO Y COLORES!: Si el usuario te indica que alguna de estas imágenes anexas ES UN LOGO, DEBES colocarla obligatoriamente en la barra de navegación (Header/Nav) como logo destacado.\n`;
+1. Si el usuario adjunta capturas de pantalla, IGNORA Y NO RECREES ninguna interfaz de usuario, menús o barras corporativas del editor. Las imágenes son solo para referencia del diseño (fotos, colores, secciones) de la Landing Page.
+2. ¡ATENCIÓN AL LOGO!: Si el usuario indica que una imagen es un logo, colócalo en el Header/Nav.\n`;
       imagenes_base64.forEach((imgBase64, idx) => {
         const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
         const mimeType = match ? match[1] : 'image/jpeg';
