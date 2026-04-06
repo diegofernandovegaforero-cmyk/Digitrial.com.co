@@ -17,10 +17,7 @@ async function checkAllUsers() {
     console.log(`Total users in DB: ${sr.size}`);
     sr.forEach(doc => {
         const data = doc.data();
-        if (data.email && data.email.includes('difor')) {
-            console.log('Found matching user!', doc.id, data.email);
-            console.log(JSON.stringify(data.historial_disenos || [], null, 2));
-        }
+        console.log(`ID: ${doc.id} | Email: ${data.email} | Credits: ${data.creditos_restantes}`);
     });
 }
 checkAllUsers().catch(console.error);

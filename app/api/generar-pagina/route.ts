@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
             const historialLength = (data.historial_disenos || []).length;
             const creditosRestantes = data.creditos_restantes ?? 0;
 
-            if (historialLength >= 3) {
-              return NextResponse.json({ error: 'Has alcanzado el límite máximo de 3 maquetas.' }, { status: 403 });
+            if (historialLength >= 1) {
+              return NextResponse.json({ error: 'Has alcanzado el límite máximo de 1 maqueta.' }, { status: 403 });
             }
             if (creditosRestantes < 5) {
               return NextResponse.json({ error: 'No tienes los 5 créditos necesarios para generar una nueva página.' }, { status: 403 });

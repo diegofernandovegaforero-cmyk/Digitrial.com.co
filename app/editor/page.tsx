@@ -6,12 +6,13 @@ import { Triangle, Sparkles, Send, AlertCircle, CheckCircle, Loader2, RefreshCw,
 import { AnimatePresence, motion } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc, increment } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 import RecargaCreditos from '@/components/RecargaCreditos';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
 
 const CREDITOS_POR_EDICION = 1;
+const COSTO_GUARDADO_MANUAL = 1;
 const MAX_TEXTO_CHARS = 500;
 
 // Sanitizar email para usarlo como Firestore doc ID (igual que en el backend)
@@ -225,20 +226,13 @@ function EditorContent() {
 
     // HANDLER DE MENSAJES: Recibe mensajes del iframe (guardar HTML, modales)
     useEffect(() => {
-        const handleMessage = async (event: MessageEvent) => {
+        const handleMessage = (event: MessageEvent) => {
             if (!event.data || typeof event.data !== 'object') return;
             const { type, html } = event.data;
 
             if (type === 'SAVE_HTML' && html && email) {
-                // Guardar el HTML limpio en Firestore
-                try {
-                    const docId = emailToDocId(email);
-                    const ref = doc(db, 'maquetasweb_usuarios', docId);
-                    await updateDoc(ref, { codigo_actual: html });
-                    setUserData(prev => prev ? { ...prev, codigo_actual: html } : null);
-                } catch (err) {
-                    console.error('[Editor] Error guardando SAVE_HTML:', err);
-                }
+                // SOLO ACTUALIZACION LOCAL PARA VISTA PREVIA Y BOTÓN DE GUARDADO
+                setUserData(prev => prev ? { ...prev, codigo_actual: html } : null);
             } else if (type === 'SHOW_RECARGA_MODAL') {
                 setShowRecarga(true);
             } else if (type === 'SHOW_AI_ALERT') {
@@ -247,7 +241,6 @@ function EditorContent() {
         };
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [email]);
 
     // Auto-identify user if they are logged in via Firebase Auth
@@ -442,6 +435,17 @@ function EditorContent() {
         }
     }, [userData?.codigo_actual]);
 
+    // EFECTO DE GUARDADO INICIAL: Realiza una acción de guardados de seguridad gratuita al cargar por primera vez
+    const hasAutoSavedRef = useRef(false);
+    useEffect(() => {
+        if (identificado && userData?.codigo_actual && !hasAutoSavedRef.current) {
+            hasAutoSavedRef.current = true;
+            // No consumimos créditos en el primer guardado de sesión
+            console.log("[Editor] Realizando primer guardado automático gratuito...");
+            handleManualSave(true);
+        }
+    }, [identificado, !!userData?.codigo_actual]);
+
     // EFECTO DE AUTOCARGA: Si el documento principal no tiene el código (por tamaño),
     // pero hay historial, cargamos el más reciente automáticamente.
     useEffect(() => {
@@ -451,9 +455,9 @@ function EditorContent() {
         }
     }, [identificado, userData?.codigo_actual, userData?.historial_disenos]);
 
-    // Listener para recibir los cambios editados nativamente desde el Iframe
+    // Listener para recibir alertas del Iframe (limpieza y control)
     useEffect(() => {
-        const handleMessage = async (event: MessageEvent) => {
+        const handleMessage = (event: MessageEvent) => {
             if (event.data?.type === 'SHOW_RECARGA_MODAL') {
                 setShowRecarga(true);
                 return;
@@ -463,45 +467,24 @@ function EditorContent() {
                 setTimeout(() => setError(''), 5000);
                 return;
             }
-            if (event.data?.type === 'SAVE_HTML' && event.data?.html && email) {
-                try {
-                    const docId = emailToDocId(email);
-                    const docRef = doc(db, 'maquetasweb_usuarios', docId);
-                    
-                    const now = Date.now();
-                    const shouldPushHistory = now - lastHistoryPushRef.current > 5 * 60 * 1000; // Cada 5 minutos
-
-                    const updateData: any = { 
-                        ultima_edicion: new Date().toISOString()
-                    };
-
-                    // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 900KB)
-                    if (new Blob([event.data.html]).size < 900000) {
-                        updateData.codigo_actual = event.data.html;
-                    }
-
-                    await setDoc(docRef, updateData, { merge: true });
-                    setExito('Cambios sincronizados.');
-                    setTimeout(() => setExito(''), 3000);
-                } catch (err: any) {
-                    console.error('Error guardando HTML editado nativamente:', err);
-                    // No mostramos error invasivo en auto-save para no interrumpir el flujo
-                    if (err.code === 'resource-exhausted') {
-                        console.warn('Auto-save: El documento principal llegó al límite de tamaño de Firestore.');
-                    }
-                }
-            }
         };
 
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
-    }, [email]);
+    }, []);
 
-    const handleManualSave = async () => {
+    const handleManualSave = async (isFree = false) => {
         if (!email || !userData?.codigo_actual) {
-            setError('No hay diseño para guardar.');
+            if (!isFree) setError('No hay diseño para guardar.');
             return;
         }
+
+        // Si no es gratis, verificar créditos
+        if (!isFree && (userData?.creditos_restantes ?? 0) < COSTO_GUARDADO_MANUAL) {
+            setShowRecarga(true);
+            return;
+        }
+
         setEditando(true);
         setError('');
         setExito('');
@@ -511,9 +494,9 @@ function EditorContent() {
             const historyId = Date.now().toString();
             
             // OPTIMIZACIÓN: Subir imágenes de Base64 a Storage para ahorrar espacio y mejorar capacidad
-            setExito('Optimizando imágenes...');
+            if (!isFree) setExito('Optimizando imágenes y guardando...');
             const htmlOptimizado = await optimizeHtmlImages(userData.codigo_actual, email);
-            setExito('');
+            if (!isFree) setExito('');
 
             // 1. Guardar código en subcolección (PESADO - Evita el límite de 1MB del doc principal)
             const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
@@ -525,7 +508,7 @@ function EditorContent() {
             // 2. Guardar metadata en doc principal (LIGERO)
             const newDesignMetadata = {
                 id: historyId,
-                descripcion: instruccion.trim() || (editando ? `Edición: ${instruccion.substring(0, 30)}...` : "Guardado manual desde editor"),
+                descripcion: isFree ? "Inicio de sesión de edición" : (instruccion.trim() || "Guardado manual desde editor"),
                 fecha: new Date().toISOString(),
                 has_separate_code: true
             };
@@ -534,8 +517,13 @@ function EditorContent() {
 
             const updatePayload: any = {
                 historial_disenos: updatedHistory,
-                ultima_generacion: new Date().toISOString()
+                ultima_edicion: new Date().toISOString()
             };
+
+            // Cobro de créditos si no es gratuito
+            if (!isFree) {
+                updatePayload.creditos_restantes = increment(-COSTO_GUARDADO_MANUAL);
+            }
 
             // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 900KB)
             const codeSize = new Blob([htmlOptimizado]).size;
@@ -545,22 +533,29 @@ function EditorContent() {
                 console.warn(`Guardado Manual: El código (${(codeSize/1024).toFixed(1)}KB) es muy grande para el doc principal. Solo se guardó en el historial.`);
             }
 
-            await setDoc(docRef, updatePayload, { merge: true });
+            await updateDoc(docRef, updatePayload);
 
-            setUserData(prev => prev ? { ...prev, historial_disenos: updatedHistory } : null);
-            setExito('¡Maqueta guardada con éxito (en el historial)!');
-            setInstruccion('');
+            setUserData(prev => prev ? { 
+                ...prev, 
+                historial_disenos: updatedHistory,
+                creditos_restantes: isFree ? prev.creditos_restantes : (prev.creditos_restantes - COSTO_GUARDADO_MANUAL)
+            } : null);
+            
+            if (!isFree) {
+                setExito('¡Maqueta guardada con éxito!');
+                setInstruccion('');
+            }
         } catch (err: any) {
             console.error('Error in manual save:', err);
-            let msg = 'Error al guardar la maqueta.';
-            if (err.code === 'resource-exhausted' || err.message?.includes('too large')) {
-                msg += ' El archivo es muy grande para el límite de Firestore.';
-            } else if (err.code === 'permission-denied') {
-                msg += ' Permiso denegado. Revisa las reglas de seguridad de Firebase.';
-            } else {
-                msg += ` Detalle: ${err.message || 'Error desconocido'}`;
+            if (!isFree) {
+                let msg = 'Error al guardar la maqueta.';
+                if (err.code === 'resource-exhausted' || err.message?.includes('too large')) {
+                    msg += ' El archivo es muy grande para el límite de Firestore.';
+                } else {
+                    msg += ` Detalle: ${err.message || 'Error desconocido'}`;
+                }
+                setError(msg);
             }
-            setError(msg);
         } finally {
             setEditando(false);
         }
@@ -1084,11 +1079,11 @@ function EditorContent() {
                                                 </button>
 
                                                 <button type="button"
-                                                    onClick={handleManualSave}
+                                                    onClick={() => handleManualSave(false)}
                                                     disabled={editando || !userData?.codigo_actual}
                                                     className="w-full bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
                                                     <History className="w-4 h-4 text-blue-400" />
-                                                    Guardar esta Maqueta (Gratis)
+                                                    Guardar esta Maqueta ({COSTO_GUARDADO_MANUAL} crédito)
                                                 </button>
                                             </div>
                                         </form>
