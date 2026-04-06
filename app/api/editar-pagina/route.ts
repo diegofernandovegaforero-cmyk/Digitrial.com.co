@@ -36,6 +36,7 @@ REGLAS ESTRICTAS DE SALIDA:
 - Mantén la calidad premium y el diseño dinámico.
 - NO uses "background-clip: text" en los títulos.
 - El fondo del Hero debe ser preferiblemente un tono suave como #ebedef si no se indica otro.
+- **LOGOS E ICONOS:** Se permite y recomienda el uso de **código SVG directo** para crear o mejorar logos e iconos si el cliente lo solicita o si faltan en el diseño.
 `;
 
 export async function POST(req: NextRequest) {
