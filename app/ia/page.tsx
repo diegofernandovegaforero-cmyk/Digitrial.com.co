@@ -778,7 +778,7 @@ function DisenaPageContent() {
 
                             <button type="submit"
                             disabled={!productosValido || !authUser}
-                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/30 text-lg">
+                            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 text-lg">
                             <Sparkles className="w-5 h-5" />
                             {!authUser 
                                 ? 'Inicia sesión para generar' 

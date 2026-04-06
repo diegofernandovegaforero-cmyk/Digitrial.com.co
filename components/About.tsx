@@ -83,7 +83,7 @@ export default function About() {
                         href="https://wa.me/573123299053"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative mt-14 px-10 py-5 rounded-2xl font-extrabold text-white text-center inline-block shadow-xl hover:shadow-indigo-500/30 transition-all duration-300 overflow-hidden bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 w-full sm:w-auto"
+                        className="group relative mt-14 px-10 py-5 rounded-2xl font-extrabold text-white text-center inline-block shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-300 overflow-hidden bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                     >
                         <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                         <span className="relative z-10 text-lg">Hablemos de tu Proyecto</span>

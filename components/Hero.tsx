@@ -75,7 +75,7 @@ export function HeroHeader() {
                                 Rápido, sencillo y 100% profesional.
                             </p>
                             <Link href="/ia"
-                                className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:shadow-blue-600/40 dark:hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 uppercase">
+                                className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-extrabold text-white text-lg shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden bg-blue-600 hover:bg-blue-700 uppercase">
                                 <div className="absolute inset-0 w-full h-full bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -skew-x-12 -translate-x-full" />
                                 <Sparkles className="w-6 h-6 animate-pulse" />
                                 <span className="relative z-10">Lanzar mi web hoy</span>
