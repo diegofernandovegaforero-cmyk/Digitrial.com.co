@@ -15,7 +15,10 @@ import {
     Loader2,
     Sparkles,
     LogOut,
-    History
+    History,
+    Pencil,
+    Check,
+    X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
@@ -240,8 +243,37 @@ function StatCard({ icon, label, value, subtext }: any) {
 }
 
 function ProyectoCard({ proyecto, email, index }: any) {
-    const router = useRouter();
-    
+    const [isEditing, setIsEditing] = useState(false);
+    const [newName, setNewName] = useState(proyecto.nombre_negocio || proyecto.descripcion?.split(' ').slice(0, 3).join(' ') || 'Mi Proyecto');
+    const [loading, setLoading] = useState(false);
+
+    const handleRename = async () => {
+        if (!newName.trim() || newName === (proyecto.nombre_negocio || proyecto.descripcion?.split(' ').slice(0, 3).join(' '))) {
+            setIsEditing(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await fetch('/api/proyectos/renombrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    proyectoId: proyecto.id,
+                    nuevoNombre: newName.trim()
+                }),
+            });
+            if (!res.ok) throw new Error('Error al renombrar');
+            setIsEditing(false);
+        } catch (err) {
+            console.error(err);
+            alert('No se pudo renombrar el proyecto');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -264,10 +296,46 @@ function ProyectoCard({ proyecto, email, index }: any) {
 
             <div className="p-6">
                 <div className="flex items-start justify-between gap-4 mb-4">
-                    <div>
-                        <h3 className="text-xl font-bold truncate max-w-[200px]">
-                            {proyecto.nombre_negocio || proyecto.descripcion?.split(' ').slice(0, 3).join(' ') || 'Mi Proyecto'}
-                        </h3>
+                    <div className="flex-1">
+                        {isEditing ? (
+                            <div className="flex items-center gap-2 bg-slate-900 border border-blue-500/50 rounded-lg p-1">
+                                <input 
+                                    autoFocus
+                                    className="bg-transparent border-none text-white text-sm font-bold w-full focus:ring-0 p-1"
+                                    value={newName}
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleRename();
+                                        if (e.key === 'Escape') setIsEditing(false);
+                                    }}
+                                />
+                                <button 
+                                    onClick={handleRename}
+                                    disabled={loading}
+                                    className="p-1 text-green-400 hover:bg-white/5 rounded"
+                                >
+                                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                                </button>
+                                <button 
+                                    onClick={() => setIsEditing(false)}
+                                    className="p-1 text-red-400 hover:bg-white/5 rounded"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 group/title">
+                                <h3 className="text-xl font-bold truncate max-w-[180px]">
+                                    {proyecto.nombre_negocio || proyecto.descripcion?.split(' ').slice(0, 3).join(' ') || 'Mi Proyecto'}
+                                </h3>
+                                <button 
+                                    onClick={() => setIsEditing(true)}
+                                    className="opacity-0 group-hover:opacity-100 group-hover/title:opacity-100 p-1 text-slate-500 hover:text-white transition-all"
+                                >
+                                    <Pencil className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
                         <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase mt-1">
                             <Calendar className="w-3 h-3" />
                             {proyecto.fecha ? new Date(proyecto.fecha).toLocaleDateString() : 'Fecha desconocida'}
@@ -288,7 +356,6 @@ function ProyectoCard({ proyecto, email, index }: any) {
                     </Link>
                     <button 
                         onClick={() => {
-                             // Lógica placeholder para ver proyecto
                              window.open(`/editor?email=${encodeURIComponent(email)}&id=${proyecto.id}`, '_blank');
                         }}
                         className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
