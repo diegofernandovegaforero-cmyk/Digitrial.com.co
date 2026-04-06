@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         const apiKey = process.env.GEMINI_API_KEY;
         const inputUsuario = descripcion;
 
-        // --- COBRO DE CRÉDITOS UPFRONT (5 Créditos) ---
+        // --- VERIFICACIÓN PREVENTIVA DE CRÉDITOS (NO COBRA AÚN) ---
         let creditosActuales = 10;
         try {
             const adminDb = await getAdminDb();
@@ -57,9 +57,6 @@ export async function POST(req: NextRequest) {
                 const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
                 const existing = await docRef.get();
 
-                const { getAdminFieldValue } = await import('@/lib/firebase-admin');
-                const FieldValue = getAdminFieldValue();
-
                 if (existing.exists) {
                     const data = existing.data() || {};
                     creditosActuales = data.creditos_restantes || 0;
@@ -67,28 +64,20 @@ export async function POST(req: NextRequest) {
                     if (creditosActuales < 5) {
                         return NextResponse.json({ error: 'Créditos insuficientes (5 créditos por generación).' }, { status: 402 });
                     }
-
-                    if (!(rid && data.last_rid === rid)) {
-                        await docRef.update({
-                            creditos_restantes: FieldValue.increment(-5),
-                            last_rid: rid || null,
-                            ultima_generacion: new Date().toISOString()
-                        });
-                        creditosActuales -= 5;
-                    }
                 } else {
+                    // Crear usuario si no existe (con los 10 de regalo)
                     await docRef.set({
                         email: email.toLowerCase().trim(),
                         nombre_contacto: nombre_contacto || '',
                         creditos_restantes: 10,
                         fecha_creacion: new Date().toISOString(),
-                        last_rid: rid || null
+                        last_rid: null
                     });
                     creditosActuales = 10;
                 }
             }
         } catch (err) {
-            console.warn("Fallo cobro upfront en generar-pagina:", err);
+            console.warn("Fallo verificación inicial en generar-pagina:", err);
         }
 
         if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
@@ -132,31 +121,55 @@ export async function POST(req: NextRequest) {
                             const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
                             const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
                             
+                            const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+                            const FieldValue = getAdminFieldValue();
                             const historyId = Date.now().toString();
-                            const newDesignMetadata = {
-                                id: historyId,
-                                descripcion: descripcion.substring(0, 200),
-                                fecha: new Date().toISOString(),
-                                has_separate_code: true
-                            };
 
-                            await docRef.collection('historial_codigos').doc(historyId).set({
-                                codigo_html: html,
-                                fecha: new Date().toISOString()
+                            await adminDb.runTransaction(async (transaction) => {
+                                const userDoc = await transaction.get(docRef);
+                                if (!userDoc.exists) return;
+
+                                const userData = userDoc.data() || {};
+                                
+                                // Verificar si ya se cobró este rid (idempotencia)
+                                if (rid && userData.last_rid === rid) {
+                                    console.log(`Petición ${rid} ya procesada. Evitando doble cobro.`);
+                                    return;
+                                }
+
+                                // 1. Descuento de créditos
+                                transaction.update(docRef, {
+                                    creditos_restantes: FieldValue.increment(-5),
+                                    last_rid: rid || null,
+                                    ultima_generacion: new Date().toISOString()
+                                });
+
+                                // 2. Guardado en historial_codigos (subcolección)
+                                const historyRef = docRef.collection('historial_codigos').doc(historyId);
+                                transaction.set(historyRef, {
+                                    codigo_html: html,
+                                    fecha: new Date().toISOString()
+                                });
+
+                                // 3. Actualizar metadatos de historial en doc principal
+                                let historial = userData.historial_disenos || [];
+                                const newDesignMetadata = {
+                                    id: historyId,
+                                    descripcion: (descripcion || '').substring(0, 200),
+                                    fecha: new Date().toISOString(),
+                                    has_separate_code: true
+                                };
+                                historial = [newDesignMetadata, ...historial].slice(0, 10);
+
+                                const finalUpdate: any = { historial_disenos: historial };
+                                if (Buffer.byteLength(html, 'utf8') < 800000) {
+                                    finalUpdate.codigo_actual = html;
+                                }
+                                transaction.update(docRef, finalUpdate);
                             });
-
-                            const userData = (await docRef.get()).data() || {};
-                            let historial = userData.historial_disenos || [];
-                            historial = [newDesignMetadata, ...historial].slice(0, 10);
-
-                            const finalUpdate: any = { historial_disenos: historial };
-                            if (Buffer.byteLength(html, 'utf8') < 800000) {
-                                finalUpdate.codigo_actual = html;
-                            }
-                            await docRef.update(finalUpdate);
                         }
                     } catch (e) {
-                        console.error("Error guardando diseño en onFinish:", e);
+                        console.error("Error en cobro diferido/transacción onFinish:", e);
                     }
                 }
             }
