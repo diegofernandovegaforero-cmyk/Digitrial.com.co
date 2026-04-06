@@ -61,7 +61,7 @@ export default function ProyectosPage() {
             } else {
                 setUserData({
                     historial_disenos: [],
-                    creditos_restantes: 5,
+                    creditos_restantes: 10,
                     limite_proyectos: 1
                 });
             }

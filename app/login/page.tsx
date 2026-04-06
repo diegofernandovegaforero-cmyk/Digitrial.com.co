@@ -45,7 +45,7 @@ async function saveUserToFirestore(user: { uid: string; email: string | null; di
             email: user.email,
             nombre_contacto: user.displayName || '',
             photo_url: user.photoURL || '',
-            creditos_restantes: 5,
+            creditos_restantes: 10,
             fecha_creacion: serverTimestamp(),
         });
     }
@@ -186,7 +186,7 @@ function LoginContent() {
                     </h1>
                     <p className="text-slate-500 text-sm mb-8">
                         {isRegister
-                            ? 'Regístrate gratis y obtén 5 créditos para diseñar tu web.'
+                            ? 'Regístrate gratis y obtén 10 créditos para diseñar tu web.'
                             : 'Accede a tu panel de Digitrial. Inicia sesión de forma segura con tu correo electrónico o tu cuenta de Google y continúa escalando tu negocio digital.'}
                     </p>
 

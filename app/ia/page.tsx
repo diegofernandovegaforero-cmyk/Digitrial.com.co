@@ -637,7 +637,7 @@ function DisenaPageContent() {
                                 Empezar a diseñar gratis
                             </motion.button>
                             <span className="text-sm text-gray-500 mt-4 font-medium tracking-wide">
-                                No necesitas tarjeta de crédito · Obtienes 5 créditos de regalo
+                                No necesitas tarjeta de crédito · Obtienes 10 créditos de regalo
                             </span>
                         </motion.div>
 
@@ -785,7 +785,7 @@ function DisenaPageContent() {
                                 : (productosValido ? 'Generar mi Página Web (5 créditos)' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`)}
                             <ArrowRight className="w-5 h-5" />
                         </button>
-                        <p className="text-center text-xs text-slate-500">✅ Diseño inicial: 5 créditos · Edición o Guardado: 1 crédito · Límite máximo: 1 diseño por cuenta</p>
+                        <p className="text-center text-xs text-slate-500">✅ Diseño inicial: 5 créditos · Edición o Guardado: 1 crédito · Límite máximo: 1 diseño por cuenta (10 créditos de regalo)</p>
                     </form>
                 </main>
             )}
