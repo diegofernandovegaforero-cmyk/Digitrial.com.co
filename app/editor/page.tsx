@@ -1138,10 +1138,11 @@ function EditorContent() {
                         )}
 
                         <div className="mt-6 pt-6 border-t border-white/10">
-                            <a href="https://wa.me/573123299053" target="_blank"
-                                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-[0_0_15px_rgba(34,197,94,0.3)]">
-                                📱 Llevar a producción · Contactar
-                            </a>
+                            <Link href="/proyectos"
+                                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                                <Layout className="w-4 h-4" />
+                                Ir a Proyectos
+                            </Link>
                         </div>
                     </div>
                 </div>
