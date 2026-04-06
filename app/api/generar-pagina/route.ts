@@ -2,308 +2,172 @@ import { NextRequest, NextResponse } from 'next/server';
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
-// Firebase Admin - solo importar si las variables están configuradas
+// Firebase Admin helper
 const getAdminDb = async () => {
-  if (!process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.FIREBASE_ADMIN_PROJECT_ID === 'TU_PROYECTO_ID') {
-    return null;
-  }
-  const { getAdminDbSafe } = await import('@/lib/firebase-admin');
-  return getAdminDbSafe();
+    if (!process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.FIREBASE_ADMIN_PROJECT_ID === 'TU_PROYECTO_ID') {
+        return null;
+    }
+    const { getAdminDbSafe } = await import('@/lib/firebase-admin');
+    return getAdminDbSafe();
 };
 
-export const maxDuration = 60; // Permitir ejecución más larga en Vercel
+export const maxDuration = 60;
 
-// ─── PROMPT MAESTRO DEFINITIVO ───────────────────────────────────────────────
 const buildPrompt = (input: string) => `
-AGENTE: GEMINI 3.1 PRO
+AGENTE: GEMINI 3.5 FLASH
+ROL: Desarrollador Web Senior y Diseñador UI/UX.
+TAE: Generar una LANDING PAGE comercial de ALTO IMPACTO y Premium basándote en la siguiente descripción.
 
-ROL Y MANDATO:
-Actúe como un Maestro Arquitecto Web de Inteligencia Artificial de DIGITRIAL, con la capacidad de diseñar y codificar experiencias web dinámicas premium de alto impacto. Su mandato es procesar la descripción detallada de la idea de un usuario de DIGITRIAL y generar un sitio web completo, funcional y dinámico utilizando un stack de programación moderno y robusto (HTML5, Tailwind CSS, y JavaScript avanzado integrados en un solo archivo).
-
-CONTEXTO DE ENTRADA DEL USUARIO:
+DESCRIPCIÓN DEL NEGOCIO:
 "${input}"
 
-INSTRUCCIONES DE GENERACIÓN DE SITIO WEB DINÁMICO PREMIUM:
+REGLAS DE DISEÑO (ESTRICTAS):
+1. Usa HTML5 semántico y CSS moderno (puedes usar Tailwind via CDN si lo deseas).
+2. Estética: Moderna, limpia, con tipografía elegante (usa Google Fonts como Inter o Montserrat). Incluye animaciones suaves.
+3. Secciones obligatorias: Hero con CTA claro, Servicios/Beneficios, Galería/Muestra, Testimonios y Pie de página con formulario de contacto.
+4. **LOGOS E ICONOS:** Diseña un logo creativo y minimalista usando **código SVG directo**. Si el cliente no aporta un logo, CREA uno proporcional y estético con código SVG.
+5. Imágenes: Usa imágenes de stock profesionales (de Pexels o Unsplash) que encajen con el nicho.
+6. Interactividad: Asegúrate de que los botones tengan efectos hover y que el diseño sea 100% responsivo.
 
-1. ANÁLISIS E INFERENCIA:
-Procese la descripción del usuario. Infiere la actividad económica, los productos/servicios clave y el público objetivo. Adapta creativamente el diseño para que sirva y se alinee perfectamente con la actividad económica y los detalles específicos del usuario de DIGITRIAL. NUNCA uses "Lorem Ipsum".
-
-2. DISEÑO DINÁMICO Y MOVIMIENTO (CRÍTICO):
-Intrínsecamente Dinámico: Genere un sitio web que sea intrínsecamente dinámico, no estático. Implementa movimientos y animaciones modernas en todo el sitio para dar vida a la página: efectos de paralaje, scroll-triggered animations (Vía GSAP desde CDN preferiblemente), y microinteracciones visuales fluidas.
-3. Layout Profesional y Estético (SISTEMA DE DISEÑO PREMIUM): Diseñe con un Sistema de Diseño Coherente. Use tipografías modernas (Google Fonts via CDN) y una paleta de colores sofisticada.
-   - **COLORES:** No se limite a fondos blancos o negros simples. Use degradados sutiles (mesh gradients), card backgrounds con desenfoque (glassmorphism), y acentos vibrantes que contrasten. 
-   - **FONDO HERO/SECCIÓN:** Como directriz de marca, el fondo de la sección principal (Hero) o del segmento destacado debe ser preferiblemente el color sólido o degradado muy suave basado en el tono **#ebedef** (un gris azulado muy claro y elegante).
-   - **TÍTULOS Y TEXTO (REGLA CRÍTICA):** Está TERMINANTEMENTE PROHIBIDO usar "background-clip: text" o efectos de recorte de imagen dentro de las letras de los títulos. Los títulos deben ser legibles, con colores sólidos (negro, gris oscuro, blanco o colores de acento) o degradados de color simples (linear-gradient de colores), pero NUNCA con fondos de imagen recortados que dificulten la lectura y causen "recortes" visuales molestos.
-   - **ESTILO:** Priorice layouts modernos, limpios y espaciados generosamente. Incorpore siempre secciones de "Social proof" (logos de clientes, testimonios) al estilo del diseño premium.
-
-3. IMÁGENES PROFESIONALES (PEXELS - PROVEEDOR ÚNICO):
-¡REGLA ABSOLUTAMENTE ESTRICTA! Está terminantemente prohibido usar archivos de imagen binaria (PNG/JPG) generados por IA. 
-**EXCEPCIÓN DE LOGOS:** SE FOMENTA la creación de Logos e Iconos mediante **código SVG directo**. Si no hay un logo adjunto, diseña uno minimalista y profesional usando etiquetas <svg> en el Header.
-Debes integrar EXCLUSIVAMENTE imágenes fotográficas reales de alta calidad usando nuestro proxy interno de Pexels O videos de stock para fondos.
-
-**REGLA DE PROVEEDOR ÚNICO:**
-Tu **ÚNICO PROVEEDOR** de imágenes debe ser Pexels usando nuestro endpoint local. NO uses Unsplash, Pollinations, Nano Banana, ni LoremFlickr.
-Usa esta estructura EXACTA para el atributo 'src' de la imagen:
-/api/pexels?q=[palabras+clave+en+ingles+separadas+por+signo+mas]
-
-**Ejemplo Perfecto de etiqueta <img>:**
-<img src="/api/pexels?q=luxury+modern+office+minimalist" alt="Oficina Premium" class="w-full h-64 object-cover rounded-2xl shadow-2xl">
-**CONSEJO:** Para mejores resultados, usa términos como "minimalist", "professional", "vibrant", "aesthetic" junto a tu búsqueda.
-
-PARA VIDEOS DE FONDOS (Stock de videos / Stick de vids):
-Puedes usar libremente estos enlaces de videos MP4 de alta calidad libres de derechos como fondo de Hero sections o bloques divisorios (usa la etiqueta <video autoplay loop muted playsinline class="..."></video>):
-- Oficina/Tecnología: https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-4174-large.mp4
-- Negocios/Reunión: https://assets.mixkit.co/videos/preview/mixkit-people-in-a-business-meeting-working-on-a-project-4180-large.mp4
-- Emprendedor/Café: https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-laptop-in-a-coffee-shop-4171-large.mp4
-- Abstracto/Cyber: https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-connection-background-27202-large.mp4
-
-4. USO DE LENGUAJES DE PROGRAMACIÓN:
-Simula un ecosistema completo mediante HTML5, Tailwind CSS via CDN, y Vanilla JS (y bibliotecas como GSAP/AOS via CDN). El output debe estar optimizado y renderizado en un solo archivo.
-
-5. PROHIBIDO USAR PANTALLAS DE CARGA (LOADING SCREENS ESPERA):
-¡CRÍTICO! Está ESTRICTAMENTE PROHIBIDO generar cualquier tipo de pantalla de carga, preloader, spinner o "loading screen" (como contadores de 0% a 100%) dentro del código HTML.
-El contenido principal de la página web DEBE SER VISIBLE INMEDIATAMENTE. No ocultes el '<body>' ni el '#main-content' con opacidad 0 o 'display: none'. La aplicación principal ya cuenta con su propia pantalla de carga, por lo que generar una segunda pantalla dentro del HTML rompe la experiencia de usuario.
-
-6. FOOTER Y DERECHOS RESERVADOS:
-¡ATENCIÓN! Al final de la página, DEBES incluir obligatoriamente una sección de Footer (Pie de página) que luzca limpio y profesional. En la parte inferior del Footer, DEBES escribir exactamente el símbolo de Copyright seguido del año actual y la frase de derechos reservados de esta forma: "© ${new Date().getFullYear()} Todos los derechos reservados", acompañado del nombre de la marca o empresa generada.
-
-FORMATO DE SALIDA (ESTRICTO):
-Debes retornar UN ÚNICO ARCHIVO HTML COMPLETO.
-¡PELIGRO! ESTÁ ESTRICTAMENTE PROHIBIDO usar formato Markdown.
-¡PELIGRO! JAMÁS envuelvas tu respuesta en bloques de código como \`\`\`html ni \`\`\`. Tu respuesta será insertada directamente en el navegador, si usas markdown romperás la página.
-CERO explicaciones, preámbulos, ni saludos. Solo presenta el código fuente puro.
-Tu respuesta debe comenzar EXACTAMENTE con <!DOCTYPE html> y terminar EXACTAMENTE con </html>.
-Todos los scripts y estilos deben ir dentro.
+REGLAS DE SALIDA:
+- Devuelve ÚNICAMENTE el código HTML completo.
+- NO uses bloques de Markdown (\`\`\`html).
+- Comienza con <!DOCTYPE html> y termina con </html>.
+- NO incluyas explicaciones ni texto fuera del código.
+- PROHIBIDO imágenes generadas por IA (bitmaps), usa solo imágenes de stock o SVG.
 `;
 
 export async function POST(req: NextRequest) {
-  try {
-    const { descripcion, nombre_contacto, email, imagenes_base64, rid } = await req.json();
-
-    if (!descripcion || descripcion.trim().length < 10) {
-      return NextResponse.json({ error: 'Faltan campos requeridos o descripción muy corta' }, { status: 400 });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    const inputUsuario = descripcion;
-
-    // PRE-CHECK LIMITS (if email is provided)
-    if (email) {
-      try {
-        const adminDb = await getAdminDb();
-        if (adminDb) {
-          const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-          const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
-          const existing = await docRef.get();
-          
-          if (existing.exists) {
-            const data = existing.data() || {};
-            const historialLength = (data.historial_disenos || []).length;
-            const creditosRestantes = data.creditos_restantes ?? 0;
-
-            const limitProyectos = data.limite_proyectos ?? 1;
-            if (historialLength >= limitProyectos) {
-              return NextResponse.json({ error: `Has alcanzado el límite máximo de ${limitProyectos} ${limitProyectos === 1 ? 'maqueta' : 'maquetas'}.` }, { status: 403 });
-            }
-            if (creditosRestantes < 5) {
-              return NextResponse.json({ error: 'No tienes los 5 créditos necesarios para generar una nueva página.' }, { status: 403 });
-            }
-          }
-        }
-      } catch (checkErr) {
-        console.warn('Error en validación previa de Firebase:', checkErr);
-      }
-    }
-
-    if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
-      const fallbackHtml = buildFallbackHTML(descripcion.substring(0, 60) + '...', descripcion);
-      return NextResponse.json({ html: fallbackHtml });
-    }
-
     try {
-      const customGoogle = createGoogleGenerativeAI({
-        apiKey: apiKey,
-      });
+        const { email, descripcion, nombre_contacto, imagenes_base64, rid } = await req.json();
 
-      const promptText = buildPrompt(inputUsuario);
-      const userContent: any[] = [{ type: 'text', text: promptText }];
+        if (!descripcion) {
+            return NextResponse.json({ error: 'La descripción es obligatoria.' }, { status: 400 });
+        }
 
-      let placeholdersInstruccion = "";
-      if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-        imagenes_base64.forEach((imgBase64, idx) => {
-          const match = imgBase64.match(/^data:(image\/[a-zA-Z]+);base64,(.+)$/i);
-          const mimeType = match ? match[1] : 'image/jpeg';
-          const base64Data = match ? match[2] : imgBase64.replace(/^data:image\/\w+;base64,/, '');
+        const apiKey = process.env.GEMINI_API_KEY;
+        const inputUsuario = descripcion;
 
-          userContent.push({
-            type: 'image',
-            image: Buffer.from(base64Data, 'base64'),
-            mimeType: mimeType
-          });
-          placeholdersInstruccion += `UPLOADED_IMG_${idx + 1}\n`;
-        });
-        
-        userContent.push({
-            type: 'text',
-            text: `\n\n¡ALERTA CRÍTICA PARA IMÁGENES Y LOGOS!: El usuario ha adjuntado imágenes reales (que estás viendo). 
-1. DEBES usarlas en tu código HTML insertando EXACTAMENTE estos identificadores literales en el 'src' de la etiqueta <img>:\n${placeholdersInstruccion}\nEjemplo: <img src="UPLOADED_IMG_1" class="...">. (Para OTRAS imágenes extras usa SIEMPRE /api/pexels).
-2. ¡ATENCIÓN AL LOGO Y COLORES!: Si el usuario te indica que alguna de estas imágenes anexas ES UN LOGO, DEBES colocarla obligatoriamente en la barra de navegación (Header/Nav) como logo destacado. ADEMÁS, DEBES analizar visualmente esa imagen y extraer sus COLORES PREDOMINANTES para construir rigurosamente toda la Paleta de Colores (botones, fondos, textos, acentos) del sitio web con ellos.`
-        });
-      }
-
-      // Intentar con modelos en orden de prioridad (Confirmados para esta API Key)
-      const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-pro-latest'];
-      let lastError: any = null;
-
-      for (const modelName of modelosFallback) {
+        // --- COBRO DE CRÉDITOS UPFRONT (5 Créditos) ---
+        let creditosActuales = 10;
         try {
-          console.log(`Intentando generar con modelo: ${modelName}`);
-          const result = await streamText({
-            model: customGoogle(modelName),
-            messages: [{ role: 'user', content: userContent }],
-            onFinish: async ({ text }) => {
-              // Limpiar markdown si el LLM no obedeció completamente
-              let html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+            const adminDb = await getAdminDb();
+            if (adminDb && email) {
+                const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+                const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
+                const existing = await docRef.get();
 
-              // Reemplazar placeholders en el HTML final para guardarlo en Firebase
-              if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-                imagenes_base64.forEach((b64, idx) => {
-                  html = html.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
-                });
-              }
+                const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+                const FieldValue = getAdminFieldValue();
 
-              if (email) {
-                try {
-                  const adminDb = await getAdminDb();
-                  if (adminDb) {
-                    const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-          const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
-                    const existing = await docRef.get();
+                if (existing.exists) {
+                    const data = existing.data() || {};
+                    creditosActuales = data.creditos_restantes || 0;
+                    
+                    if (creditosActuales < 5) {
+                        return NextResponse.json({ error: 'Créditos insuficientes (5 créditos por generación).' }, { status: 402 });
+                    }
 
-                    const historyId = Date.now().toString();
-                    const newDesignMetadata = {
-                      id: historyId,
-                      descripcion: descripcion.substring(0, 200),
-                      fecha: new Date().toISOString(),
-                      has_separate_code: true
-                    };
-
-                    // 1. Guardar código en subcolección (PESADO)
-                    await docRef.collection('historial_codigos').doc(historyId).set({
-                      codigo_html: html,
-                      fecha: new Date().toISOString()
-                    });
-
-                    if (!existing.exists) {
-                      const initialPayload: any = {
-                        nombre_negocio: descripcion.substring(0, 60),
-                        nombre_contacto: nombre_contacto || '',
+                    if (!(rid && data.last_rid === rid)) {
+                        await docRef.update({
+                            creditos_restantes: FieldValue.increment(-5),
+                            last_rid: rid || null,
+                            ultima_generacion: new Date().toISOString()
+                        });
+                        creditosActuales -= 5;
+                    }
+                } else {
+                    await docRef.set({
                         email: email.toLowerCase().trim(),
-                        descripcion,
-                        historial_disenos: [newDesignMetadata],
+                        nombre_contacto: nombre_contacto || '',
                         creditos_restantes: 10,
                         fecha_creacion: new Date().toISOString(),
-                      };
-                      if (Buffer.byteLength(html, 'utf8') < 800000) {
-                        initialPayload.codigo_actual = html;
-                      }
-                      await docRef.set(initialPayload);
-                    } else {
-                      const data = existing.data() || {};
-                      let historial = data.historial_disenos || [];
-
-                      // Migración silenciosa si es necesario
-                      if (historial.length === 0 && data.codigo_actual) {
-                        historial.push({
-                          id: (Date.now() - 1000).toString(),
-                          codigo_actual: data.codigo_actual,
-                          descripcion: data.descripcion ? data.descripcion.substring(0, 200) : 'Diseño anterior',
-                          fecha: data.ultima_generacion || data.fecha_creacion || new Date().toISOString()
-                        });
-                      }
-
-                      historial.unshift(newDesignMetadata);
-                      historial = historial.slice(0, 10); // Aumentar a 10 ya que ahora son livianos
-
-                      const updatePayload: any = {
-                        historial_disenos: historial,
-                        ultima_generacion: new Date().toISOString(),
-                      };
-
-                      // OPTIMIZACIÓN: Refrescar snap para evitar colisiones de RID y usar FieldValue
-                      const { getAdminFieldValue } = await import('@/lib/firebase-admin');
-                      const FieldValue = getAdminFieldValue();
-                      const freshSnap = await docRef.get();
-                      const freshData = freshSnap.data() || {};
-
-                      if (rid && freshData.last_rid === rid) {
-                        console.log(`IDEMPOTENCIA: Petición ${rid} ya procesada. Saltando cargos.`);
-                        return;
-                      }
-
-                      // Cobro atómico
-                      updatePayload.creditos_restantes = FieldValue.increment(-5);
-                      updatePayload.last_rid = rid || null;
-                      if (Buffer.byteLength(html, 'utf8') < 800000) {
-                        updatePayload.codigo_actual = html;
-                      }
-                      await docRef.update(updatePayload);
-                    }
-                  }
-                } catch (fbErr) {
-                  console.warn('Firebase no disponible:', fbErr);
+                        last_rid: rid || null
+                    });
+                    creditosActuales = 10;
                 }
-              }
-            },
-          });
-
-          return result.toTextStreamResponse();
-        } catch (err: any) {
-          console.warn(`Fallo con modelo ${modelName}:`, err.message);
-          lastError = err;
-          // Continuar al siguiente modelo
+            }
+        } catch (err) {
+            console.warn("Fallo cobro upfront en generar-pagina:", err);
         }
-      }
 
-      // Si todos los modelos fallan
-      throw lastError || new Error('Todos los modelos de AI fallaron');
+        if (!apiKey || apiKey === 'PEGA_TU_API_KEY_AQUI') {
+            return NextResponse.json({ error: 'API Key no configurada' }, { status: 500 });
+        }
 
-    } catch (geminiError) {
-      console.warn('Gemini API falló, usando fallback:', geminiError);
-      return NextResponse.json({ html: buildFallbackHTML(descripcion.substring(0, 60), descripcion) });
+        const customGoogle = createGoogleGenerativeAI({ apiKey });
+        const promptText = buildPrompt(inputUsuario);
+        const userContent: any[] = [{ type: 'text', text: promptText }];
+
+        if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+            let placeholders = "";
+            imagenes_base64.forEach((img, idx) => {
+                const base64Data = img.replace(/^data:image\/\w+;base64,/, '');
+                userContent.push({
+                    type: 'image',
+                    image: Buffer.from(base64Data, 'base64'),
+                    mimeType: 'image/jpeg'
+                });
+                placeholders += `UPLOADED_IMG_${idx + 1}\n`;
+            });
+            userContent.push({ type: 'text', text: `\n\nIMÁGENES ADJUNTAS:\n${placeholders}` });
+        }
+
+        const result = await streamText({
+            model: customGoogle('gemini-1.5-flash-latest'),
+            messages: [{ role: 'user', content: userContent }],
+            onFinish: async ({ text }) => {
+                let html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
+
+                if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+                    imagenes_base64.forEach((b64, idx) => {
+                        html = html.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
+                    });
+                }
+
+                if (email) {
+                    try {
+                        const adminDb = await getAdminDb();
+                        if (adminDb) {
+                            const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+                            const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
+                            
+                            const historyId = Date.now().toString();
+                            const newDesignMetadata = {
+                                id: historyId,
+                                descripcion: descripcion.substring(0, 200),
+                                fecha: new Date().toISOString(),
+                                has_separate_code: true
+                            };
+
+                            await docRef.collection('historial_codigos').doc(historyId).set({
+                                codigo_html: html,
+                                fecha: new Date().toISOString()
+                            });
+
+                            const userData = (await docRef.get()).data() || {};
+                            let historial = userData.historial_disenos || [];
+                            historial = [newDesignMetadata, ...historial].slice(0, 10);
+
+                            const finalUpdate: any = { historial_disenos: historial };
+                            if (Buffer.byteLength(html, 'utf8') < 800000) {
+                                finalUpdate.codigo_actual = html;
+                            }
+                            await docRef.update(finalUpdate);
+                        }
+                    } catch (e) {
+                        console.error("Error guardando diseño en onFinish:", e);
+                    }
+                }
+            }
+        });
+
+        return result.toTextStreamResponse({
+            headers: { 'x-creditos-restantes': creditosActuales.toString() }
+        });
+
+    } catch (error: any) {
+        console.error('Error generando página:', error);
+        return NextResponse.json({ error: error.message || 'Error generando la página' }, { status: 500 });
     }
-  } catch (error) {
-    console.error('Error generando página:', error);
-    return NextResponse.json({ error: 'Error generando la página' }, { status: 500 });
-  }
 }
-
-// ─── FALLBACK HTML ────────────────────────────────────────────────────────────
-function buildFallbackHTML(titulo: string, descripcion: string): string {
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${titulo}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="font-sans bg-white text-gray-800">
-  <section class="bg-gradient-to-br from-blue-900 via-purple-800 to-pink-700 text-white py-24 px-6 text-center">
-    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">${titulo}</h1>
-    <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto mb-8">${descripcion}</p>
-    <a href="#contacto" class="bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-full text-lg hover:bg-yellow-300 transition shadow-xl">
-      ¡Quiero empezar ahora!
-    </a>
-  </section>
-  <section id="contacto" class="bg-blue-900 text-white py-16 px-6 text-center">
-    <h2 class="text-2xl font-bold mb-4">Agenda tu asesoría gratis</h2>
-    <a href="https://wa.me/573123299053" target="_blank" class="bg-yellow-400 text-gray-900 font-bold px-8 py-3 rounded-full hover:bg-yellow-300 transition inline-block">
-      📱 Hablar por WhatsApp
-    </a>
-  </section>
-</body>
-</html>`;
-}
-

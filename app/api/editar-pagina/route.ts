@@ -67,10 +67,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por edición).' }, { status: 402 });
     }
 
+    // --- COBRO DE CRÉDITOS UPFRONT ---
+    const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+    const FieldValue = getAdminFieldValue();
+    
+    // Verificar idempotencia primero para evitar cobros dobles
+    if (rid && userData.last_rid === rid) {
+        console.log(`IDEMPOTENCIA: Petición ${rid} ya cobrada.`);
+    } else {
+        await docRef.update({
+            creditos_restantes: FieldValue.increment(-1),
+            last_rid: rid || null,
+            ultima_edicion: new Date().toISOString()
+        });
+    }
+
     // Obtener el código actual para editar
     let codigoParaEditar = userData.codigo_actual || '';
-    
-    // Si se especifica un ID de diseño base, intentar obtenerlo de la subcolección
     if (id_diseno_base) {
         const historySnap = await docRef.collection('historial_codigos').doc(id_diseno_base.toString()).get();
         if (historySnap.exists) {
@@ -109,78 +122,56 @@ export async function POST(req: NextRequest) {
       userContent.push({ type: 'text', text: placeholdersInstruccion });
     }
 
-    const modelosFallback = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-pro-latest'];
-    let lastError: any = null;
+    const result = await streamText({
+      model: customGoogle('gemini-1.5-flash-latest'),
+      messages: [{ role: 'user', content: userContent }],
+      onFinish: async ({ text }) => {
+        let cleanHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
 
-    for (const modelName of modelosFallback) {
-      try {
-        const result = await streamText({
-          model: customGoogle(modelName),
-          messages: [{ role: 'user', content: userContent }],
-          onFinish: async ({ text }) => {
-            let cleanHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
-
-            // Reemplazar placeholders de imágenes subidas
-            if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
-                imagenes_base64.forEach((b64, idx) => {
-                    cleanHtml = cleanHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
-                });
-            }
-
-            const historyId = Date.now().toString();
-            const newDesignMetadata = {
-              id: historyId,
-              descripcion: `Edición: ${instruccion_texto.substring(0, 100)}`,
-              fecha: new Date().toISOString(),
-              has_separate_code: true
-            };
-
-            // 1. Guardar en subcolección
-            await docRef.collection('historial_codigos').doc(historyId).set({
-              codigo_html: cleanHtml,
-              fecha: new Date().toISOString()
+        if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
+            imagenes_base64.forEach((b64, idx) => {
+                cleanHtml = cleanHtml.split(`UPLOADED_IMG_${idx + 1}`).join(b64);
             });
+        }
 
-            const currentHistory = userData.historial_disenos || [];
-            const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
+        const historyId = Date.now().toString();
+        const newDesignMetadata = {
+          id: historyId,
+          descripcion: `Edición: ${instruccion_texto.substring(0, 100)}`,
+          fecha: new Date().toISOString(),
+          has_separate_code: true
+        };
 
-            // OPTIMIZACIÓN: Refrescar snap para evitar colisiones de RID y usar FieldValue
-            const { getAdminFieldValue } = await import('@/lib/firebase-admin');
-            const FieldValue = getAdminFieldValue();
-            const freshSnap = await docRef.get();
-            const freshData = freshSnap.data() || {};
-
-            if (rid && freshData.last_rid === rid) {
-                console.log(`IDEMPOTENCIA: Petición ${rid} ya procesada. Saltando cargos.`);
-                return;
-            }
-
-            const updatePayload: any = {
-              historial_disenos: updatedHistory,
-              ultima_edicion: new Date().toISOString(),
-              creditos_restantes: FieldValue.increment(-1),
-              last_rid: rid || null
-            };
-
-            if (Buffer.byteLength(cleanHtml, 'utf8') < 800000) {
-              updatePayload.codigo_actual = cleanHtml;
-            }
-
-            await docRef.update(updatePayload);
-          }
+        // Guardar diseño
+        await docRef.collection('historial_codigos').doc(historyId).set({
+          codigo_html: cleanHtml,
+          fecha: new Date().toISOString()
         });
 
-        return result.toTextStreamResponse();
-      } catch (err: any) {
-        console.warn(`Fallo edición con ${modelName}:`, err.message);
-        lastError = err;
+        // Obtener historial fresco para unshift
+        const currentData = (await docRef.get()).data() || {};
+        const currentHistory = currentData.historial_disenos || [];
+        const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
+
+        const finalUpdate: any = {
+           historial_disenos: updatedHistory
+        };
+        if (Buffer.byteLength(cleanHtml, 'utf8') < 800000) {
+            finalUpdate.codigo_actual = cleanHtml;
+        }
+        await docRef.update(finalUpdate);
       }
-    }
+    });
 
-    throw lastError || new Error('Todos los modelos fallaron en edición');
+    // Devolvemos el stream y el header de créditos restantes (ya restado)
+    return result.toTextStreamResponse({
+      headers: {
+        'x-creditos-restantes': (creditosRestantes - 1).toString()
+      }
+    });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fatal en API de edición:', error);
-    return NextResponse.json({ error: 'Error interno en el proceso de edición.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Error interno en el proceso de edición.' }, { status: 500 });
   }
 }
