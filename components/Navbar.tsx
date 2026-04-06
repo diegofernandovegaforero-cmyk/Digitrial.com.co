@@ -2,16 +2,27 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Triangle, Layout } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Triangle, Layout, LogOut } from 'lucide-react';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import AnnouncementBar from './AnnouncementBar';
 
 export default function Navbar() {
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [user, setUser] = useState<any>(null);
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            router.push('/');
+        } catch (err) {
+            console.error("Error signing out:", err);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -71,9 +82,21 @@ export default function Navbar() {
                                     Mis Proyectos
                                 </Link>
                             )}
-                            <Link href="#contact" className={`transition-colors duration-300 ${
-                                isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
-                            }`}>Contacto</Link>
+                            {user ? (
+                                <button 
+                                    onClick={handleLogout}
+                                    className={`transition-colors duration-300 flex items-center gap-1.5 ${
+                                        isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
+                                    }`}
+                                >
+                                    <LogOut className="w-3.5 h-3.5" />
+                                    Cerrar Sesión
+                                </button>
+                            ) : (
+                                <Link href="#contact" className={`transition-colors duration-300 ${
+                                    isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
+                                }`}>Contacto</Link>
+                            )}
                             <div className={`h-4 w-px ${isScrolled ? 'bg-slate-200' : 'bg-white/10'}`} />
                         </div>
 
@@ -121,7 +144,22 @@ export default function Navbar() {
                             <Link href="#" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
                             <Link href="/ia" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>IA</Link>
                             {user && <Link href="/proyectos" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Mis Proyectos</Link>}
-                            <Link href="#contact" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
+                            {user ? (
+                                <button 
+                                    onClick={() => {
+                                        handleLogout();
+                                        setIsOpen(false);
+                                    }} 
+                                    className={`text-base transition-colors duration-300 flex items-center gap-2 ${
+                                        isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'
+                                    }`}
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Cerrar Sesión
+                                </button>
+                            ) : (
+                                <Link href="#contact" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Contacto</Link>
+                            )}
                             <Link
                                 href={user ? "/proyectos" : "/login"}
                                 onClick={() => setIsOpen(false)}
