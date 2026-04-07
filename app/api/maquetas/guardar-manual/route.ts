@@ -11,7 +11,7 @@ const getAdminDb = async () => {
 
 export async function POST(req: NextRequest) {
     try {
-        const { email, html, descripcion, rid } = await req.json();
+        const { email, html, descripcion, rid, isFree } = await req.json();
 
         if (!email || !html) {
             return NextResponse.json({ error: 'Faltan campos requeridos (email/html).' }, { status: 400 });
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         const userData = snap.data() || {};
         const creditosActuales = userData.creditos_restantes ?? 0;
 
-        if (creditosActuales < 1) {
+        if (!isFree && creditosActuales < 1) {
             return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por guardado).' }, { status: 402 });
         }
 
@@ -65,11 +65,14 @@ export async function POST(req: NextRequest) {
         historial = [meta, ...historial].slice(0, 10);
 
         const updateData: any = {
-            creditos_restantes: FieldValue.increment(-1),
             last_rid: rid || null,
             ultima_edicion: new Date().toISOString(),
             historial_disenos: historial
         };
+
+        if (!isFree) {
+            updateData.creditos_restantes = FieldValue.increment(-1);
+        }
 
         // Solo guardar código actual si es < 800KB para Firestore
         if (Buffer.byteLength(html, 'utf8') < 800000) {
@@ -77,15 +80,16 @@ export async function POST(req: NextRequest) {
         }
 
         await docRef.update(updateData);
-        console.log(`[GUARDADO MANUAL] Éxito: 1 crédito descontado para ${email}`);
+        const finalCredits = isFree ? creditosActuales : creditosActuales - 1;
+        console.log(`[GUARDADO MANUAL] Éxito: ${isFree ? '0' : '1'} crédito descontado para ${email}`);
 
         return NextResponse.json({ 
             success: true, 
-            creditos_restantes: creditosActuales - 1,
+            creditos_restantes: finalCredits,
             historyId 
         }, {
             headers: {
-                'x-creditos-restantes': (creditosActuales - 1).toString()
+                'x-creditos-restantes': finalCredits.toString()
             }
         });
 

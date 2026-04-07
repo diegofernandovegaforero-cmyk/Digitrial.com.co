@@ -510,6 +510,7 @@ function EditorContent() {
                 body: JSON.stringify({
                     email,
                     html: htmlOptimizado,
+                    isFree,
                     descripcion: isFree ? "Inicio de sesión de edición" : (instruccion.trim() || "Guardado manual desde editor"),
                     rid: `save_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
                 }),
