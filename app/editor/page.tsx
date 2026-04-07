@@ -243,8 +243,7 @@ function EditorContent() {
     const [cargando, setCargando] = useState(!sessionHtml && !!emailFromUrl);
     const [error, setError] = useState('');
 
-    // Pestañas
-    const [activeTab, setActiveTab] = useState<'editor' | 'history'>('editor');
+    // Editor state
     const [selectedDesignId, setSelectedDesignId] = useState<string | null>(null);
 
     // Editor state
@@ -1019,215 +1018,162 @@ function EditorContent() {
 
             <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
                 {/* ─── Panel izquierdo: Editor ─── */}
-                <div className="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-white/10 bg-slate-900 overflow-y-auto">
-                    <div className="flex border-b border-white/10 sticky top-0 bg-slate-900 z-10">
-                        <button
-                            onClick={() => setActiveTab('editor')}
-                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'editor' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>
-                            <Sparkles className="w-4 h-4" /> Editor
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('history')}
-                            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'history' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>
-                            <History className="w-4 h-4" /> ({userData?.historial_disenos?.length || 0}) Diseños
-                        </button>
-                    </div>
-
-                    <div className="p-6">
-                        {activeTab === 'editor' ? (
-                            <>
-                                <h2 className="text-lg font-bold mb-1">
-                                    Editando: <span className="text-blue-400">{userData?.nombre_negocio}</span>
-                                </h2>
-                                {(!userData?.codigo_actual) ? (
-                                    <div className="flex flex-col items-center text-center p-6 bg-blue-900/10 border border-blue-500/20 rounded-xl mt-4">
-                                        <Sparkles className="w-8 h-8 text-blue-400 mb-3" />
-                                        <h3 className="text-white font-bold text-lg mb-2">Comienza tu primer diseño</h3>
-                                        <p className="text-sm text-slate-400 mb-4 px-4">
-                                            Aún no tienes ningún diseño para editar. Genera tu primera página web con inteligencia artificial y luego podrás personalizarla aquí.
-                                        </p>
-                                        <Link 
-                                            href="/ia?form=true" 
-                                            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-blue-600/20 w-full"
-                                        >
-                                            Generar mi página web
-                                        </Link>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {/* Estado y créditos */}
-                                        <div className="flex items-center justify-between mb-4 mt-2">
-                                            <div className="text-xs text-slate-400 font-medium tracking-wide">
-                                                Costo por edición: <span className="text-slate-200">{CREDITOS_POR_EDICION} créditos</span>
-                                            </div>
-                                        </div>
-
-                                        {creditosBajos && (
-                                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
-                                                ⚠️ Te quedan <strong>{userData?.creditos_restantes ?? 0}</strong> créditos.{' '}
-                                                <button onClick={() => setShowRecarga(true)} className="underline text-red-100 hover:text-white font-bold transition-all">
-                                                    Recarga ahora
-                                                </button>{' '}para seguir editando.
-                                            </div>
-                                        )}
-
-                                        {exito && (
-                                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
-                                            </div>
-                                        )}
-
-                                        {error && (
-                                            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
-                                                <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
-                                            </div>
-                                        )}
-
-                                        {transcripcion && (
-                                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
-                                                🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
-                                            </div>
-                                        )}
-
-                                        <form onSubmit={handleEditar} className="space-y-4">
-                                            {/* Instrucción de texto */}
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                                    ✍️ Instrucción en texto
-                                                </label>
-                                                <textarea
-                                                    value={instruccion}
-                                                    onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
-                                                    placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
-                                                    rows={4}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
-                                                />
-                                                <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
-                                            </div>
-
-                                            {/* Imágenes de referencia */}
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
-                                                    🖼️ Imágenes de referencia
-                                                </label>
-                                                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                                                    {/* Thumbnails */}
-                                                    {editImages.length > 0 && (
-                                                        <div className="flex gap-2 flex-wrap mb-3">
-                                                            {editImages.map((img, idx) => (
-                                                                <div key={idx} className="relative w-16 h-16 rounded-lg border border-white/20 overflow-hidden group">
-                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                                    <img src={img.url} alt="" className="w-full h-full object-cover" />
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => removeEditImage(idx)}
-                                                                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                    >
-                                                                        <X className="w-4 h-4 text-white" />
-                                                                    </button>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-xs text-slate-500">Máx. 3 imágenes</span>
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            multiple
-                                                            className="hidden"
-                                                            ref={editFileInputRef}
-                                                            onChange={handleEditImageSelect}
-                                                            disabled={editImages.length >= 3}
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => editFileInputRef.current?.click()}
-                                                            disabled={editImages.length >= 3}
-                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                                                editImages.length >= 3
-                                                                    ? 'bg-white/5 text-slate-500 cursor-not-allowed'
-                                                                    : 'bg-blue-600/30 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
-                                                            }`}
-                                                        >
-                                                            <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Botón de envío */}
-                                            <div className="space-y-3">
-                                                <button type="submit"
-                                                    disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
-                                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
-                                                    {editando ? (
-                                                        <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios...</>
-                                                    ) : sinCreditos ? (
-                                                        <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
-                                                    ) : (
-                                                        <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
-                                                    )}
-                                                </button>
-
-                                                <button type="button"
-                                                    onClick={() => handleManualSave(false)}
-                                                    disabled={editando || !userData?.codigo_actual || sinCreditos}
-                                                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                                                    <History className="w-4 h-4 text-blue-400" />
-                                                    Guardar esta Maqueta ({COSTO_GUARDADO_MANUAL} crédito)
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </>
-                                )}
-                            </>
+                <div className="w-full md:w-96 flex-shrink-0 flex flex-col border-r border-white/10 bg-slate-900">
+                    <div className="flex-1 overflow-y-auto p-6">
+                        <h2 className="text-lg font-bold mb-1">
+                            Editando: <span className="text-blue-400">{userData?.nombre_negocio}</span>
+                        </h2>
+                        {(!userData?.codigo_actual) ? (
+                            <div className="flex flex-col items-center text-center p-6 bg-blue-900/10 border border-blue-500/20 rounded-xl mt-4">
+                                <Sparkles className="w-8 h-8 text-blue-400 mb-3" />
+                                <h3 className="text-white font-bold text-lg mb-2">Comienza tu primer diseño</h3>
+                                <p className="text-sm text-slate-400 mb-4 px-4">
+                                    Aún no tienes ningún diseño para editar. Genera tu primera página web con inteligencia artificial y luego podrás personalizarla aquí.
+                                </p>
+                                <Link 
+                                    href="/ia?form=true" 
+                                    className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-blue-600/20 w-full"
+                                >
+                                    Generar mi página web
+                                </Link>
+                            </div>
                         ) : (
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-lg mb-4 text-white">Tus últimos diseños</h3>
-                                {(!userData?.historial_disenos || userData.historial_disenos.length === 0) ? (
-                                    <div className="text-center p-6 bg-white/5 border border-white/10 rounded-xl">
-                                        <Code className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                                        <p className="text-slate-500 text-sm">Aún no hay diseños en el historial.</p>
-                                        <p className="text-slate-600 text-xs mt-1">Has un cambio para guardar el actual.</p>
+                            <>
+                                {/* Estado y créditos */}
+                                <div className="flex items-center justify-between mb-4 mt-2">
+                                    <div className="text-xs text-slate-400 font-medium tracking-wide">
+                                        Costo por edición: <span className="text-slate-200">{CREDITOS_POR_EDICION} créditos</span>
                                     </div>
-                                ) : (
-                                    userData.historial_disenos.map((diseno, index) => (
-                                        <div
-                                            key={diseno.id}
-                                            onClick={() => loadHistoricalDesign(diseno)}
-                                            className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedDesignId === diseno.id || (!selectedDesignId && index === 0) ? 'bg-blue-600/20 border-blue-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
-                                        >
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">
-                                                    {index === 0 ? 'Diseño más reciente' : `Versión anterior`}
-                                                </span>
-                                                <span className="text-[10px] bg-black/30 px-2 py-0.5 rounded text-slate-400">
-                                                    {new Date(diseno.fecha).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-slate-300 line-clamp-3 italic">
-                                                "{diseno.descripcion}"
-                                            </p>
-                                            {(selectedDesignId === diseno.id || (!selectedDesignId && index === 0)) && (
-                                                <div className="mt-3 flex items-center gap-2 text-xs text-green-400 font-semibold bg-green-500/10 p-2 rounded-lg border border-green-500/20">
-                                                    <Eye className="w-4 h-4" /> Diseñando esta versión
+                                </div>
+
+                                {creditosBajos && (
+                                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300">
+                                        ⚠️ Te quedan <strong>{userData?.creditos_restantes ?? 0}</strong> créditos.{' '}
+                                        <button onClick={() => setShowRecarga(true)} className="underline text-red-100 hover:text-white font-bold transition-all">
+                                            Recarga ahora
+                                        </button>{' '}para seguir editando.
+                                    </div>
+                                )}
+
+                                {exito && (
+                                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4 text-sm text-green-300 flex items-center gap-2">
+                                        <CheckCircle className="w-4 h-4 flex-shrink-0" />{exito}
+                                    </div>
+                                )}
+
+                                {error && (
+                                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-sm text-red-300 flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
+                                    </div>
+                                )}
+
+                                {transcripcion && (
+                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 mb-4 text-xs text-purple-300">
+                                        🎤 Transcripción: <em>&quot;{transcripcion}&quot;</em>
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleEditar} className="space-y-4">
+                                    {/* Instrucción de texto */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                            ✍️ Instrucción en texto
+                                        </label>
+                                        <textarea
+                                            value={instruccion}
+                                            onChange={e => setInstruccion(e.target.value.slice(0, MAX_TEXTO_CHARS))}
+                                            placeholder='Ej: "Cambia el fondo del hero a azul oscuro" o "Agrega una sección de precios"'
+                                            rows={4}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm resize-none"
+                                        />
+                                        <p className="text-right text-xs text-slate-600 mt-1">{instruccion.length}/{MAX_TEXTO_CHARS}</p>
+                                    </div>
+
+                                    {/* Imágenes de referencia */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">
+                                            🖼️ Imágenes de referencia
+                                        </label>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                            {/* Thumbnails */}
+                                            {editImages.length > 0 && (
+                                                <div className="flex gap-2 flex-wrap mb-3">
+                                                    {editImages.map((img, idx) => (
+                                                        <div key={idx} className="relative w-16 h-16 rounded-lg border border-white/20 overflow-hidden group">
+                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                            <img src={img.url} alt="" className="w-full h-full object-cover" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeEditImage(idx)}
+                                                                className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            >
+                                                                <X className="w-4 h-4 text-white" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        )}
 
-                        <div className="mt-6 pt-6 border-t border-white/10">
-                            <Link href="/proyectos"
-                                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-                                <Layout className="w-4 h-4" />
-                                Ir a Proyectos
-                            </Link>
-                        </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-slate-500">Máx. 3 imágenes</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    className="hidden"
+                                                    ref={editFileInputRef}
+                                                    onChange={handleEditImageSelect}
+                                                    disabled={editImages.length >= 3}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => editFileInputRef.current?.click()}
+                                                    disabled={editImages.length >= 3}
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                                        editImages.length >= 3
+                                                            ? 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                                            : 'bg-blue-600/30 hover:bg-blue-600/60 text-blue-300 hover:text-white border border-blue-500/30'
+                                                    }`}
+                                                >
+                                                    <ImagePlus className="w-3.5 h-3.5" /> Adjuntar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Botón de envío */}
+                                    <div className="space-y-3">
+                                        <button type="submit"
+                                            disabled={editando || sinCreditos || (!instruccion.trim() && editImages.length === 0)}
+                                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                                            {editando ? (
+                                                <><Loader2 className="w-4 h-4 animate-spin" />Aplicando cambios...</>
+                                            ) : sinCreditos ? (
+                                                <><AlertCircle className="w-4 h-4" />Sin créditos disponibles</>
+                                            ) : (
+                                                <><Sparkles className="w-4 h-4" />Actualizar Diseño ({CREDITOS_POR_EDICION} créditos)<Send className="w-4 h-4" /></>
+                                            )}
+                                        </button>
+
+                                        <button type="button"
+                                            onClick={() => handleManualSave(false)}
+                                            disabled={editando || !userData?.codigo_actual || sinCreditos}
+                                            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                                            <History className="w-4 h-4 text-blue-400" />
+                                            Guardar esta Maqueta ({COSTO_GUARDADO_MANUAL} crédito)
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="mt-auto p-6 border-t border-white/10">
+                        <Link href="/proyectos"
+                            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                            <Layout className="w-4 h-4" />
+                            Ir a Proyectos
+                        </Link>
                     </div>
                 </div>
 
