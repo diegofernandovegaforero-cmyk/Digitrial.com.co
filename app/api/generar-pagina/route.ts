@@ -116,62 +116,62 @@ export async function POST(req: NextRequest) {
                             const userDoc = await docRef.get();
                             const historyId = Date.now().toString();
 
-                            // 1. Guardar en historial_codigos
-                            await docRef.collection('historial_codigos').doc(historyId).set({
-                                codigo_html: html,
-                                fecha: new Date().toISOString()
-                            });
+                             if (!userDoc.exists) {
+                                 // USUARIO NUEVO: 6 iniciales - 1 consumido = 5 finales
+                                 await docRef.set({
+                                     email: email.toLowerCase().trim(),
+                                     nombre_contacto: nombre_contacto || '',
+                                     creditos_restantes: 5,
+                                     fecha_creacion: new Date().toISOString(),
+                                     last_rid: rid || null,
+                                     historial_disenos: [{
+                                         id: historyId,
+                                         descripcion: (descripcion || '').substring(0, 200),
+                                         fecha: new Date().toISOString(),
+                                         has_separate_code: true
+                                     }],
+                                     codigo_actual: Buffer.byteLength(html, 'utf8') < 800000 ? html : null
+                                 });
+                                 console.log(`[GENERACIÓN] Usuario nuevo creado con 6 iniciales (queda en 5) para ${email}`);
+                             } else {
+                                 // USUARIO EXISTENTE: Descuento atómico de 1 crédito
+                                 const userData = userDoc.data() || {};
+                                 
+                                 // Idempotencia: No cobrar si ya se procesó este rid
+                                 if (rid && userData.last_rid === rid) {
+                                     console.log(`[GENERACIÓN] Rid ${rid} ya cobrado. Saltando.`);
+                                     return;
+                                 }
 
-                            if (!userDoc.exists) {
-                                // USUARIO NUEVO: 6 iniciales - 1 consumido = 5 finales
-                                await docRef.set({
-                                    email: email.toLowerCase().trim(),
-                                    nombre_contacto: nombre_contacto || '',
-                                    creditos_restantes: 5,
-                                    fecha_creacion: new Date().toISOString(),
-                                    last_rid: rid || null,
-                                    historial_disenos: [{
-                                        id: historyId,
-                                        descripcion: (descripcion || '').substring(0, 200),
-                                        fecha: new Date().toISOString(),
-                                        has_separate_code: true
-                                    }],
-                                    codigo_actual: Buffer.byteLength(html, 'utf8') < 800000 ? html : null
-                                });
-                                console.log(`[GENERACIÓN] Usuario nuevo creado con 6 iniciales (queda en 5) para ${email}`);
-                            } else {
-                                // USUARIO EXISTENTE: Descuento atómico de 1 crédito
-                                const userData = userDoc.data() || {};
-                                
-                                // Idempotencia: No cobrar si ya se procesó este rid
-                                if (rid && userData.last_rid === rid) {
-                                    console.log(`[GENERACIÓN] Rid ${rid} ya cobrado. Saltando.`);
-                                    return;
-                                }
+                                 let historial = userData.historial_disenos || [];
+                                 const meta = {
+                                     id: historyId,
+                                     descripcion: (descripcion || '').substring(0, 200),
+                                     fecha: new Date().toISOString(),
+                                     has_separate_code: true
+                                 };
+                                 historial = [meta, ...historial].slice(0, 10);
 
-                                let historial = userData.historial_disenos || [];
-                                const meta = {
-                                    id: historyId,
-                                    descripcion: (descripcion || '').substring(0, 200),
-                                    fecha: new Date().toISOString(),
-                                    has_separate_code: true
-                                };
-                                historial = [meta, ...historial].slice(0, 10);
+                                 const updateData: any = {
+                                     creditos_restantes: FieldValue.increment(-1),
+                                     last_rid: rid || null,
+                                     ultima_generacion: new Date().toISOString(),
+                                     historial_disenos: historial
+                                 };
 
-                                const updateData: any = {
-                                    creditos_restantes: FieldValue.increment(-1),
-                                    last_rid: rid || null,
-                                    ultima_generacion: new Date().toISOString(),
-                                    historial_disenos: historial
-                                };
+                                 if (Buffer.byteLength(html, 'utf8') < 800000) {
+                                     updateData.codigo_actual = html;
+                                 }
 
-                                if (Buffer.byteLength(html, 'utf8') < 800000) {
-                                    updateData.codigo_actual = html;
-                                }
+                                 await docRef.update(updateData);
+                                 console.log(`[GENERACIÓN] Cobro de 1 crédito realizado para ${email}`);
+                             }
 
-                                await docRef.update(updateData);
-                                console.log(`[GENERACIÓN] Cobro de 1 crédito realizado para ${email}`);
-                            }
+                             // 1. Guardar en historial_codigos (DESPUÉS de asegurar que el doc padre existe)
+                             await docRef.collection('historial_codigos').doc(historyId).set({
+                                 codigo_html: html,
+                                 fecha: new Date().toISOString()
+                             });
                         }
                     } catch (e) {
                          console.error("[GENERACIÓN] Error en onFinish (guardado/cobro):", e);

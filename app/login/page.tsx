@@ -39,15 +39,18 @@ async function saveUserToFirestore(user: { uid: string; email: string | null; di
     const docId = emailToDocId(user.email);
     const ref = doc(db, 'maquetasweb_usuarios', docId);
     const snap = await getDoc(ref);
-    if (!snap.exists()) {
+    const data = snap.data();
+
+    // Si el documento no existe O existe pero no tiene créditos establecidos
+    if (!snap.exists() || data?.creditos_restantes === undefined || data?.creditos_restantes === null) {
         await setDoc(ref, {
             uid: user.uid,
             email: user.email,
-            nombre_contacto: user.displayName || '',
-            photo_url: user.photoURL || '',
+            nombre_contacto: user.displayName || data?.nombre_contacto || '',
+            photo_url: user.photoURL || data?.photo_url || '',
             creditos_restantes: 6,
-            fecha_creacion: serverTimestamp(),
-        });
+            fecha_creacion: data?.fecha_creacion || serverTimestamp(),
+        }, { merge: true });
     }
 }
 
@@ -186,7 +189,7 @@ function LoginContent() {
                     </h1>
                     <p className="text-slate-500 text-sm mb-8">
                         {isRegister
-                            ? 'Regístrate gratis y obtén 10 créditos para diseñar tu web.'
+                            ? 'Regístrate gratis y obtén 6 créditos para diseñar tu web.'
                             : 'Accede a tu panel de Digitrial. Inicia sesión de forma segura con tu correo electrónico o tu cuenta de Google y continúa escalando tu negocio digital.'}
                     </p>
 

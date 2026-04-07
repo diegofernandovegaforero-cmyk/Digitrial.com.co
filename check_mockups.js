@@ -17,7 +17,7 @@ async function checkAllUsers() {
     console.log(`Total users in DB: ${sr.size}`);
     sr.forEach(doc => {
         const data = doc.data();
-        console.log(`ID: ${doc.id} | Email: ${data.email} | Credits: ${data.creditos_restantes}`);
+        console.log(`ID: ${doc.id} | Data: ${JSON.stringify(data)}`);
     });
 }
 checkAllUsers().catch(console.error);
