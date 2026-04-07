@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap, Layout, Save } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 import RecargaCreditos from '@/components/RecargaCreditos';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
@@ -147,7 +147,8 @@ function DisenaPageContent() {
     const [formVisible, setFormVisible] = useState(false);
     const [authUser, setAuthUser] = useState<{ email: string | null; displayName: string | null } | null>(null);
 
-    // Detect auth state to skip hero automatically if logged in
+    const [userData, setUserData] = useState<any>(null);
+
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -155,6 +156,18 @@ function DisenaPageContent() {
                 // Si el usuario ya está registrado, saltamos el hero y vamos al form
                 setShowHero(false);
                 setFormVisible(true);
+
+                // Cargar datos de limites en tiempo real
+                const docId = emailToDocId(user.email!);
+                const docRef = doc(db, 'maquetasweb_usuarios', docId);
+                const unsubData = onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        setUserData(snapshot.data());
+                    } else {
+                        setUserData({ historial_disenos: [], limite_proyectos: 1 });
+                    }
+                });
+                return () => unsubData();
             }
         });
         return unsub;
@@ -249,6 +262,16 @@ function DisenaPageContent() {
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // VALIDACIÓN DE LÍMITES POR PLAN
+        const currentProjects = userData?.historial_disenos?.length || 0;
+        const limit = userData?.limite_proyectos || 1;
+        
+        if (currentProjects >= limit) {
+            setShowRecarga(true);
+            return;
+        }
+
         setStep('loading');
         setError('');
         let idx = 0;

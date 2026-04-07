@@ -26,6 +26,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import Navbar from '@/components/Navbar';
 import DigitrialLoader from '@/components/DigitrialLoader';
+import RecargaCreditos from '@/components/RecargaCreditos';
 
 // Helper para ID de Firestore
 const emailToDocId = (email: string) =>
@@ -37,6 +38,7 @@ export default function ProyectosPage() {
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const [showRecarga, setShowRecarga] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
 
@@ -81,6 +83,18 @@ export default function ProyectosPage() {
     const handleLogout = async () => {
         await signOut(auth);
         router.push('/');
+    };
+
+    const handleNuevoProyecto = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const currentProjects = userData?.historial_disenos?.length || 0;
+        const limit = userData?.limite_proyectos || 1;
+        
+        if (currentProjects >= limit) {
+            setShowRecarga(true);
+        } else {
+            router.push('/ia');
+        }
     };
 
     if (!mounted) return null;
@@ -131,13 +145,13 @@ export default function ProyectosPage() {
                         transition={{ delay: 0.3 }}
                         className="flex items-center gap-4"
                     >
-                        <Link 
-                            href="/ia"
+                        <button 
+                            onClick={handleNuevoProyecto}
                             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 active:translate-y-0"
                         >
                             <Plus className="w-5 h-5" />
                             Nuevo Proyecto
-                        </Link>
+                        </button>
                     </motion.div>
                 </div>
 
@@ -164,8 +178,8 @@ export default function ProyectosPage() {
                     <StatCard 
                         icon={<Sparkles className="w-5 h-5 text-emerald-400" />}
                         label="Tipo de Plan"
-                        value={userData?.limite_proyectos > 1 ? (userData.limite_proyectos > 5 ? 'PRO' : 'RÁPIDO') : 'GRATIS'}
-                        subtext="Explora más opciones"
+                        value={userData?.limite_proyectos > 1 ? (userData.limite_proyectos > 3 ? 'PRO' : 'RÁPIDA') : 'GRATIS'}
+                        subtext={userData?.limite_proyectos > 1 ? "Plan Premium Activo" : "Explora más opciones"}
                     />
                 </div>
 
@@ -201,13 +215,13 @@ export default function ProyectosPage() {
                         <p className="text-slate-400 mb-8 max-w-sm mx-auto">
                             Comienza hoy mismo a crear tu presencia digital con el poder de nuestra Inteligencia Artificial.
                         </p>
-                        <Link 
-                            href="/ia"
+                        <button 
+                            onClick={handleNuevoProyecto}
                             className="inline-flex items-center gap-2 bg-white text-slate-900 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-50 transition-colors"
                         >
                             Empezar mi primera web
                             <ArrowRight className="w-4 h-4" />
-                        </Link>
+                        </button>
                     </motion.div>
                 )}
             </main>
@@ -226,6 +240,8 @@ export default function ProyectosPage() {
                     Cerrar Sesión ({user?.email})
                 </button>
             </div>
+
+            <RecargaCreditos isOpen={showRecarga} onClose={() => setShowRecarga(false)} />
         </div>
     );
 }
