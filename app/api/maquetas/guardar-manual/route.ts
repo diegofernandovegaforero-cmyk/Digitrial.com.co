@@ -44,9 +44,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, creditos_restantes: creditosActuales });
         }
 
-        const { getAdminFieldValue } = await import('@/lib/firebase-admin');
-        const FieldValue = getAdminFieldValue();
-        const historyId = Date.now().toString();
+        const limit = userData.limite_proyectos || 1;
+        const historyId = limit <= 1 ? 'main_project' : Date.now().toString();
 
         // 3. Guardar en historial_codigos (subcolección)
         await docRef.collection('historial_codigos').doc(historyId).set({
@@ -62,7 +61,10 @@ export async function POST(req: NextRequest) {
             fecha: new Date().toISOString(),
             has_separate_code: true
         };
-        historial = [meta, ...historial].slice(0, 10);
+        historial = [meta, ...historial.filter((h: any) => h.id !== historyId)].slice(0, limit);
+
+        const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+        const FieldValue = getAdminFieldValue();
 
         const updateData: any = {
             last_rid: rid || null,

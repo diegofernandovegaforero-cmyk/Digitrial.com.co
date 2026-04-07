@@ -120,7 +120,11 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const historyId = Date.now().toString();
+        // Obtener historial fresco para unshift y cobrar crédito
+        const currentData = (await docRef.get()).data() || {};
+        const limit = currentData.limite_proyectos || 1;
+        const historyId = limit <= 1 ? 'main_project' : Date.now().toString();
+
         const newDesignMetadata = {
           id: historyId,
           descripcion: `Edición: ${instruccion_texto.substring(0, 100)}`,
@@ -134,10 +138,8 @@ export async function POST(req: NextRequest) {
           fecha: new Date().toISOString()
         });
 
-        // Obtener historial fresco para unshift y cobrar crédito
-        const currentData = (await docRef.get()).data() || {};
         const currentHistory = currentData.historial_disenos || [];
-        const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
+        const updatedHistory = [newDesignMetadata, ...currentHistory.filter((h: any) => h.id !== historyId)].slice(0, limit);
 
         const { getAdminFieldValue } = await import('@/lib/firebase-admin');
         const FieldValue = getAdminFieldValue();
