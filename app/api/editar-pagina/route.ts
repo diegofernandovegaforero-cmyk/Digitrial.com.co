@@ -60,26 +60,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
+    // --- VERIFICACIÓN DE CRÉDITOS ---
     const userData = snap.data() || {};
     const creditosRestantes = userData.creditos_restantes ?? 6;
 
     if (creditosRestantes < 1) {
       return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por edición).' }, { status: 402 });
-    }
-
-    // --- COBRO DE CRÉDITOS UPFRONT ---
-    const { getAdminFieldValue } = await import('@/lib/firebase-admin');
-    const FieldValue = getAdminFieldValue();
-    
-    // Verificar idempotencia primero para evitar cobros dobles
-    if (rid && userData.last_rid === rid) {
-        console.log(`IDEMPOTENCIA: Petición ${rid} ya cobrada.`);
-    } else {
-        await docRef.update({
-            creditos_restantes: FieldValue.increment(-1),
-            last_rid: rid || null,
-            ultima_edicion: new Date().toISOString()
-        });
     }
 
     // Obtener el código actual para editar
@@ -148,7 +134,7 @@ export async function POST(req: NextRequest) {
           fecha: new Date().toISOString()
         });
 
-        // Obtener historial fresco para unshift
+        // Obtener historial fresco para unshift y cobrar crédito
         const currentData = (await docRef.get()).data() || {};
         const currentHistory = currentData.historial_disenos || [];
         const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
@@ -156,15 +142,20 @@ export async function POST(req: NextRequest) {
         const { getAdminFieldValue } = await import('@/lib/firebase-admin');
         const FieldValue = getAdminFieldValue();
 
+        // 1. Cobrar crédito y actualizar historial (operación atómica)
         const finalUpdate: any = {
-           historial_disenos: updatedHistory,
            creditos_restantes: FieldValue.increment(-1),
+           last_rid: rid || null,
+           historial_disenos: updatedHistory,
            ultima_edicion: new Date().toISOString()
         };
+
         if (Buffer.byteLength(cleanHtml, 'utf8') < 800000) {
             finalUpdate.codigo_actual = cleanHtml;
         }
+
         await docRef.update(finalUpdate);
+        console.log(`[EDICIÓN] Cobro exitoso y diseño guardado para ${email}`);
       }
     });
 
