@@ -467,6 +467,11 @@ function EditorContent() {
                 setTimeout(() => setError(''), 5000);
                 return;
             }
+            if (event.data?.type === 'SAVE_HTML' && event.data?.html) {
+                // Actualizar el código actual localmente tras cada edición directa (sin costo)
+                setUserData(prev => prev ? { ...prev, codigo_actual: event.data.html } : null);
+                return;
+            }
         };
 
         window.addEventListener('message', handleMessage);
@@ -515,8 +520,9 @@ function EditorContent() {
                 throw new Error(errData.error || 'Error en el servidor al guardar.');
             }
 
+            const creditosHeader = res.headers.get('x-creditos-restantes');
             const data = await res.json();
-            const creditosRestantes = data.creditos_restantes;
+            const creditosRestantes = creditosHeader ? parseInt(creditosHeader, 10) : data.creditos_restantes;
 
             // 2. Actualizar estado local
             setUserData(prev => {
@@ -1085,7 +1091,7 @@ function EditorContent() {
 
                                                 <button type="button"
                                                     onClick={() => handleManualSave(false)}
-                                                    disabled={editando || !userData?.codigo_actual}
+                                                    disabled={editando || !userData?.codigo_actual || sinCreditos}
                                                     className="w-full bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
                                                     <History className="w-4 h-4 text-blue-400" />
                                                     Guardar esta Maqueta ({COSTO_GUARDADO_MANUAL} crédito)
@@ -1158,7 +1164,7 @@ function EditorContent() {
                         <iframe
                             ref={iframeRef}
                             srcDoc={injectEditorScript(userData.codigo_actual, sinCreditos)}
-                            className="w-full h-full border-none"
+                            className={`w-full h-full border-none transition-opacity ${editando ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}
                             title="Vista previa en tiempo real"
                             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                             onLoad={handleIframeLoad}

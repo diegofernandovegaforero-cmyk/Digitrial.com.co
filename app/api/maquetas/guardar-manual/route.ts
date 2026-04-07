@@ -83,6 +83,10 @@ export async function POST(req: NextRequest) {
             success: true, 
             creditos_restantes: creditosActuales - 1,
             historyId 
+        }, {
+            headers: {
+                'x-creditos-restantes': (creditosActuales - 1).toString()
+            }
         });
 
     } catch (error: any) {

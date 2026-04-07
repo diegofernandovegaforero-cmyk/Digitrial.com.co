@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
         });
 
         return result.toTextStreamResponse({
-            headers: { 'x-creditos-restantes': creditosActuales.toString() }
+            headers: { 'x-creditos-restantes': (creditosActuales - 1).toString() }
         });
 
     } catch (error: any) {
