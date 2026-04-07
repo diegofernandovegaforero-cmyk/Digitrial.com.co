@@ -3,11 +3,12 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap, Layout } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap, Layout, Save } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
+import RecargaCreditos from '@/components/RecargaCreditos';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
 
 const emailToDocId = (email: string) => email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
@@ -356,6 +357,9 @@ function DisenaPageContent() {
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [logoLoading, setLogoLoading] = useState(false);
     const [exitoGuardado, setExitoGuardado] = useState('');
+    const [unsavedHtml, setUnsavedHtml] = useState<string | null>(null);
+    const [isSavingManual, setIsSavingManual] = useState(false);
+    const [showRecarga, setShowRecarga] = useState(false);
     const hasParsedLogoRef = useRef(false);
 
     // ─── IMÁGENES ADJUNTAS AL EDITAR ───
@@ -446,22 +450,51 @@ function DisenaPageContent() {
     useEffect(() => {
         const handleMessage = async (event: MessageEvent) => {
             if (event.data?.type === 'SAVE_HTML' && event.data?.html && userEmail) {
-                try {
-                    const docId = emailToDocId(userEmail);
-                    const docRef = doc(db, 'maquetasweb_usuarios', docId);
-                    const optimizedHtml = await optimizeHtmlImages(event.data.html, userEmail);
-                    await setDoc(docRef, { codigo_actual: optimizedHtml }, { merge: true });
-                    setExitoGuardado('¡Texto modificado nativamente y guardado con éxito!');
-                    setTimeout(() => setExitoGuardado(''), 4000);
-                } catch (err) {
-                    console.error('Error guardando HTML editado nativamente:', err);
-                }
+                // Ya NO guardamos automáticamente. Guardamos localmente para mostrar el botón de "Guardar (1 crédito)"
+                setUnsavedHtml(event.data.html);
             }
         };
 
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
     }, [userEmail]);
+
+    const handleManualSavePreview = async () => {
+        if (!unsavedHtml || !userEmail || isSavingManual) return;
+        
+        setIsSavingManual(true);
+        setError('');
+        try {
+            const res = await fetch('/api/maquetas/guardar-manual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: userEmail,
+                    html: unsavedHtml,
+                    descripcion: 'Cambios manuales (edición nativa)',
+                    rid: `save_${Date.now()}`
+                })
+            });
+
+            if (res.status === 402) {
+                setShowRecarga(true);
+                return;
+            }
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Error al guardar.');
+            }
+
+            setExitoGuardado('¡Cambios guardados con éxito! (1 crédito descontado)');
+            setUnsavedHtml(null);
+            setTimeout(() => setExitoGuardado(''), 4000);
+        } catch (err: any) {
+            console.error('Error guardando manual:', err);
+            setError(err.message || 'Error al conectar con el servidor para guardar.');
+        } finally {
+            setIsSavingManual(false);
+        }
+    };
 
     const handleEditRequest = async () => {
         if (!editInstruction.trim() || !userEmail) return;
@@ -820,6 +853,23 @@ function DisenaPageContent() {
                         )}
                     </AnimatePresence>
 
+                    {/* Botón Flotante de Guardado Manual (1 crédito) */}
+                    <AnimatePresence>
+                        {unsavedHtml && (
+                            <motion.button
+                                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                                onClick={handleManualSavePreview}
+                                disabled={isSavingManual}
+                                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-[0_15px_50px_rgba(16,185,129,0.4)] border border-emerald-400/30 flex items-center gap-3 font-bold text-lg transition-all active:scale-95 group"
+                            >
+                                {isSavingManual ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6 group-hover:scale-110 transition-transform" />}
+                                {isSavingManual ? 'Guardando...' : '💾 Guardar Edición (1 crédito)'}
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+
                     {/* Iframe ocupando el 100% de la pantalla */}
                     <iframe
                         srcDoc={injectEditorScript(generatedHtml)}
@@ -1062,6 +1112,12 @@ function DisenaPageContent() {
                     </div>
                 </div>
             )}
+
+            {/* Modal de Recarga */}
+            <RecargaCreditos 
+                isOpen={showRecarga} 
+                onClose={() => setShowRecarga(false)} 
+            />
         </div>
     );
 }
