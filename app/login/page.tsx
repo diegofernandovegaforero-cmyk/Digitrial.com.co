@@ -45,7 +45,7 @@ async function saveUserToFirestore(user: { uid: string; email: string | null; di
             email: user.email,
             nombre_contacto: user.displayName || '',
             photo_url: user.photoURL || '',
-            creditos_restantes: 10,
+            creditos_restantes: 6,
             fecha_creacion: serverTimestamp(),
         });
     }
