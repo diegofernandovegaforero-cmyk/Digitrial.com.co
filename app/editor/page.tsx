@@ -123,6 +123,71 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                         });
                     }
                 });
+
+                // --- LÓGICA DE TOOLTIP PARA IMÁGENES ---
+                const tooltipStyle = document.createElement('style');
+                tooltipStyle.textContent = \`
+                    .digitrial-img-tooltip {
+                        position: fixed;
+                        background: rgba(15, 23, 42, 0.98);
+                        color: #e2e8f0;
+                        padding: 12px 16px;
+                        border-radius: 14px;
+                        font-size: 13px;
+                        line-height: 1.5;
+                        max-width: 280px;
+                        z-index: 99999;
+                        pointer-events: none;
+                        backdrop-filter: blur(12px);
+                        border: 1px solid rgba(255, 255, 255, 0.15);
+                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+                        font-family: system-ui, -apple-system, sans-serif;
+                        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                        opacity: 0;
+                        transform: translateY(8px) scale(0.95);
+                        text-align: center;
+                    }
+                    .digitrial-img-tooltip.visible {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                    .digitrial-img-tooltip b {
+                        color: #60a5fa;
+                        display: block;
+                        margin-bottom: 4px;
+                    }
+                \`;
+                document.head.appendChild(tooltipStyle);
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'digitrial-img-tooltip';
+                tooltip.innerHTML = "<b>¿Deseas cambiar esta imagen?</b> Solicita una nueva en la instrucción de texto (ej: 'Busca una de tecnología en Pexels') o adjunta el archivo que prefieras.";
+                document.body.appendChild(tooltip);
+
+                document.querySelectorAll('img').forEach(img => {
+                    img.style.transition = 'filter 0.3s ease';
+                    
+                    img.addEventListener('mouseenter', (e) => {
+                        img.style.filter = 'brightness(0.8) contrast(1.1)';
+                        const rect = img.getBoundingClientRect();
+                        
+                        let left = rect.left + (rect.width / 2) - 140; 
+                        let top = rect.top - 100;
+
+                        if (left < 10) left = 10;
+                        if (left + 280 > window.innerWidth - 10) left = window.innerWidth - 290;
+                        if (top < 10) top = rect.bottom + 10;
+
+                        tooltip.style.left = left + 'px';
+                        tooltip.style.top = top + 'px';
+                        tooltip.classList.add('visible');
+                    });
+
+                    img.addEventListener('mouseleave', () => {
+                        img.style.filter = '';
+                        tooltip.classList.remove('visible');
+                    });
+                });
             })();
         </script>
     `;
