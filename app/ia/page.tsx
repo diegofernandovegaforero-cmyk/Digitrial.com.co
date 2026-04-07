@@ -146,19 +146,18 @@ function DisenaPageContent() {
     const [formVisible, setFormVisible] = useState(false);
     const [authUser, setAuthUser] = useState<{ email: string | null; displayName: string | null } | null>(null);
 
-    // Detect auth state + ?form=true param to skip hero
+    // Detect auth state to skip hero automatically if logged in
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setAuthUser({ email: user.email, displayName: user.displayName });
-                if (searchParams.get('form') === 'true') {
-                    setShowHero(false);
-                    setFormVisible(true);
-                }
+                // Si el usuario ya está registrado, saltamos el hero y vamos al form
+                setShowHero(false);
+                setFormVisible(true);
             }
         });
         return unsub;
-    }, [searchParams]);
+    }, []);
 
     // Hero CTA → go to /login
     const handleStartDesigning = () => {
