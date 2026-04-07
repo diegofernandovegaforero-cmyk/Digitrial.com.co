@@ -38,12 +38,13 @@ export function getAdminDbSafe() {
             }
         }
 
-        // 2. Standardize newlines (handle both literal \n and real newlines)
-        privateKey = privateKey.replace(/\\n/g, '\n');
-        
-        // 3. Remove all types of surrounding quotes (escaped or literal)
+        // 2. Remove all types of surrounding quotes (escaped or literal)
+        // Move this BEFORE newline replacement to avoid artifacts
         privateKey = privateKey.trim().replace(/^['"]+|['"]+$/g, '');
 
+        // 3. Standardize newlines (handle both literal \n and real newlines)
+        privateKey = privateKey.replace(/\\n/g, '\n');
+        
         // 4. Final safety check: ensure headers exist if it's a PEM
         if (privateKey && !privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
             // If it looks like base64 but missing headers, wrap it (rare but possible)

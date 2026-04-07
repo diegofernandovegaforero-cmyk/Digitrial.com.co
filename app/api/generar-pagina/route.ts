@@ -14,7 +14,7 @@ const getAdminDb = async () => {
 export const maxDuration = 60;
 
 const buildPrompt = (input: string) => `
-AGENTE: GEMINI 3.5 FLASH
+AGENTE: GEMINI 3 FLASH PREVIEW
 ROL: Desarrollador Web Senior y Diseñador UI/UX.
 TAE: Generar una LANDING PAGE comercial de ALTO IMPACTO y Premium basándote en la siguiente descripción.
 
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
         }
 
         const result = await streamText({
-            model: customGoogle('gemini-1.5-flash-latest'),
+            model: customGoogle('gemini-3-flash-preview'),
             messages: [{ role: 'user', content: userContent }],
             onFinish: async ({ text }) => {
                 console.log(`[GENERACIÓN] Stream completado para ${email}. Iniciando guardado y cobro...`);

@@ -14,7 +14,7 @@ const getAdminDb = async () => {
 export const maxDuration = 60;
 
 const buildEditPrompt = (codigoActual: string, instruccion: string) => `
-AGENTE: GEMINI 3.5 FLASH
+AGENTE: GEMINI 3 FLASH PREVIEW
 ROL Y MANDATO:
 Eres el Desarrollador Front-End Senior de Digitrial.
 Se te entrega el código HTML actual de una landing page comercial y una instrucción para modificarla.
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await streamText({
-      model: customGoogle('gemini-1.5-flash-latest'),
+      model: customGoogle('gemini-3-flash-preview'),
       messages: [{ role: 'user', content: userContent }],
       onFinish: async ({ text }) => {
         let cleanHtml = text.replace(/```html/gi, '').replace(/```/g, '').trim();
