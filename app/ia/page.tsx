@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap } from 'lucide-react';
+import { Triangle, ArrowRight, Sparkles, Loader2, Link2, ImagePlus, X, Type, Zap, Layout } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
@@ -517,7 +517,15 @@ function DisenaPageContent() {
                                 DIGI<span className="text-blue-400">TRIAL</span>
                             </span>
                         </Link>
-                        <Link href="https://digitrial.com.co" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
+                        <div className="flex items-center gap-6">
+                            {authUser && (
+                                <Link href="/proyectos" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+                                    <Layout className="w-4 h-4" />
+                                    Mis Proyectos
+                                </Link>
+                            )}
+                            <Link href="https://digitrial.com.co" className="text-sm text-slate-400 hover:text-white transition-colors">← Volver al inicio</Link>
+                        </div>
                     </motion.nav>
                 )}
             </AnimatePresence>
