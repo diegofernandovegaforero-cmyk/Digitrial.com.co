@@ -644,7 +644,7 @@ function DisenaPageContent() {
                                 Empezar a diseñar gratis
                             </motion.button>
                             <span className="text-sm text-gray-500 mt-4 font-medium tracking-wide">
-                                No necesitas tarjeta de crédito · Obtienes 10 créditos de regalo
+                                No necesitas tarjeta de crédito · Obtienes 6 créditos de regalo
                             </span>
                         </motion.div>
 
@@ -789,10 +789,10 @@ function DisenaPageContent() {
                             <Sparkles className="w-5 h-5" />
                             {!authUser 
                                 ? 'Inicia sesión para generar' 
-                                : (productosValido ? 'Generar mi Página Web (5 créditos)' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`)}
+                                : (productosValido ? 'Generar mi Página Web (1 crédito)' : `Faltan ${MIN_CHARS_PRODUCTOS - descripcion.length} caracteres...`)}
                             <ArrowRight className="w-5 h-5" />
                         </button>
-                        <p className="text-center text-xs text-slate-500">✅ Diseño inicial: 5 créditos · Edición o Guardado: 1 crédito · Límite máximo: 1 diseño por cuenta (10 créditos de regalo)</p>
+                        <p className="text-center text-xs text-slate-500">✅ Diseño inicial: 1 crédito · Edición o Guardado: 1 crédito · Límite máximo: 1 diseño por cuenta (6 créditos de regalo)</p>
                     </form>
                 </main>
             )}
@@ -1005,9 +1005,9 @@ function DisenaPageContent() {
                                                     Créditos de Edición
                                                 </div>
                                                 <p className="text-xs text-blue-200/70 leading-relaxed">
-                                                    Cuentas con <strong>15 créditos gratuitos</strong> iniciales. <br />
-                                                    Cada modificación por IA consume <strong>3 créditos</strong>.<br />
-                                                    Tienes hasta <strong>5 intentos de diseño</strong> sin costo.
+                                                    Cuentas con <strong>6 créditos gratuitos</strong> iniciales. <br />
+                                                    Cada modificación por IA consume <strong>1 crédito</strong>.<br />
+                                                    Tienes hasta <strong>6 intentos de diseño</strong> sin costo.
                                                 </p>
                                             </div>
 

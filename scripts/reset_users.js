@@ -13,7 +13,7 @@ admin.initializeApp({
 const db = admin.firestore();
 
 async function resetAllUsers() {
-    console.log("Iniciando reinicio masivo de cr\u00E9ditos a 10...");
+    console.log("Iniciando reinicio masivo de cr\u00E9ditos a 6...");
     const snapshot = await db.collection('maquetasweb_usuarios').get();
     console.log(`Total usuarios encontrados: ${snapshot.size}`);
 
@@ -21,13 +21,13 @@ async function resetAllUsers() {
     let count = 0;
 
     snapshot.forEach(doc => {
-        batch.update(doc.ref, { creditos_restantes: 10 });
+        batch.update(doc.ref, { creditos_restantes: 6 });
         count++;
     });
 
     if (count > 0) {
         await batch.commit();
-        console.log(`\u00A1\u00C9xito! Se han reseteado a 10 los cr\u00E9ditos de ${count} usuarios.`);
+        console.log(`\u00A1\u00C9xito! Se han reseteado a 6 los cr\u00E9ditos de ${count} usuarios.`);
     } else {
         console.log("No se encontraron usuarios para resetear.");
     }

@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         const inputUsuario = descripcion;
 
         // --- VERIFICACIÓN PREVENTIVA DE CRÉDITOS (SOLO LECTURA) ---
-        let creditosActuales = 10;
+        let creditosActuales = 6;
         try {
             const adminDb = await getAdminDb();
             if (adminDb && email) {
@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
                 if (existing.exists) {
                     const data = existing.data() || {};
                     creditosActuales = data.creditos_restantes || 0;
-                    if (creditosActuales < 5) {
-                        return NextResponse.json({ error: 'Créditos insuficientes (5 créditos por generación).' }, { status: 402 });
+                    if (creditosActuales < 1) {
+                        return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por generación).' }, { status: 402 });
                     }
                 }
             }
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
                             });
 
                             if (!userDoc.exists) {
-                                // USUARIO NUEVO: 10 iniciales - 5 consumidos = 5 finales
+                                // USUARIO NUEVO: 6 iniciales - 1 consumido = 5 finales
                                 await docRef.set({
                                     email: email.toLowerCase().trim(),
                                     nombre_contacto: nombre_contacto || '',
@@ -138,9 +138,9 @@ export async function POST(req: NextRequest) {
                                     }],
                                     codigo_actual: Buffer.byteLength(html, 'utf8') < 800000 ? html : null
                                 });
-                                console.log(`[GENERACIÓN] Usuario nuevo creado con 5 créditos (10-5) para ${email}`);
+                                console.log(`[GENERACIÓN] Usuario nuevo creado con 6 iniciales (queda en 5) para ${email}`);
                             } else {
-                                // USUARIO EXISTENTE: Descuento atómico de 5 créditos
+                                // USUARIO EXISTENTE: Descuento atómico de 1 crédito
                                 const userData = userDoc.data() || {};
                                 
                                 // Idempotencia: No cobrar si ya se procesó este rid
@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
                                 historial = [meta, ...historial].slice(0, 10);
 
                                 const updateData: any = {
-                                    creditos_restantes: FieldValue.increment(-5),
+                                    creditos_restantes: FieldValue.increment(-1),
                                     last_rid: rid || null,
                                     ultima_generacion: new Date().toISOString(),
                                     historial_disenos: historial
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
                                 }
 
                                 await docRef.update(updateData);
-                                console.log(`[GENERACIÓN] Cobro de 5 créditos realizado para ${email}`);
+                                console.log(`[GENERACIÓN] Cobro de 1 crédito realizado para ${email}`);
                             }
                         }
                     } catch (e) {
@@ -178,10 +178,6 @@ export async function POST(req: NextRequest) {
                     }
                 }
             }
-        });
-
-        return result.toTextStreamResponse({
-            headers: { 'x-creditos-restantes': creditosActuales.toString() }
         });
 
         return result.toTextStreamResponse({
