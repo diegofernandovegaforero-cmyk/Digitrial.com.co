@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userData = snap.data() || {};
-    const creditosRestantes = userData.creditos_restantes ?? 5;
+    const creditosRestantes = userData.creditos_restantes ?? 6;
 
     if (creditosRestantes < 1) {
       return NextResponse.json({ error: 'Créditos insuficientes (1 crédito por edición).' }, { status: 402 });

@@ -294,7 +294,7 @@ function EditorContent() {
                     setUserData({
                         nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                         nombre_contacto: data.nombre_contacto || '',
-                        creditos_restantes: data.creditos_restantes ?? 5,
+                        creditos_restantes: data.creditos_restantes ?? 6,
                         codigo_actual: currentCode,
                         historial_disenos: pastDesigns,
                     });
@@ -320,7 +320,7 @@ function EditorContent() {
                             setUserData({
                                 nombre_negocio: data.nombre_negocio || data.nombre || 'Tu negocio',
                                 nombre_contacto: data.nombre_contacto || '',
-                                creditos_restantes: data.creditos_restantes ?? 5,
+                                creditos_restantes: data.creditos_restantes ?? 6,
                                 codigo_actual: currentCode,
                                 historial_disenos: pastDesigns,
                             });
@@ -342,7 +342,7 @@ function EditorContent() {
                                     setUserData({
                                         nombre_negocio: 'Tu negocio',
                                         nombre_contacto: '',
-                                        creditos_restantes: 5,
+                                        creditos_restantes: 6,
                                         codigo_actual: '',
                                         historial_disenos: [],
                                     });
