@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
                             const FieldValue = getAdminFieldValue();
                             
                             const userDoc = await docRef.get();
-                            const historyId = Date.now().toString();
+                            // const historyId = Date.now().toString(); // Redundant
 
                              if (!userDoc.exists) {
                                   // USUARIO NUEVO: 6 iniciales - 1 consumido = 5 finales

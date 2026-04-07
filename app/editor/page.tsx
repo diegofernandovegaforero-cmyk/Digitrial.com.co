@@ -73,6 +73,7 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                         el.addEventListener('focus', function() {
                             this.style.outline = '2px dashed rgba(59, 130, 246, 0.5)';
                             this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                            this._initialContent = this.innerText;
                         });
                         
                         el.addEventListener('blur', function() {
@@ -81,6 +82,8 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                             
                             cleanupUI();
                             
+                            if (this.innerText === this._initialContent) return;
+
                             const clone = document.documentElement.cloneNode(true);
                             const clonedNodes = clone.querySelectorAll('[contenteditable="true"]');
                             clonedNodes.forEach(n => {
@@ -94,9 +97,16 @@ function injectEditorScript(html: string, sinCreditos: boolean = false): string 
                             });
                             
                             window.parent.postMessage({
-                                type: 'SAVE_HTML',
+                                type: 'REQUEST_UPDATE_CONFIRM',
                                 html: '<!DOCTYPE html><html>' + clone.innerHTML + '</html>'
                             }, '*');
+                        });
+
+                        el.addEventListener('keydown', function(e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                this.blur();
+                            }
                         });
 
                         // Efecto visual al pasar el ratón
@@ -177,6 +187,8 @@ function EditorContent() {
     const [exito, setExito] = useState('');
     const [transcripcion, setTranscripcion] = useState('');
     const [showRecarga, setShowRecarga] = useState(false);
+    const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
+    const [pendingHtml, setPendingHtml] = useState('');
 
     // Audio recording — REMOVED
     // Logout logic
@@ -233,6 +245,9 @@ function EditorContent() {
             if (type === 'SAVE_HTML' && html && email) {
                 // SOLO ACTUALIZACION LOCAL PARA VISTA PREVIA Y BOTÓN DE GUARDADO
                 setUserData(prev => prev ? { ...prev, codigo_actual: html } : null);
+            } else if (type === 'REQUEST_UPDATE_CONFIRM' && html && email) {
+                setPendingHtml(html);
+                setShowUpdateConfirm(true);
             } else if (type === 'SHOW_RECARGA_MODAL') {
                 setShowRecarga(true);
             } else if (type === 'SHOW_AI_ALERT') {
@@ -1178,9 +1193,64 @@ function EditorContent() {
                 </div>
             </div>
 
-            {/* ── Módulo de Precios y Lanzamiento ── */}
-            <PlanesDigitrial />
-            <RecargaCreditos isOpen={showRecarga} onClose={() => setShowRecarga(false)} />
+                {/* Modal de Confirmación de Actualización */}
+                <AnimatePresence>
+                    {showUpdateConfirm && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowUpdateConfirm(false)}
+                                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                            />
+                            <motion.div 
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                className="relative bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center"
+                            >
+                                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Sparkles className="w-8 h-8 text-blue-400" />
+                                </div>
+                                <h2 className="text-2xl font-bold mb-2">Actualizar Diseño</h2>
+                                <p className="text-slate-400 mb-8">
+                                    ¿Deseas aplicar estos cambios a tu maqueta? Esta acción consumirá <span className="text-blue-400 font-bold">1 crédito</span>.
+                                </p>
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={async () => {
+                                            if (pendingHtml) {
+                                                setUserData(prev => prev ? { ...prev, codigo_actual: pendingHtml } : null);
+                                                setTimeout(() => handleManualSave(false), 100);
+                                            }
+                                            setShowUpdateConfirm(false);
+                                        }}
+                                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                                    >
+                                        <CheckCircle className="w-5 h-5" />
+                                        Actualizar (1 Crédito)
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowUpdateConfirm(false);
+                                            if (iframeRef.current && userData?.codigo_actual) {
+                                                iframeRef.current.srcdoc = injectEditorScript(userData.codigo_actual, sinCreditos);
+                                            }
+                                        }}
+                                        className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3 rounded-xl transition-colors"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                {/* ── Módulo de Precios y Lanzamiento ── */}
+                <PlanesDigitrial />
+                <RecargaCreditos isOpen={showRecarga} onClose={() => setShowRecarga(false)} />
         </div>
     );
 }
