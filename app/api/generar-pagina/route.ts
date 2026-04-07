@@ -106,6 +106,7 @@ export async function POST(req: NextRequest) {
             model: customGoogle('gemini-1.5-flash-latest'),
             messages: [{ role: 'user', content: userContent }],
             onFinish: async ({ text }) => {
+                console.log(`[GENERACIÓN] Terminó streaming para: ${email}`);
                 let html = text.replace(/```html/gi, '').replace(/```/g, '').trim();
 
                 if (Array.isArray(imagenes_base64) && imagenes_base64.length > 0) {
@@ -117,59 +118,59 @@ export async function POST(req: NextRequest) {
                 if (email) {
                     try {
                         const adminDb = await getAdminDb();
-                        if (adminDb) {
-                            const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
-                            const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
+                        if (!adminDb) return;
+
+                        const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+                        const FieldValue = getAdminFieldValue();
+                        
+                        const emailKey = email.toLowerCase().trim().replace(/[.#$[\]]/g, '_');
+                        const docRef = adminDb.collection('maquetasweb_usuarios').doc(emailKey);
+                        const userDoc = await docRef.get();
+                        
+                        if (userDoc.exists) {
+                            const userData = userDoc.data() || {};
                             
-                            const { getAdminFieldValue } = await import('@/lib/firebase-admin');
-                            const FieldValue = getAdminFieldValue();
+                            // Idempotencia: No cobrar si ya se procesó este RID
+                            if (rid && userData.last_rid === rid) {
+                                console.log(`[GENERACIÓN] Rid ${rid} ya cobrado anteriormente.`);
+                                return;
+                            }
+
                             const historyId = Date.now().toString();
+                            console.log(`[GENERACIÓN] Guardando historial ID: ${historyId} para ${email}`);
 
-                            await adminDb.runTransaction(async (transaction) => {
-                                const userDoc = await transaction.get(docRef);
-                                if (!userDoc.exists) return;
-
-                                const userData = userDoc.data() || {};
-                                
-                                // Verificar si ya se cobró este rid (idempotencia)
-                                if (rid && userData.last_rid === rid) {
-                                    console.log(`Petición ${rid} ya procesada. Evitando doble cobro.`);
-                                    return;
-                                }
-
-                                // 1. Descuento de créditos
-                                transaction.update(docRef, {
-                                    creditos_restantes: FieldValue.increment(-5),
-                                    last_rid: rid || null,
-                                    ultima_generacion: new Date().toISOString()
-                                });
-
-                                // 2. Guardado en historial_codigos (subcolección)
-                                const historyRef = docRef.collection('historial_codigos').doc(historyId);
-                                transaction.set(historyRef, {
-                                    codigo_html: html,
-                                    fecha: new Date().toISOString()
-                                });
-
-                                // 3. Actualizar metadatos de historial en doc principal
-                                let historial = userData.historial_disenos || [];
-                                const newDesignMetadata = {
-                                    id: historyId,
-                                    descripcion: (descripcion || '').substring(0, 200),
-                                    fecha: new Date().toISOString(),
-                                    has_separate_code: true
-                                };
-                                historial = [newDesignMetadata, ...historial].slice(0, 10);
-
-                                const finalUpdate: any = { historial_disenos: historial };
-                                if (Buffer.byteLength(html, 'utf8') < 800000) {
-                                    finalUpdate.codigo_actual = html;
-                                }
-                                transaction.update(docRef, finalUpdate);
+                            // 1. Guardar el código en la subcolección (operación pesada)
+                            await docRef.collection('historial_codigos').doc(historyId).set({
+                                codigo_html: html,
+                                fecha: new Date().toISOString()
                             });
+
+                            // 2. Actualizar el doc principal y DESCONTAR CRÉDITOS
+                            let historial = userData.historial_disenos || [];
+                            const newDesignMetadata = {
+                                id: historyId,
+                                descripcion: (descripcion || '').substring(0, 200),
+                                fecha: new Date().toISOString(),
+                                has_separate_code: true
+                            };
+                            historial = [newDesignMetadata, ...historial].slice(0, 10);
+
+                            const finalUpdate: any = { 
+                                historial_disenos: historial,
+                                creditos_restantes: FieldValue.increment(-5),
+                                last_rid: rid || null,
+                                ultima_generacion: new Date().toISOString()
+                            };
+
+                            if (Buffer.byteLength(html, 'utf8') < 800000) {
+                                finalUpdate.codigo_actual = html;
+                            }
+
+                            await docRef.update(finalUpdate);
+                            console.log(`[GENERACIÓN] Éxito: Diseño guardado y créditos descontados para ${email}`);
                         }
                     } catch (e) {
-                        console.error("Error en cobro diferido/transacción onFinish:", e);
+                        console.error("[GENERACIÓN] Error crítico guardando/cobrando en onFinish:", e);
                     }
                 }
             }
