@@ -9,6 +9,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot, updateDoc, getDoc, collection, setDoc, increment } from 'firebase/firestore';
 import PlanesDigitrial from '@/components/PlanesDigitrial';
 import RecargaCreditos from '@/components/RecargaCreditos';
+import DigitrialLoader from '@/components/DigitrialLoader';
 import { optimizeHtmlImages } from '@/lib/storage-utils';
 
 const CREDITOS_POR_EDICION = 1;
@@ -1233,12 +1234,11 @@ function EditorContent() {
                 {/* ─── Panel derecho: Preview en tiempo real ─── */}
                 <div className="flex-1 relative hidden md:block">
                     {editando && (
-                        <div className="absolute inset-0 z-10 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center">
-                            <div className="text-center">
-                                <Loader2 className="w-10 h-10 animate-spin text-blue-400 mx-auto mb-3" />
-                                <p className="text-blue-300 font-medium">Gemini está aplicando tus cambios...</p>
-                                <p className="text-slate-500 text-sm mt-1">Esto puede tomar hasta 30 segundos</p>
-                            </div>
+                        <div className="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-md flex items-center justify-center">
+                            <DigitrialLoader 
+                                message="Personalizando tu Web" 
+                                subtext="La IA está trabajando en tu diseño profesional" 
+                            />
                         </div>
                     )}
                     {userData?.codigo_actual ? (

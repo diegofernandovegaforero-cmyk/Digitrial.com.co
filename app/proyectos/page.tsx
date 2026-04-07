@@ -25,6 +25,7 @@ import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import Navbar from '@/components/Navbar';
+import DigitrialLoader from '@/components/DigitrialLoader';
 
 // Helper para ID de Firestore
 const emailToDocId = (email: string) =>
@@ -170,9 +171,11 @@ export default function ProyectosPage() {
 
                 {/* Projects Grid */}
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
-                        <p className="text-slate-400 font-medium">Cargando tus proyectos...</p>
+                    <div className="flex flex-col items-center justify-center py-32">
+                        <DigitrialLoader 
+                            message="Cargando Proyectos" 
+                            subtext="Preparando tu panel de control" 
+                        />
                     </div>
                 ) : userData?.historial_disenos?.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
