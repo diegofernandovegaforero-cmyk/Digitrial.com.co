@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Triangle, Layout, LogOut } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -10,6 +10,7 @@ import AnnouncementBar from './AnnouncementBar';
 
 export default function Navbar() {
     const router = useRouter();
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -71,6 +72,13 @@ export default function Navbar() {
                             <Link href="#" className={`${isScrolled ? 'text-blue-600' : 'text-blue-400'} font-semibold transition-colors duration-300`}>
                                 Inicio
                             </Link>
+
+                            {/* El botón IA solo se muestra en el Inicio */}
+                            {pathname === '/' && (
+                                <Link href="/ia" className={`transition-colors duration-300 ${
+                                    isScrolled ? 'text-slate-600 hover:text-blue-600' : 'text-slate-300 hover:text-white'
+                                }`}>IA</Link>
+                            )}
                             {user ? (
                                 <button 
                                     onClick={handleLogout}
@@ -131,6 +139,11 @@ export default function Navbar() {
                             isScrolled ? 'text-slate-900' : 'text-white'
                         }`}>
                             <Link href="#" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>Inicio</Link>
+                            
+                            {/* IA en móvil solo si está en el inicio */}
+                            {pathname === '/' && (
+                                <Link href="/ia" onClick={() => setIsOpen(false)} className={`text-base transition-colors duration-300 ${isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'}`}>IA</Link>
+                            )}
                             {user ? (
                                 <button 
                                     onClick={() => {
