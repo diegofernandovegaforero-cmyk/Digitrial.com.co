@@ -153,8 +153,13 @@ export async function POST(req: NextRequest) {
         const currentHistory = currentData.historial_disenos || [];
         const updatedHistory = [newDesignMetadata, ...currentHistory].slice(0, 10);
 
+        const { getAdminFieldValue } = await import('@/lib/firebase-admin');
+        const FieldValue = getAdminFieldValue();
+
         const finalUpdate: any = {
-           historial_disenos: updatedHistory
+           historial_disenos: updatedHistory,
+           creditos_restantes: FieldValue.increment(-1),
+           ultima_edicion: new Date().toISOString()
         };
         if (Buffer.byteLength(cleanHtml, 'utf8') < 800000) {
             finalUpdate.codigo_actual = cleanHtml;

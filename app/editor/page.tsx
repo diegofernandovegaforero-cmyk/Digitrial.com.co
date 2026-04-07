@@ -498,48 +498,44 @@ function EditorContent() {
             const htmlOptimizado = await optimizeHtmlImages(userData.codigo_actual, email);
             if (!isFree) setExito('');
 
-            // 1. Guardar código en subcolección (PESADO - Evita el límite de 1MB del doc principal)
-            const codeRef = doc(db, 'maquetasweb_usuarios', docId, 'historial_codigos', historyId);
-            await setDoc(codeRef, { 
-                codigo_html: htmlOptimizado,
-                fecha: new Date().toISOString()
+            // 1. Guardar a través de la API (Más seguro y maneja cobros)
+            const res = await fetch('/api/maquetas/guardar-manual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    html: htmlOptimizado,
+                    descripcion: isFree ? "Inicio de sesión de edición" : (instruccion.trim() || "Guardado manual desde editor"),
+                    rid: `save_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+                }),
             });
 
-            // 2. Guardar metadata en doc principal (LIGERO)
-            const newDesignMetadata = {
-                id: historyId,
-                descripcion: isFree ? "Inicio de sesión de edición" : (instruccion.trim() || "Guardado manual desde editor"),
-                fecha: new Date().toISOString(),
-                has_separate_code: true
-            };
-
-            const updatedHistory = [newDesignMetadata, ...(userData.historial_disenos || [])].slice(0, 10);
-
-            const updatePayload: any = {
-                historial_disenos: updatedHistory,
-                ultima_edicion: new Date().toISOString()
-            };
-
-            // Cobro de créditos si no es gratuito
-            if (!isFree) {
-                updatePayload.creditos_restantes = increment(-COSTO_GUARDADO_MANUAL);
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Error en el servidor al guardar.');
             }
 
-            // Solo guardar código actual si es razonablemente pequeño para Firestore (aprox < 900KB)
-            const codeSize = new Blob([htmlOptimizado]).size;
-            if (codeSize < 900000) {
-                updatePayload.codigo_actual = htmlOptimizado;
-            } else {
-                console.warn(`Guardado Manual: El código (${(codeSize/1024).toFixed(1)}KB) es muy grande para el doc principal. Solo se guardó en el historial.`);
-            }
+            const data = await res.json();
+            const creditosRestantes = data.creditos_restantes;
 
-            await updateDoc(docRef, updatePayload);
-
-            setUserData(prev => prev ? { 
-                ...prev, 
-                historial_disenos: updatedHistory,
-                creditos_restantes: isFree ? prev.creditos_restantes : (prev.creditos_restantes - COSTO_GUARDADO_MANUAL)
-            } : null);
+            // 2. Actualizar estado local
+            setUserData(prev => {
+                if (!prev) return null;
+                const newDesignMetadata = {
+                    id: data.historyId,
+                    descripcion: isFree ? "Inicio de sesión de edición" : (instruccion.trim() || "Guardado manual desde editor"),
+                    fecha: new Date().toISOString(),
+                    has_separate_code: true
+                };
+                const updatedHistory = [newDesignMetadata, ...(prev.historial_disenos || [])].slice(0, 10);
+                
+                return { 
+                    ...prev, 
+                    codigo_actual: htmlOptimizado,
+                    historial_disenos: updatedHistory,
+                    creditos_restantes: creditosRestantes
+                };
+            });
             
             if (!isFree) {
                 setExito('¡Maqueta guardada con éxito!');
