@@ -881,10 +881,10 @@ function EditorContent() {
     if (cargando) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-400 mx-auto mb-4" />
-                    <p className="text-slate-300 font-medium">Cargando tu cuenta y diseños...</p>
-                </div>
+                <DigitrialLoader 
+                    message="Cargando tu cuenta" 
+                    subtext="Preparando el entorno de edición..." 
+                />
             </div>
         );
     }

@@ -41,13 +41,40 @@ export default function DigitrialLoader({ message, subtext }: DigitrialLoaderPro
                         rotateY: [0, 10, -10, 0],
                     }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative z-10 w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-[0_10px_40px_rgba(37,99,235,0.4)] border border-white/20"
+                    className="relative z-10 w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-[0_10px_40px_rgba(37,99,235,0.4)] border border-white/20 overflow-hidden group"
                 >
-                    <Triangle className="text-white fill-white w-7 h-7" />
+                    {/* Sweeping Flash Line (Wompi style shimmer) */}
+                    <motion.div
+                        animate={{
+                            left: ['-200%', '200%'],
+                        }}
+                        transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                        }}
+                        className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-white to-transparent opacity-90 blur-[2px] skew-x-[-20deg] z-0"
+                    />
+
+                    {/* Secondary Laser Line (Destellos) */}
+                    <motion.div
+                        animate={{
+                            top: ['-150%', '150%'],
+                        }}
+                        transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: 0.5,
+                            ease: "linear",
+                        }}
+                        className="absolute -inset-x-4 h-2 bg-gradient-to-b from-transparent via-cyan-300 to-transparent opacity-80 blur-[1px] rotate-12 z-0"
+                    />
+
+                    <Triangle className="text-white fill-white w-7 h-7 relative z-10" />
                     
                     {/* Corner accents */}
-                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-t border-l border-white/40 rounded-tl-sm" />
-                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-b border-r border-white/40 rounded-br-sm" />
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-t border-l border-white/40 rounded-tl-sm z-10" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-b border-r border-white/40 rounded-br-sm z-10" />
                 </motion.div>
 
                 {/* ─── Orbiting Particles ─── */}
