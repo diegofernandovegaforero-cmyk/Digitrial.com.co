@@ -49,7 +49,7 @@ export default function About() {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">Somos tu equipo extendido.</span>
                     </h2>
                     <p className="text-slate-600 dark:text-slate-400 text-lg mb-12 leading-relaxed">
-                        En <strong className="text-slate-900 dark:text-white">DIGITRIAL</strong>, fusionamos creatividad, datos y tecnología para construir ecosistemas digitales que impulsan tu crecimiento. No solo creamos páginas web; diseñamos el motor de tu éxito online.
+                        Webs modernas con IA en minutos · E-commerce Shopify a medida · Diseño ágil sin barreras · Multiplica. tus. ventas. hoy.
                     </p>
 
                     <div className="grid grid-cols-2 gap-x-8 gap-y-12">
