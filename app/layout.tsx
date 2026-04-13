@@ -22,6 +22,27 @@ export const metadata: Metadata = {
     verification: {
         google: "kqOFsjCL9xEiGycDMKCV_A7wZgzLJUT2-9pffthHiFg",
     },
+    openGraph: {
+        title: "Crea Tu Web En Minutos | Digitrial",
+        description: "Construye la confianza sólida para tu empresa con el respaldo de manos expertas.",
+        url: 'https://digitrial.com.co',
+        siteName: 'Digitrial',
+        images: [
+            {
+                url: '/icon.png', // Fallback as a general image
+                width: 512,
+                height: 512,
+            },
+        ],
+        locale: 'es_CO',
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: "Crea Tu Web En Minutos | Digitrial",
+        description: "Construye la confianza sólida para tu empresa con el respaldo de manos expertas.",
+        images: ['/icon.png'],
+    },
 };
 
 export default function RootLayout({
